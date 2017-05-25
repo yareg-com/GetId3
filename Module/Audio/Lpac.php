@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\AudioVideo\Riff;
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +35,8 @@ use GetId3\Module\AudioVideo\Riff;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Lpac extends BaseHandler
 {
@@ -87,7 +96,6 @@ class Lpac extends BaseHandler
                     $info['warning'][] = 'Quantization expected to be 20 in LPAC file stucture v6, actually '.$info['lpac']['flags']['Q'];
                 }
                 break;
-
             default:
                 //$info['warning'][] = 'This version of GetId3Core() ['.$this->getid3->version().'] only supports LPAC file format version 6, this file is version '.$info['lpac']['file_version'].' - please report to info@getid3.org';
                 break;

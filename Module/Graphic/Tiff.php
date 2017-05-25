@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Graphic;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Tiff extends BaseHandler
 {
@@ -83,7 +92,6 @@ class Tiff extends BaseHandler
                             $CurrentIFD['fields'][$i]['offset'] = $this->TIFFendian2Int($CurrentIFD['fields'][$i]['raw']['offset'], $info['tiff']['byte_order']);
                         }
                         break;
-
                     case 2: // ASCII 8-bit bytes  that store ASCII codes; the last byte must be null.
                         if ($CurrentIFD['fields'][$i]['raw']['length'] <= 4) {
                             $CurrentIFD['fields'][$i]['value'] = substr($CurrentIFD['fields'][$i]['raw']['offset'], 3);
@@ -91,7 +99,6 @@ class Tiff extends BaseHandler
                             $CurrentIFD['fields'][$i]['offset'] = $this->TIFFendian2Int($CurrentIFD['fields'][$i]['raw']['offset'], $info['tiff']['byte_order']);
                         }
                         break;
-
                     case 3: // SHORT A 16-bit (2-byte) unsigned integer.
                         if ($CurrentIFD['fields'][$i]['raw']['length'] <= 2) {
                             $CurrentIFD['fields'][$i]['value'] = $this->TIFFendian2Int(substr($CurrentIFD['fields'][$i]['raw']['offset'], 0, 2), $info['tiff']['byte_order']);
@@ -99,7 +106,6 @@ class Tiff extends BaseHandler
                             $CurrentIFD['fields'][$i]['offset'] = $this->TIFFendian2Int($CurrentIFD['fields'][$i]['raw']['offset'], $info['tiff']['byte_order']);
                         }
                         break;
-
                     case 4: // LONG  A 32-bit (4-byte) unsigned integer.
                         if ($CurrentIFD['fields'][$i]['raw']['length'] <= 1) {
                             $CurrentIFD['fields'][$i]['value'] = $this->TIFFendian2Int($CurrentIFD['fields'][$i]['raw']['offset'], $info['tiff']['byte_order']);
@@ -107,7 +113,6 @@ class Tiff extends BaseHandler
                             $CurrentIFD['fields'][$i]['offset'] = $this->TIFFendian2Int($CurrentIFD['fields'][$i]['raw']['offset'], $info['tiff']['byte_order']);
                         }
                         break;
-
                     case 5: // RATIONAL   Two LONG_s:  the first represents the numerator of a fraction, the second the denominator.
                         break;
                 }
@@ -130,7 +135,6 @@ class Tiff extends BaseHandler
                             $info['tiff']['ifd'][$IFDid]['fields'][$key]['raw']['data'] = fread($this->getid3->fp, $fieldarray['raw']['length'] * $FieldTypeByteLength[$fieldarray['raw']['type']]);
                         }
                         break;
-
                     case 270: // ImageDescription
                     case 271: // Make
                     case 272: // Model
@@ -150,11 +154,9 @@ class Tiff extends BaseHandler
                     case 256: // ImageWidth
                         $info['video']['resolution_x'] = $fieldarray['value'];
                         break;
-
                     case 257: // ImageLength
                         $info['video']['resolution_y'] = $fieldarray['value'];
                         break;
-
                     case 258: // BitsPerSample
                         if (isset($fieldarray['value'])) {
                             $info['video']['bits_per_sample'] = $fieldarray['value'];
@@ -165,11 +167,9 @@ class Tiff extends BaseHandler
                             }
                         }
                         break;
-
                     case 259: // Compression
                         $info['video']['codec'] = $this->TIFFcompressionMethod($fieldarray['value']);
                         break;
-
                     case 270: // ImageDescription
                     case 271: // Make
                     case 272: // Model
@@ -184,7 +184,6 @@ class Tiff extends BaseHandler
                             $info['tiff']['comments'][$TIFFcommentName] = array($info['tiff']['ifd'][$IFDid]['fields'][$key]['raw']['data']);
                         }
                         break;
-
                     default:
                         break;
                 }
@@ -231,7 +230,7 @@ class Tiff extends BaseHandler
             );
         }
 
-        return (isset($TIFFcompressionMethod[$id]) ? $TIFFcompressionMethod[$id] : 'unknown/invalid ('.$id.')');
+        return isset($TIFFcompressionMethod[$id]) ? $TIFFcompressionMethod[$id] : 'unknown/invalid ('.$id.')';
     }
 
     /**
@@ -256,6 +255,6 @@ class Tiff extends BaseHandler
             );
         }
 
-        return (isset($TIFFcommentName[$id]) ? $TIFFcommentName[$id] : 'unknown/invalid ('.$id.')');
+        return isset($TIFFcommentName[$id]) ? $TIFFcommentName[$id] : 'unknown/invalid ('.$id.')';
     }
 }

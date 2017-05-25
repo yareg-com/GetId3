@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Monkey extends BaseHandler
 {
@@ -179,7 +188,7 @@ class Monkey extends BaseHandler
                 $info['md5_data_source'] = '';
                 $md5 = $thisfile_monkeysaudio_raw['cFileMD5'];
                 for ($i = 0; $i < strlen($md5); ++$i) {
-                    $info['md5_data_source'] .= str_pad(dechex(ord($md5{$i})), 2, '00', STR_PAD_LEFT);
+                    $info['md5_data_source'] .= str_pad(dechex(ord($md5[$i])), 2, '00', STR_PAD_LEFT);
                 }
                 if (!preg_match('/^[0-9a-f]{32}$/', $info['md5_data_source'])) {
                     unset($info['md5_data_source']);
@@ -212,7 +221,7 @@ class Monkey extends BaseHandler
             5000 => 'insane',
         );
 
-        return (isset($MonkeyCompressionLevelNameLookup[$compressionlevel]) ? $MonkeyCompressionLevelNameLookup[$compressionlevel] : 'invalid');
+        return isset($MonkeyCompressionLevelNameLookup[$compressionlevel]) ? $MonkeyCompressionLevelNameLookup[$compressionlevel] : 'invalid';
     }
 
     /**
@@ -229,8 +238,8 @@ class Monkey extends BaseHandler
             return 73728;
         } elseif (($versionid >= 3800) && ($compressionlevel == 4000)) {
             return 73728;
-        } else {
-            return 9216;
         }
+
+        return 9216;
     }
 }

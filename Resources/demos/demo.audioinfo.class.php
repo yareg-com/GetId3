@@ -1,6 +1,14 @@
 <?php
 
-// +----------------------------------------------------------------------+
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 // | PHP version 4.1.0                                                    |
 // +----------------------------------------------------------------------+
 // | Placed in public domain by Allan Hansen, 2002. Share and enjoy!      |
@@ -59,7 +67,8 @@ class AudioInfo
     /**
      * Extract information - only public function
      *
-     * @param    string  file    Audio file to extract info from.
+     * @param    string  file    Audio file to extract info from
+     * @param mixed $file
      */
     public function Info($file)
     {
@@ -74,18 +83,18 @@ class AudioInfo
         // Init wrapper object
         $this->result = array();
         $this->result['format_name'] = (isset($this->info['fileformat']) ? $this->info['fileformat'] : '').'/'.(isset($this->info['audio']['dataformat']) ? $this->info['audio']['dataformat'] : '').(isset($this->info['video']['dataformat']) ? '/'.$this->info['video']['dataformat'] : '');
-        $this->result['encoder_version'] = (isset($this->info['audio']['encoder'])         ? $this->info['audio']['encoder']         : '');
+        $this->result['encoder_version'] = (isset($this->info['audio']['encoder']) ? $this->info['audio']['encoder'] : '');
         $this->result['encoder_options'] = (isset($this->info['audio']['encoder_options']) ? $this->info['audio']['encoder_options'] : '');
-        $this->result['bitrate_mode'] = (isset($this->info['audio']['bitrate_mode'])    ? $this->info['audio']['bitrate_mode']    : '');
-        $this->result['channels'] = (isset($this->info['audio']['channels'])        ? $this->info['audio']['channels']        : '');
-        $this->result['sample_rate'] = (isset($this->info['audio']['sample_rate'])     ? $this->info['audio']['sample_rate']     : '');
+        $this->result['bitrate_mode'] = (isset($this->info['audio']['bitrate_mode']) ? $this->info['audio']['bitrate_mode'] : '');
+        $this->result['channels'] = (isset($this->info['audio']['channels']) ? $this->info['audio']['channels'] : '');
+        $this->result['sample_rate'] = (isset($this->info['audio']['sample_rate']) ? $this->info['audio']['sample_rate'] : '');
         $this->result['bits_per_sample'] = (isset($this->info['audio']['bits_per_sample']) ? $this->info['audio']['bits_per_sample'] : '');
-        $this->result['playing_time'] = (isset($this->info['playtime_seconds'])         ? $this->info['playtime_seconds']         : '');
-        $this->result['avg_bit_rate'] = (isset($this->info['audio']['bitrate'])         ? $this->info['audio']['bitrate']         : '');
-        $this->result['tags'] = (isset($this->info['tags'])                     ? $this->info['tags']                     : '');
-        $this->result['comments'] = (isset($this->info['comments'])                 ? $this->info['comments']                 : '');
-        $this->result['warning'] = (isset($this->info['warning'])                  ? $this->info['warning']                  : '');
-        $this->result['md5'] = (isset($this->info['md5_data'])                 ? $this->info['md5_data']                 : '');
+        $this->result['playing_time'] = (isset($this->info['playtime_seconds']) ? $this->info['playtime_seconds'] : '');
+        $this->result['avg_bit_rate'] = (isset($this->info['audio']['bitrate']) ? $this->info['audio']['bitrate'] : '');
+        $this->result['tags'] = (isset($this->info['tags']) ? $this->info['tags'] : '');
+        $this->result['comments'] = (isset($this->info['comments']) ? $this->info['comments'] : '');
+        $this->result['warning'] = (isset($this->info['warning']) ? $this->info['warning'] : '');
+        $this->result['md5'] = (isset($this->info['md5_data']) ? $this->info['md5_data'] : '');
 
         // Post getID3() data handling based on file format
         $method = (isset($this->info['fileformat']) ? $this->info['fileformat'] : '').'Info';

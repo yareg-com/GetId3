@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Archive;
 
 use GetId3\Handler\BaseHandler;
@@ -30,8 +39,8 @@ use GetId3\Lib\Helper;
  * @author James Heinrich <info@getid3.org>
  * @author Mike Mozolin <teddybearØmail*ru>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Tar extends BaseHandler
 {
@@ -58,13 +67,13 @@ class Tar extends BaseHandler
             // check the block
             $checksum = 0;
             for ($i = 0; $i < 148; ++$i) {
-                $checksum += ord($buffer{$i});
+                $checksum += ord($buffer[$i]);
             }
             for ($i = 148; $i < 156; ++$i) {
                 $checksum += ord(' ');
             }
             for ($i = 156; $i < 512; ++$i) {
-                $checksum += ord($buffer{$i});
+                $checksum += ord($buffer[$i]);
             }
             $attr = unpack($unpack_header, $buffer);
             $name = (isset($attr['fname']) ? trim($attr['fname']) : '');
@@ -234,6 +243,6 @@ class Tar extends BaseHandler
             'V' => 'LF_VOLHDR',
         );
 
-        return (isset($flag_types[$typflag]) ? $flag_types[$typflag] : '');
+        return isset($flag_types[$typflag]) ? $flag_types[$typflag] : '';
     }
 }

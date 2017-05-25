@@ -70,7 +70,7 @@ if (isset($_POST['WriteTags'])) {
                         $APICdata = fread($fd, filesize($_FILES['userfile']['tmp_name']));
                         fclose($fd);
 
-                        list($APIC_width, $APIC_height, $APIC_imageTypeID) = GetImageSize($_FILES['userfile']['tmp_name']);
+                        list($APIC_width, $APIC_height, $APIC_imageTypeID) = getimagesize($_FILES['userfile']['tmp_name']);
                         $imagetypes = array(1 => 'gif', 2 => 'jpeg', 3 => 'png');
                         if (isset($imagetypes[$APIC_imageTypeID])) {
                             $TagData['attached_picture'][0]['data'] = $APICdata;
@@ -116,7 +116,6 @@ if (!empty($Filename)) {
     echo '<table border="3" cellspacing="0" cellpadding="4">';
     echo '<tr><th align="right">Filename:</th><td><input type="hidden" name="Filename" value="'.htmlentities($Filename, ENT_QUOTES).'"><a href="'.htmlentities($browsescriptfilename.'?filename='.rawurlencode($Filename), ENT_QUOTES).'" target="_blank">'.$Filename.'</a></td></tr>';
     if (file_exists($Filename)) {
-
         // Initialize getID3 engine
         $getID3 = new getID3();
         $OldThisFileInfo = $getID3->analyze($Filename);
@@ -128,11 +127,9 @@ if (!empty($Filename)) {
             case 'mp1':
                 $ValidTagTypes = array('id3v1', 'id3v2.3', 'ape');
                 break;
-
             case 'mpc':
                 $ValidTagTypes = array('ape');
                 break;
-
             case 'ogg':
                 if (!empty($OldThisFileInfo['audio']['dataformat']) && ($OldThisFileInfo['audio']['dataformat'] == 'flac')) {
                     //$ValidTagTypes = array('metaflac');
@@ -142,23 +139,20 @@ if (!empty($Filename)) {
                     $ValidTagTypes = array('vorbiscomment');
                 }
                 break;
-
             case 'flac':
                 $ValidTagTypes = array('metaflac');
                 break;
-
             case 'real':
                 $ValidTagTypes = array('real');
                 break;
-
             default:
                 $ValidTagTypes = array();
                 break;
         }
-        echo '<tr><td align="right"><b>Title</b></td> <td><input type="text" size="40" name="Title"  value="'.htmlentities((!empty($OldThisFileInfo['comments']['title'])  ? implode(', ', $OldThisFileInfo['comments']['title']) : ''), ENT_QUOTES).'"></td></tr>';
+        echo '<tr><td align="right"><b>Title</b></td> <td><input type="text" size="40" name="Title"  value="'.htmlentities((!empty($OldThisFileInfo['comments']['title']) ? implode(', ', $OldThisFileInfo['comments']['title']) : ''), ENT_QUOTES).'"></td></tr>';
         echo '<tr><td align="right"><b>Artist</b></td><td><input type="text" size="40" name="Artist" value="'.htmlentities((!empty($OldThisFileInfo['comments']['artist']) ? implode(', ', $OldThisFileInfo['comments']['artist']) : ''), ENT_QUOTES).'"></td></tr>';
-        echo '<tr><td align="right"><b>Album</b></td> <td><input type="text" size="40" name="Album"  value="'.htmlentities((!empty($OldThisFileInfo['comments']['album'])  ? implode(', ', $OldThisFileInfo['comments']['album']) : ''), ENT_QUOTES).'"></td></tr>';
-        echo '<tr><td align="right"><b>Year</b></td>  <td><input type="text" size="4"  name="Year"   value="'.htmlentities((!empty($OldThisFileInfo['comments']['year'])   ? implode(', ', $OldThisFileInfo['comments']['year']) : ''), ENT_QUOTES).'"></td></tr>';
+        echo '<tr><td align="right"><b>Album</b></td> <td><input type="text" size="40" name="Album"  value="'.htmlentities((!empty($OldThisFileInfo['comments']['album']) ? implode(', ', $OldThisFileInfo['comments']['album']) : ''), ENT_QUOTES).'"></td></tr>';
+        echo '<tr><td align="right"><b>Year</b></td>  <td><input type="text" size="4"  name="Year"   value="'.htmlentities((!empty($OldThisFileInfo['comments']['year']) ? implode(', ', $OldThisFileInfo['comments']['year']) : ''), ENT_QUOTES).'"></td></tr>';
 
         $TracksTotal = '';
         $TrackNumber = '';
@@ -219,7 +213,6 @@ if (!empty($Filename)) {
                             echo ' checked="checked"';
                         }
                         break;
-
                     default:
                         if (isset($OldThisFileInfo['tags'][$ValidTagType])) {
                             echo ' checked="checked"';

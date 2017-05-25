@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 use GetId3\Handler\BaseHandler;
@@ -24,10 +33,10 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\AudioVideo\Riff
+ * @uses \GetId3\Module\AudioVideo\Riff
  */
 class Real extends BaseHandler
 {
@@ -99,26 +108,21 @@ class Real extends BaseHandler
             $offset = 8;
 
             switch ($ChunkName) {
-
                 case '.RMF': // RealMedia File Header
                     $thisfile_real_chunks_currentchunk['object_version'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 2));
                     $offset += 2;
                     switch ($thisfile_real_chunks_currentchunk['object_version']) {
-
                         case 0:
                             $thisfile_real_chunks_currentchunk['file_version'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 4));
                             $offset += 4;
                             $thisfile_real_chunks_currentchunk['headers_count'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 4));
                             $offset += 4;
                             break;
-
                         default:
                             //$info['warning'][] = 'Expected .RMF-object_version to be "0", actual value is "'.$thisfile_real_chunks_currentchunk['object_version'].'" (should not be a problem)';
                             break;
-
                     }
                     break;
-
                 case 'PROP': // Properties Header
                     $thisfile_real_chunks_currentchunk['object_version'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 2));
                     $offset += 2;
@@ -154,7 +158,6 @@ class Real extends BaseHandler
                         $thisfile_real_chunks_currentchunk['flags']['live_broadcast'] = (bool) ($thisfile_real_chunks_currentchunk['flags_raw'] & 0x0004);
                     }
                     break;
-
                 case 'MDPR': // Media Properties Header
                     $thisfile_real_chunks_currentchunk['object_version'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 2));
                     $offset += 2;
@@ -225,7 +228,6 @@ class Real extends BaseHandler
                                 $info['video']['codec'] = $thisfile_real_chunks_currentchunk_videoinfo['codec'];
                                 $info['video']['bits_per_sample'] = $thisfile_real_chunks_currentchunk_videoinfo['bits_per_sample'];
                                 break;
-
                             case 'audio/x-pn-realaudio':
                             case 'audio/x-pn-multirate-realaudio':
                                 $this->ParseOldRAheader($thisfile_real_chunks_currentchunk_typespecificdata, $thisfile_real_chunks_currentchunk['parsed_audio_data']);
@@ -241,7 +243,6 @@ class Real extends BaseHandler
                                     }
                                 }
                                 break;
-
                             case 'logical-fileinfo':
                                 // shortcut
                                 $thisfile_real_chunks_currentchunk['logical_fileinfo'] = array();
@@ -268,7 +269,6 @@ class Real extends BaseHandler
                                 //$thisfile_real_chunks_currentchunk_logicalfileinfo_offset += (6 + $thisfile_real_chunks_currentchunk_logicalfileinfo_thislength);
 
                                 break;
-
                         }
 
                         if (empty($info['playtime_seconds'])) {
@@ -283,7 +283,6 @@ class Real extends BaseHandler
                                     $info['audio']['dataformat'] = 'real';
                                     $info['audio']['lossless'] = false;
                                     break;
-
                                 case 'video/x-pn-realvideo':
                                 case 'video/x-pn-multirate-realvideo':
                                     $info['video']['bitrate'] = (isset($info['video']['bitrate']) ? $info['video']['bitrate'] : 0) + $thisfile_real_chunks_currentchunk['avg_bit_rate'];
@@ -292,7 +291,6 @@ class Real extends BaseHandler
                                     $info['video']['lossless'] = false;
                                     $info['video']['pixel_aspect_ratio'] = (float) 1;
                                     break;
-
                                 case 'audio/x-ralf-mpeg4-generic':
                                     $info['audio']['bitrate'] = (isset($info['audio']['bitrate']) ? $info['audio']['bitrate'] : 0) + $thisfile_real_chunks_currentchunk['avg_bit_rate'];
                                     $info['audio']['codec'] = 'RealAudio Lossless';
@@ -304,7 +302,6 @@ class Real extends BaseHandler
                         }
                     }
                     break;
-
                 case 'CONT': // Content Description Header (text comments)
                     $thisfile_real_chunks_currentchunk['object_version'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 2));
                     $offset += 2;
@@ -337,11 +334,9 @@ class Real extends BaseHandler
                         }
                     }
                     break;
-
                 case 'DATA': // Data Chunk Header
                     // do nothing
                     break;
-
                 case 'INDX': // Index Section Header
                     $thisfile_real_chunks_currentchunk['object_version'] = Helper::BigEndian2Int(substr($ChunkData, $offset, 2));
                     $offset += 2;
@@ -356,13 +351,11 @@ class Real extends BaseHandler
                         if ($thisfile_real_chunks_currentchunk['next_index_header'] == 0) {
                             // last index chunk found, ignore rest of file
                             break 2;
-                        } else {
+                        }
                             // non-last index chunk, seek to next index chunk (skipping actual index data)
                             fseek($this->getid3->fp, $thisfile_real_chunks_currentchunk['next_index_header'], SEEK_SET);
-                        }
                     }
                     break;
-
                 default:
                     $info['warning'][] = 'Unhandled RealMedia chunk "'.$ChunkName.'" at offset '.$thisfile_real_chunks_currentchunk['offset'];
                     break;
@@ -386,7 +379,7 @@ class Real extends BaseHandler
      *
      * @return bool
      *
-     * @link http://www.freelists.org/archives/matroska-devel/07-2003/msg00010.html
+     * @see http://www.freelists.org/archives/matroska-devel/07-2003/msg00010.html
      */
     public function ParseOldRAheader($OldRAheaderData, &$ParsedArray)
     {
@@ -430,7 +423,6 @@ class Real extends BaseHandler
             ++$commentoffset; // fourcc length (?) should be 4
             $ParsedArray['fourcc'] = substr($OldRAheaderData, 23 + $commentoffset, 4);
         } elseif ($ParsedArray['version1'] <= 5) {
-
             //$ParsedArray['unknown1']         = GetId3_lib::BigEndian2Int(substr($OldRAheaderData,  6, 2));
             $ParsedArray['fourcc1'] = substr($OldRAheaderData, 8, 4);
             $ParsedArray['file_size'] = Helper::BigEndian2Int(substr($OldRAheaderData, 12, 4));
@@ -447,7 +439,6 @@ class Real extends BaseHandler
             //$ParsedArray['unknown6']         = GetId3_lib::BigEndian2Int(substr($OldRAheaderData, 46, 2));
 
             switch ($ParsedArray['version1']) {
-
                 case 4:
                     $ParsedArray['sample_rate'] = Helper::BigEndian2Int(substr($OldRAheaderData, 48, 2));
                     //$ParsedArray['unknown8']         = GetId3_lib::BigEndian2Int(substr($OldRAheaderData, 50, 2));
@@ -474,7 +465,6 @@ class Real extends BaseHandler
                     $ParsedArray['comments']['copyright'][] = substr($ParsedArray['comments_raw'], $commentoffset, $commentlength);
                     $commentoffset += $commentlength;
                     break;
-
                 case 5:
                     $ParsedArray['sample_rate'] = Helper::BigEndian2Int(substr($OldRAheaderData, 48, 4));
                     $ParsedArray['sample_rate2'] = Helper::BigEndian2Int(substr($OldRAheaderData, 52, 4));
@@ -504,8 +494,8 @@ class Real extends BaseHandler
      *
      * @return string
      *
-     * @link http://www.its.msstate.edu/net/real/reports/config/tags.stats
-     * @link http://www.freelists.org/archives/matroska-devel/06-2003/fullthread18.html
+     * @see http://www.its.msstate.edu/net/real/reports/config/tags.stats
+     * @see http://www.freelists.org/archives/matroska-devel/06-2003/fullthread18.html
      */
     public function RealAudioCodecFourCClookup($fourcc, $bitrate)
     {
@@ -536,7 +526,7 @@ class Real extends BaseHandler
             $RealAudioCodecFourCClookup['cook'][0] = 'RealAudio G2';
             $RealAudioCodecFourCClookup['atrc'][0] = 'RealAudio 8';
         }
-        $roundbitrate = intval(round($bitrate));
+        $roundbitrate = (int) (round($bitrate));
         if (isset($RealAudioCodecFourCClookup[$fourcc][$roundbitrate])) {
             return $RealAudioCodecFourCClookup[$fourcc][$roundbitrate];
         } elseif (isset($RealAudioCodecFourCClookup[$fourcc][0])) {

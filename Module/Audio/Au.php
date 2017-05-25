@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Au extends BaseHandler
 {
@@ -126,7 +135,7 @@ class Au extends BaseHandler
             27 => 'A-Law 8-bit',
         );
 
-        return (isset($AUdataFormatNameLookup[$id]) ? $AUdataFormatNameLookup[$id] : false);
+        return isset($AUdataFormatNameLookup[$id]) ? $AUdataFormatNameLookup[$id] : false;
     }
 
     /**
@@ -163,7 +172,7 @@ class Au extends BaseHandler
             27 => 8,
         );
 
-        return (isset($AUdataFormatBitsPerSampleLookup[$id]) ? $AUdataFormatBitsPerSampleLookup[$id] : false);
+        return isset($AUdataFormatBitsPerSampleLookup[$id]) ? $AUdataFormatBitsPerSampleLookup[$id] : false;
     }
 
     /**
@@ -200,6 +209,6 @@ class Au extends BaseHandler
             27 => 8,
         );
 
-        return (isset($AUdataFormatUsedBitsPerSampleLookup[$id]) ? $AUdataFormatUsedBitsPerSampleLookup[$id] : false);
+        return isset($AUdataFormatUsedBitsPerSampleLookup[$id]) ? $AUdataFormatUsedBitsPerSampleLookup[$id] : false;
     }
 }

@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\Tag\Id3v2;
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +35,8 @@ use GetId3\Module\Tag\Id3v2;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Bonk extends BaseHandler
 {
@@ -48,7 +57,6 @@ class Bonk extends BaseHandler
         if (!Helper::intValueSupported($thisfile_bonk['dataend'])) {
             $info['warning'][] = 'Unable to parse BONK file from end (v0.6+ preferred method) because PHP filesystem functions only support up to '.round(PHP_INT_MAX / 1073741824).'GB';
         } else {
-
             // scan-from-end method, for v0.6 and higher
             fseek($this->getid3->fp, $thisfile_bonk['dataend'] - 8, SEEK_SET);
             $PossibleBonkTag = fread($this->getid3->fp, 8);
@@ -57,7 +65,7 @@ class Bonk extends BaseHandler
                 fseek($this->getid3->fp, 0 - $BonkTagSize, SEEK_CUR);
                 $BonkTagOffset = ftell($this->getid3->fp);
                 $TagHeaderTest = fread($this->getid3->fp, 5);
-                if (($TagHeaderTest{0} != "\x00") || (substr($PossibleBonkTag, 4, 4) != strtolower(substr($PossibleBonkTag, 4, 4)))) {
+                if (($TagHeaderTest[0] != "\x00") || (substr($PossibleBonkTag, 4, 4) != strtolower(substr($PossibleBonkTag, 4, 4)))) {
                     $info['error'][] = 'Expecting "'.Helper::PrintHexBytes("\x00".strtoupper(substr($PossibleBonkTag, 4, 4))).'" at offset '.$BonkTagOffset.', found "'.Helper::PrintHexBytes($TagHeaderTest).'"';
 
                     return false;
@@ -91,11 +99,9 @@ class Bonk extends BaseHandler
                             $info['audio']['encoder'] = 'BONK v0.4';
                         }
                         break;
-
                     case "\x00".'INFO':
                         $info['audio']['encoder'] = 'Extended BONK v0.5';
                         break;
-
                     default:
                         break 2;
                 }
@@ -170,7 +176,6 @@ class Bonk extends BaseHandler
                     $info['audio']['bitrate'] = (($info['bonk']['dataend'] - $info['bonk']['dataoffset']) * 8) / $info['playtime_seconds'];
                 }
                 break;
-
             case 'INFO':
                 // shortcut
                 $thisfile_bonk_INFO = &$info['bonk']['INFO'];
@@ -193,7 +198,6 @@ class Bonk extends BaseHandler
                     }
                 }
                 break;
-
             case 'META':
                 $BonkData = "\x00".'META'.fread($this->getid3->fp, $info['bonk']['META']['size'] - 5);
                 $info['bonk']['META']['version'] = Helper::LittleEndian2Int(substr($BonkData, 5, 1));
@@ -208,7 +212,6 @@ class Bonk extends BaseHandler
                     $info['bonk']['META']['tags'][$MetaEntryTagName] = $MetaEntryTagOffset;
                 }
                 break;
-
             case ' ID3':
                 $info['audio']['encoder'] = 'Extended BONK v0.9+';
 
@@ -225,11 +228,9 @@ class Bonk extends BaseHandler
                     unset($getid3_temp, $getid3_id3v2);
                 }
                 break;
-
             default:
                 $info['warning'][] = 'Unexpected Bonk tag "'.$BonkTagName.'" at offset '.$info['bonk'][$BonkTagName]['offset'];
                 break;
-
         }
     }
 

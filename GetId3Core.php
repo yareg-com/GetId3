@@ -1,28 +1,36 @@
 <?php
 
-/**
- * GetId3() by James Heinrich <info@getid3.org>
- * available at http://getid3.sourceforge.net
- * or http://www.getid3.org
+/*
+ * This file is part of GetID3.
  *
- * Please see readme.txt for more information
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace GetId3;
 
-use GetId3\Lib\Helper;
 use GetId3\Exception\DefaultException;
+use GetId3\Lib\Helper;
 
 /**
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
  * @version 1.9.4-20120530
  */
 class GetId3Core
 {
+    const VERSION = '1.9.4-20120530';
+
+    const FREAD_BUFFER_SIZE = 32768;
+
+    const ATTACHMENTS_NONE = false;
+
+    const ATTACHMENTS_INLINE = true;
     // public: Settings
 
     /**
@@ -162,6 +170,11 @@ class GetId3Core
      */
     public $info = array();
 
+    /**
+     * @var type
+     */
+    public $tempdir;
+
     // Protected variables
 
     /**
@@ -178,11 +191,6 @@ class GetId3Core
      * @var int
      */
     protected $memory_limit = 0;
-
-    /**
-     * @var type
-     */
-    public $tempdir;
 
     /**
      * $TempDir = '/something/else/';  // feel free to override temp dir here if it works better for your system
@@ -205,26 +213,6 @@ class GetId3Core
      * @var type
      */
     protected static $HelperAppsDir;
-
-    /**
-     *
-     */
-    const VERSION = '1.9.4-20120530';
-
-    /**
-     *
-     */
-    const FREAD_BUFFER_SIZE = 32768;
-
-    /**
-     *
-     */
-    const ATTACHMENTS_NONE = false;
-
-    /**
-     *
-     */
-    const ATTACHMENTS_INLINE = true;
 
     /**
      * public: constructor
@@ -262,7 +250,7 @@ class GetId3Core
             $this->warning('WARNING: Safe mode is on, shorten support disabled, md5data/sha1data for ogg vorbis disabled, ogg vorbos/flac tag writing disabled.');
         }
 
-        if (intval(ini_get('mbstring.func_overload')) > 0) {
+        if ((int) (ini_get('mbstring.func_overload')) > 0) {
             $this->warning('WARNING: php.ini contains "mbstring.func_overload = '.ini_get('mbstring.func_overload').'", this may break things.');
         }
 
@@ -294,54 +282,6 @@ class GetId3Core
         // check for critical errors
         if ($this->hasStartupError()) {
             throw new DefaultException($this->getStartupError());
-        }
-    }
-
-    /**
-     * Needed for Windows only:
-     * Define locations of helper applications for Shorten, VorbisComment,
-     * MetaFLAC as well as other helper functions such as head, tail, md5sum, etc
-     * This path cannot contain spaces, but the below code will attempt to get
-     * the 8.3-equivalent path automatically
-     * IMPORTANT: This path must include the trailing slash
-     */
-    protected function setHelperAppsDir()
-    {
-        if (self::$EnvironmentIsWindows && null === self::$HelperAppsDir) {
-            $helperappsdir = self::$IncludePath.'Resources'.DIRECTORY_SEPARATOR.'helperapps'; // must not have any space in this path
-
-            if (!is_dir($helperappsdir)) {
-                $this->addStartupWarning('"'.$helperappsdir.'" cannot be defined as self::getHelperAppsDir() because it does not exist');
-            } elseif (strpos(realpath($helperappsdir), ' ') !== false) {
-                $DirPieces = explode(DIRECTORY_SEPARATOR,
-                                     realpath($helperappsdir));
-                $path_so_far = array();
-                foreach ($DirPieces as $key => $value) {
-                    if (strpos($value, ' ') !== false) {
-                        if (!empty($path_so_far)) {
-                            $commandline = 'dir /x '.escapeshellarg(implode(DIRECTORY_SEPARATOR,
-                                                                              $path_so_far));
-                            $dir_listing = `$commandline`;
-                            $lines = explode("\n", $dir_listing);
-                            foreach ($lines as $line) {
-                                $line = trim($line);
-                                if (preg_match('#^([0-9/]{10}) +([0-9:]{4,5}( [AP]M)?) +(<DIR>|[0-9,]+) +([^ ]{0,11}) +(.+)$#',
-                                               $line, $matches)) {
-                                    list($dummy, $date, $time, $ampm, $filesize, $shortname, $filename) = $matches;
-                                    if ((strtoupper($filesize) == '<DIR>') && (strtolower($filename) == strtolower($value))) {
-                                        $value = $shortname;
-                                    }
-                                }
-                            }
-                        } else {
-                            $this->addStartupWarning('self::getHelperAppsDir() must not have any spaces in it - use 8dot3 naming convention if neccesary. You can run "dir /x" from the commandline to see the correct 8.3-style names.');
-                        }
-                    }
-                    $path_so_far[] = $value;
-                }
-                $helperappsdir = implode(DIRECTORY_SEPARATOR, $path_so_far);
-            }
-            self::$HelperAppsDir = $helperappsdir.DIRECTORY_SEPARATOR;
         }
     }
 
@@ -391,9 +331,9 @@ class GetId3Core
     /**
      * @param  type             $filename
      *
-     * @return bool
-     *
      * @throws DefaultException
+     *
+     * @return bool
      */
     public function openfile($filename)
     {
@@ -507,9 +447,9 @@ class GetId3Core
      *
      * @param  type      $filename
      *
-     * @return type
-     *
      * @throws Exception
+     *
+     * @return type
      */
     public function analyze($filename)
     {
@@ -548,8 +488,8 @@ class GetId3Core
                 $header = fread($this->getFp(), 10);
                 if ((substr($header, 0, 3) == 'ID3') && (strlen($header) == 10)) {
                     $this->info['id3v2']['header'] = true;
-                    $this->info['id3v2']['majorversion'] = ord($header{3});
-                    $this->info['id3v2']['minorversion'] = ord($header{4});
+                    $this->info['id3v2']['majorversion'] = ord($header[3]);
+                    $this->info['id3v2']['minorversion'] = ord($header[4]);
                     $this->info['avdataoffset'] += Helper::BigEndian2Int(substr($header,
                                                                                    6,
                                                                                    4),
@@ -680,24 +620,6 @@ class GetId3Core
     }
 
     /**
-     * private: error handling
-     *
-     * @param  type $message
-     *
-     * @return type
-     */
-    private function error($message)
-    {
-        $this->CleanUp();
-        if (!isset($this->info['error'])) {
-            $this->info['error'] = array();
-        }
-        $this->info['error'][] = $message;
-
-        return $this->info;
-    }
-
-    /**
      * private: warning handling
      *
      * @param  string  $message
@@ -707,58 +629,6 @@ class GetId3Core
     public function warning($message)
     {
         $this->info['warning'][] = $message;
-
-        return true;
-    }
-
-    /**
-     * private: CleanUp
-     *
-     * @return bool
-     */
-    private function CleanUp()
-    {
-
-        // remove possible empty keys
-        $AVpossibleEmptyKeys = array('dataformat', 'bits_per_sample', 'encoder_options', 'streams', 'bitrate');
-        foreach ($AVpossibleEmptyKeys as $dummy => $key) {
-            if (empty($this->info['audio'][$key]) && isset($this->info['audio'][$key])) {
-                unset($this->info['audio'][$key]);
-            }
-            if (empty($this->info['video'][$key]) && isset($this->info['video'][$key])) {
-                unset($this->info['video'][$key]);
-            }
-        }
-
-        // remove empty root keys
-        if (!empty($this->info)) {
-            foreach ($this->info as $key => $value) {
-                if (empty($this->info[$key]) && ($this->info[$key] !== 0) && ($this->info[$key] !== '0')) {
-                    unset($this->info[$key]);
-                }
-            }
-        }
-
-        // remove meaningless entries from unknown-format files
-        if (empty($this->info['fileformat'])) {
-            if (isset($this->info['avdataoffset'])) {
-                unset($this->info['avdataoffset']);
-            }
-            if (isset($this->info['avdataend'])) {
-                unset($this->info['avdataend']);
-            }
-        }
-
-        // remove possible duplicated identical entries
-        if (!empty($this->info['error'])) {
-            $this->info['error'] = array_values(array_unique($this->info['error']));
-        }
-        if (!empty($this->info['warning'])) {
-            $this->info['warning'] = array_values(array_unique($this->info['warning']));
-        }
-
-        // remove "global variable" type keys
-        unset($this->info['php_memory_limit']);
 
         return true;
     }
@@ -1292,7 +1162,6 @@ class GetId3Core
      */
     public function CharConvert(&$array, $encoding)
     {
-
         // identical encoding - end here
         if ($encoding == $this->getEncoding()) {
             return;
@@ -1300,7 +1169,6 @@ class GetId3Core
 
         // loop thru array
         foreach ($array as $key => $value) {
-
             // go recursive
             if (is_array($value)) {
                 $this->CharConvert($array[$key], $encoding);
@@ -1322,7 +1190,6 @@ class GetId3Core
      */
     public function HandleAllTags()
     {
-
         // key name => array (tag name, character encoding)
         static $tags;
         if (empty($tags)) {
@@ -1457,14 +1324,12 @@ class GetId3Core
             case 'md5':
             case 'sha1':
                 break;
-
             default:
                 return $this->error('bad algorithm "'.$algorithm.'" in getHashdata()');
                 break;
         }
 
         if (!empty($this->info['fileformat']) && !empty($this->info['dataformat']) && ($this->info['fileformat'] == 'ogg') && ($this->info['audio']['dataformat'] == 'vorbis')) {
-
             // We cannot get an identical md5_data value for Ogg files where the comments
             // span more than 1 Ogg page (compared to the same audio data with smaller
             // comments) using the normal GetId3Core() method of MD5'ing the data between the
@@ -1486,7 +1351,6 @@ class GetId3Core
                 $this->warning('Failed making system call to vorbiscomment.exe - '.$algorithm.'_data is incorrect - error returned: PHP running in Safe Mode (backtick operator not available)');
                 $this->info[$algorithm.'_data'] = false;
             } else {
-
                 // Prevent user from aborting script
                 $old_abort = ignore_user_abort(true);
 
@@ -1515,13 +1379,11 @@ class GetId3Core
                     $this->info['warning'][] = 'Failed making system call to vorbiscomment(.exe) - '.$algorithm.'_data will be incorrect. If vorbiscomment is unavailable, please download from http://www.vorbis.com/download.psp and put in the GetId3Core() directory. Error returned: '.$VorbisCommentError;
                     $this->info[$algorithm.'_data'] = false;
                 } else {
-
                     // Get hash of newly created file
                     switch ($algorithm) {
                         case 'md5':
                             $this->info[$algorithm.'_data'] = md5_file($temp);
                             break;
-
                         case 'sha1':
                             $this->info[$algorithm.'_data'] = sha1_file($temp);
                             break;
@@ -1537,20 +1399,17 @@ class GetId3Core
             }
         } else {
             if (!empty($this->info['avdataoffset']) || (isset($this->info['avdataend']) && ($this->info['avdataend'] < $this->info['filesize']))) {
-
                 // get hash from part of file
                 $this->info[$algorithm.'_data'] = Helper::hash_data($this->info['filenamepath'],
                                                                          $this->info['avdataoffset'],
                                                                          $this->info['avdataend'],
                                                                          $algorithm);
             } else {
-
                 // get hash from whole file
                 switch ($algorithm) {
                     case 'md5':
                         $this->info[$algorithm.'_data'] = md5_file($this->info['filenamepath']);
                         break;
-
                     case 'sha1':
                         $this->info[$algorithm.'_data'] = sha1_file($this->info['filenamepath']);
                         break;
@@ -1561,12 +1420,8 @@ class GetId3Core
         return true;
     }
 
-    /**
-     *
-     */
     public function ChannelsBitratePlaytimeCalculations()
     {
-
         // set channelmode on audio
         if (!empty($this->info['audio']['channelmode']) || !isset($this->info['audio']['channels'])) {
             // ignore
@@ -1654,7 +1509,6 @@ class GetId3Core
                 $PlaytimeSeconds = 1;
                 $BitrateCompressed = $this->info['filesize'] * 8;
                 break;
-
             default:
                 if (!empty($this->info['video']['frame_rate'])) {
                     $FrameRate = $this->info['video']['frame_rate'];
@@ -1708,7 +1562,7 @@ class GetId3Core
     {
         if (isset($this->info['replay_gain'])) {
             if (!isset($this->info['replay_gain']['reference_volume'])) {
-                $this->info['replay_gain']['reference_volume'] = (double) 89.0;
+                $this->info['replay_gain']['reference_volume'] = (float) 89.0;
             }
             if (isset($this->info['replay_gain']['track']['adjustment'])) {
                 $this->info['replay_gain']['track']['volume'] = $this->info['replay_gain']['reference_volume'] - $this->info['replay_gain']['track']['adjustment'];
@@ -1754,9 +1608,6 @@ class GetId3Core
         return tempnam($this->tempdir, 'gI3');
     }
 
-    /**
-     *
-     */
     public static function getTempDir()
     {
         if (null === self::$TempDir) {
@@ -1820,9 +1671,6 @@ class GetId3Core
         return self::$EnvironmentIsWindows;
     }
 
-    /**
-     *
-     */
     public static function getIncludePath()
     {
         // Get base path of GetId3Core() - ONCE
@@ -2119,5 +1967,122 @@ class GetId3Core
         $this->memory_limit = $memory_limit;
 
         return $this;
+    }
+
+    /**
+     * Needed for Windows only:
+     * Define locations of helper applications for Shorten, VorbisComment,
+     * MetaFLAC as well as other helper functions such as head, tail, md5sum, etc
+     * This path cannot contain spaces, but the below code will attempt to get
+     * the 8.3-equivalent path automatically
+     * IMPORTANT: This path must include the trailing slash
+     */
+    protected function setHelperAppsDir()
+    {
+        if (self::$EnvironmentIsWindows && null === self::$HelperAppsDir) {
+            $helperappsdir = self::$IncludePath.'Resources'.DIRECTORY_SEPARATOR.'helperapps'; // must not have any space in this path
+
+            if (!is_dir($helperappsdir)) {
+                $this->addStartupWarning('"'.$helperappsdir.'" cannot be defined as self::getHelperAppsDir() because it does not exist');
+            } elseif (strpos(realpath($helperappsdir), ' ') !== false) {
+                $DirPieces = explode(DIRECTORY_SEPARATOR,
+                                     realpath($helperappsdir));
+                $path_so_far = array();
+                foreach ($DirPieces as $key => $value) {
+                    if (strpos($value, ' ') !== false) {
+                        if (!empty($path_so_far)) {
+                            $commandline = 'dir /x '.escapeshellarg(implode(DIRECTORY_SEPARATOR,
+                                                                              $path_so_far));
+                            $dir_listing = `$commandline`;
+                            $lines = explode("\n", $dir_listing);
+                            foreach ($lines as $line) {
+                                $line = trim($line);
+                                if (preg_match('#^([0-9/]{10}) +([0-9:]{4,5}( [AP]M)?) +(<DIR>|[0-9,]+) +([^ ]{0,11}) +(.+)$#',
+                                               $line, $matches)) {
+                                    list($dummy, $date, $time, $ampm, $filesize, $shortname, $filename) = $matches;
+                                    if ((strtoupper($filesize) == '<DIR>') && (strtolower($filename) == strtolower($value))) {
+                                        $value = $shortname;
+                                    }
+                                }
+                            }
+                        } else {
+                            $this->addStartupWarning('self::getHelperAppsDir() must not have any spaces in it - use 8dot3 naming convention if neccesary. You can run "dir /x" from the commandline to see the correct 8.3-style names.');
+                        }
+                    }
+                    $path_so_far[] = $value;
+                }
+                $helperappsdir = implode(DIRECTORY_SEPARATOR, $path_so_far);
+            }
+            self::$HelperAppsDir = $helperappsdir.DIRECTORY_SEPARATOR;
+        }
+    }
+
+    /**
+     * private: error handling
+     *
+     * @param  type $message
+     *
+     * @return type
+     */
+    private function error($message)
+    {
+        $this->CleanUp();
+        if (!isset($this->info['error'])) {
+            $this->info['error'] = array();
+        }
+        $this->info['error'][] = $message;
+
+        return $this->info;
+    }
+
+    /**
+     * private: CleanUp
+     *
+     * @return bool
+     */
+    private function CleanUp()
+    {
+        // remove possible empty keys
+        $AVpossibleEmptyKeys = array('dataformat', 'bits_per_sample', 'encoder_options', 'streams', 'bitrate');
+        foreach ($AVpossibleEmptyKeys as $dummy => $key) {
+            if (empty($this->info['audio'][$key]) && isset($this->info['audio'][$key])) {
+                unset($this->info['audio'][$key]);
+            }
+            if (empty($this->info['video'][$key]) && isset($this->info['video'][$key])) {
+                unset($this->info['video'][$key]);
+            }
+        }
+
+        // remove empty root keys
+        if (!empty($this->info)) {
+            foreach ($this->info as $key => $value) {
+                if (empty($this->info[$key]) && ($this->info[$key] !== 0) && ($this->info[$key] !== '0')) {
+                    unset($this->info[$key]);
+                }
+            }
+        }
+
+        // remove meaningless entries from unknown-format files
+        if (empty($this->info['fileformat'])) {
+            if (isset($this->info['avdataoffset'])) {
+                unset($this->info['avdataoffset']);
+            }
+            if (isset($this->info['avdataend'])) {
+                unset($this->info['avdataend']);
+            }
+        }
+
+        // remove possible duplicated identical entries
+        if (!empty($this->info['error'])) {
+            $this->info['error'] = array_values(array_unique($this->info['error']));
+        }
+        if (!empty($this->info['warning'])) {
+            $this->info['warning'] = array_values(array_unique($this->info['warning']));
+        }
+
+        // remove "global variable" type keys
+        unset($this->info['php_memory_limit']);
+
+        return true;
     }
 }

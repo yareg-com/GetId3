@@ -1,6 +1,14 @@
 <?php
 
-/////////////////////////////////////////////////////////////////
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 /// getID3() by James Heinrich <info@getid3.org>               //
 //  available at http://getid3.sourceforge.net                 //
 //            or http://www.getid3.org                         //
@@ -67,7 +75,7 @@ if (isset($_REQUEST['deletefile'])) {
         $deletefilemessage = 'FAILED to delete '.addslashes($_REQUEST['deletefile']).' - file does not exist';
     }
     if (isset($_REQUEST['noalert'])) {
-        echo '<b><font color="'.(($deletefilemessage{0} == 'F') ? '#FF0000' : '#008000').'">'.$deletefilemessage.'</font></b><hr>';
+        echo '<b><font color="'.(($deletefilemessage[0] == 'F') ? '#FF0000' : '#008000').'">'.$deletefilemessage.'</font></b><hr>';
     } else {
         echo '<script type="text/javascript">alert("'.$deletefilemessage.'");</script>';
     }
@@ -155,7 +163,6 @@ if (isset($_REQUEST['filename'])) {
                     $DirectoryContents[$currentfulldir]['dir'][$file]['filename'] = $ParentDir;
                     continue 2;
                     break;
-
                 case '.':
                     // ignore
                     continue 2;
@@ -182,7 +189,7 @@ if (isset($_REQUEST['filename'])) {
                 if (!empty($fileinformation['fileformat'])) {
                     $DirectoryContents[$currentfulldir]['known'][$file] = $fileinformation;
                     $TotalScannedPlaytime += (isset($fileinformation['playtime_seconds']) ? $fileinformation['playtime_seconds'] : 0);
-                    $TotalScannedBitrate  += (isset($fileinformation['bitrate'])          ? $fileinformation['bitrate']          : 0);
+                    $TotalScannedBitrate += (isset($fileinformation['bitrate']) ? $fileinformation['bitrate'] : 0);
                     ++$TotalScannedKnownFiles;
                 } else {
                     $DirectoryContents[$currentfulldir]['other'][$file] = $fileinformation;
@@ -263,10 +270,10 @@ if (isset($_REQUEST['filename'])) {
                     echo '<td align="right">&nbsp;'.(isset($fileinfo['playtime_string']) ? $fileinfo['playtime_string'] : '-').'</td>';
                     echo '<td align="right">&nbsp;'.(isset($fileinfo['bitrate']) ? BitrateText($fileinfo['bitrate'] / 1000, 0, ((isset($fileinfo['audio']['bitrate_mode']) && ($fileinfo['audio']['bitrate_mode'] == 'vbr')) ? true : false)) : '-').'</td>';
                     echo '<td align="left">&nbsp;'.(isset($fileinfo['comments_html']['artist']) ? implode('<br>', $fileinfo['comments_html']['artist']) : ((isset($fileinfo['video']['resolution_x']) && isset($fileinfo['video']['resolution_y'])) ? $fileinfo['video']['resolution_x'].'x'.$fileinfo['video']['resolution_y'] : '')).'</td>';
-                    echo '<td align="left">&nbsp;'.(isset($fileinfo['comments_html']['title'])  ? implode('<br>', $fileinfo['comments_html']['title'])  :  (isset($fileinfo['video']['frame_rate'])                                                 ? number_format($fileinfo['video']['frame_rate'], 3).'fps'                  : '')).'</td>';
+                    echo '<td align="left">&nbsp;'.(isset($fileinfo['comments_html']['title']) ? implode('<br>', $fileinfo['comments_html']['title']) : (isset($fileinfo['video']['frame_rate']) ? number_format($fileinfo['video']['frame_rate'], 3).'fps' : '')).'</td>';
                     if (isset($_REQUEST['ShowMD5'])) {
-                        echo '<td align="left"><tt>'.(isset($fileinfo['md5_file'])        ? $fileinfo['md5_file']        : '&nbsp;').'</tt></td>';
-                        echo '<td align="left"><tt>'.(isset($fileinfo['md5_data'])        ? $fileinfo['md5_data']        : '&nbsp;').'</tt></td>';
+                        echo '<td align="left"><tt>'.(isset($fileinfo['md5_file']) ? $fileinfo['md5_file'] : '&nbsp;').'</tt></td>';
+                        echo '<td align="left"><tt>'.(isset($fileinfo['md5_data']) ? $fileinfo['md5_data'] : '&nbsp;').'</tt></td>';
                         echo '<td align="left"><tt>'.(isset($fileinfo['md5_data_source']) ? $fileinfo['md5_data_source'] : '&nbsp;').'</tt></td>';
                     } else {
                         echo '<td align="center" colspan="3">-</td>';
@@ -461,25 +468,20 @@ function table_var_dump($variable, $wrap_in_td = false, $encoding = 'ISO-8859-1'
             $returnstring .= '</table>'."\n";
             $returnstring .= ($wrap_in_td ? '</td>'."\n" : '');
             break;
-
         case 'boolean':
             $returnstring .= ($wrap_in_td ? '<td class="dump_boolean">' : '').($variable ? 'TRUE' : 'FALSE').($wrap_in_td ? '</td>'."\n" : '');
             break;
-
         case 'integer':
             $returnstring .= ($wrap_in_td ? '<td class="dump_integer">' : '').$variable.($wrap_in_td ? '</td>'."\n" : '');
             break;
-
         case 'double':
         case 'float':
             $returnstring .= ($wrap_in_td ? '<td class="dump_double">' : '').$variable.($wrap_in_td ? '</td>'."\n" : '');
             break;
-
         case 'object':
         case 'null':
             $returnstring .= ($wrap_in_td ? '<td>' : '').string_var_dump($variable).($wrap_in_td ? '</td>'."\n" : '');
             break;
-
         case 'string':
             //$variable = str_replace("\x00", ' ', $variable);
             //$varlen = strlen($variable);
@@ -489,7 +491,6 @@ function table_var_dump($variable, $wrap_in_td = false, $encoding = 'ISO-8859-1'
             $returnstring = htmlentities($variable, ENT_QUOTES, $encoding);
             $returnstring = ($wrap_in_td ? '<td class="dump_string">' : '').nl2br($returnstring).($wrap_in_td ? '</td>'."\n" : '');
             break;
-
         default:
             $imageinfo = array();
             $imagechunkcheck = getid3_lib::GetDataImageSize($variable, $imageinfo);

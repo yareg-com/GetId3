@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\AudioVideo\Riff;
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +35,8 @@ use GetId3\Module\AudioVideo\Riff;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Wavpack extends BaseHandler
 {
@@ -117,8 +126,8 @@ class Wavpack extends BaseHandler
                     return false;
                 }
 
-                $info['wavpack']['blockheader']['minor_version'] = ord($wavpackheader{8});
-                $info['wavpack']['blockheader']['major_version'] = ord($wavpackheader{9});
+                $info['wavpack']['blockheader']['minor_version'] = ord($wavpackheader[8]);
+                $info['wavpack']['blockheader']['major_version'] = ord($wavpackheader[9]);
 
                 if (($info['wavpack']['blockheader']['major_version'] != 4) ||
                     (($info['wavpack']['blockheader']['minor_version'] < 4) &&
@@ -138,8 +147,8 @@ class Wavpack extends BaseHandler
                     return false;
                 }
 
-                $info['wavpack']['blockheader']['track_number'] = ord($wavpackheader{10}); // unused
-                $info['wavpack']['blockheader']['index_number'] = ord($wavpackheader{11}); // unused
+                $info['wavpack']['blockheader']['track_number'] = ord($wavpackheader[10]); // unused
+                $info['wavpack']['blockheader']['index_number'] = ord($wavpackheader[11]); // unused
                 $info['wavpack']['blockheader']['total_samples'] = Helper::LittleEndian2Int(substr($wavpackheader, 12, 4));
                 $info['wavpack']['blockheader']['block_index'] = Helper::LittleEndian2Int(substr($wavpackheader, 16, 4));
                 $info['wavpack']['blockheader']['block_samples'] = Helper::LittleEndian2Int(substr($wavpackheader, 20, 4));
@@ -168,7 +177,7 @@ class Wavpack extends BaseHandler
                 if (feof($this->getid3->fp)) {
                     break;
                 }
-                $metablock['id'] = ord($metablockheader{0});
+                $metablock['id'] = ord($metablockheader[0]);
                 $metablock['function_id'] = ($metablock['id'] & 0x3F);
                 $metablock['function_name'] = $this->WavPackMetablockNameLookup($metablock['function_id']);
 
@@ -205,7 +214,6 @@ class Wavpack extends BaseHandler
                                 $metablock['data'] = substr($metablock['data'], 0, -1);
                             }
                             break;
-
                         case 0x00: // ID_DUMMY
                         case 0x01: // ID_ENCODER_INFO
                         case 0x02: // ID_DECORR_TERMS
@@ -222,7 +230,6 @@ class Wavpack extends BaseHandler
                         case 0x0D: // ID_CHANNEL_INFO
                             fseek($this->getid3->fp, $metablock['offset'] + ($metablock['large_block'] ? 4 : 2) + $metablock['size'], SEEK_SET);
                             break;
-
                         default:
                             $info['warning'][] = 'Unexpected metablock type "0x'.str_pad(dechex($metablock['function_id']), 2, '0', STR_PAD_LEFT).'" at offset '.$metablock['offset'];
                             fseek($this->getid3->fp, $metablock['offset'] + ($metablock['large_block'] ? 4 : 2) + $metablock['size'], SEEK_SET);
@@ -248,7 +255,6 @@ class Wavpack extends BaseHandler
                             // Safe RIFF header in case there's a RIFF footer later
                             $metablockRIFFheader = $metablock['data'];
                             break;
-
                         case 0x22: // ID_RIFF_TRAILER
                             $metablockRIFFfooter = $metablockRIFFheader.$metablock['data'];
 
@@ -266,15 +272,12 @@ class Wavpack extends BaseHandler
                             }
                             unset($getid3_temp, $getid3_riff);
                             break;
-
                         case 0x23: // ID_REPLAY_GAIN
                             $info['warning'][] = 'WavPack "Replay Gain" contents not yet handled by GetId3Core() in metablock at offset '.$metablock['offset'];
                             break;
-
                         case 0x24: // ID_CUESHEET
                             $info['warning'][] = 'WavPack "Cuesheet" contents not yet handled by GetId3Core() in metablock at offset '.$metablock['offset'];
                             break;
-
                         case 0x25: // ID_CONFIG_BLOCK
                             $metablock['flags_raw'] = Helper::LittleEndian2Int(substr($metablock['data'], 0, 3));
 
@@ -306,23 +309,22 @@ class Wavpack extends BaseHandler
                             if ($info['wavpack']['blockheader']['flags']['hybrid']) {
                                 $info['audio']['encoder_options'] .= ' -b???';
                             }
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['adobe_mode']     ? ' -a' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['optimize_wvc']   ? ' -cc' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['create_exe']     ? ' -e' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['fast_flag']      ? ' -f' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['adobe_mode'] ? ' -a' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['optimize_wvc'] ? ' -cc' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['create_exe'] ? ' -e' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['fast_flag'] ? ' -f' : '');
                             $info['audio']['encoder_options'] .= ($metablock['flags']['joint_override'] ? ' -j?' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['high_flag']      ? ' -h' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['md5_checksum']   ? ' -m' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['calc_noise']     ? ' -n' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['high_flag'] ? ' -h' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['md5_checksum'] ? ' -m' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['calc_noise'] ? ' -n' : '');
                             $info['audio']['encoder_options'] .= ($metablock['flags']['shape_override'] ? ' -s?' : '');
-                            $info['audio']['encoder_options'] .= ($metablock['flags']['extra_mode']     ? ' -x?' : '');
+                            $info['audio']['encoder_options'] .= ($metablock['flags']['extra_mode'] ? ' -x?' : '');
                             if (!empty($info['audio']['encoder_options'])) {
                                 $info['audio']['encoder_options'] = trim($info['audio']['encoder_options']);
                             } elseif (isset($info['audio']['encoder_options'])) {
                                 unset($info['audio']['encoder_options']);
                             }
                             break;
-
                         case 0x26: // ID_MD5_CHECKSUM
                             if (strlen($metablock['data']) == 16) {
                                 $info['md5_data_source'] = strtolower(Helper::PrintHexBytes($metablock['data'], true, false, false));
@@ -330,7 +332,6 @@ class Wavpack extends BaseHandler
                                 $info['warning'][] = 'Expecting 16 bytes of WavPack "MD5 Checksum" in metablock at offset '.$metablock['offset'].', but found '.strlen($metablock['data']).' bytes';
                             }
                             break;
-
                         case 0x00: // ID_DUMMY
                         case 0x01: // ID_ENCODER_INFO
                         case 0x02: // ID_DECORR_TERMS
@@ -400,6 +401,6 @@ class Wavpack extends BaseHandler
             0x26 => 'MD5 Checksum',
         );
 
-        return (isset($WavPackMetablockNameLookup[$id]) ? $WavPackMetablockNameLookup[$id] : '');
+        return isset($WavPackMetablockNameLookup[$id]) ? $WavPackMetablockNameLookup[$id] : '';
     }
 }

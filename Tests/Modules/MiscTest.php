@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Tests\Modules;
 
 use GetId3\GetId3Core;
@@ -53,13 +62,13 @@ class MiscTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $properties);
         $this->assertArrayNotHasKey('warning', $properties);
         $this->assertArrayHasKey('mime_type', $properties);
-        $this->assertEquals('application/octet-stream', $properties['mime_type']);
+        $this->assertSame('application/octet-stream', $properties['mime_type']);
         $this->assertArrayHasKey('encoding', $properties);
-        $this->assertEquals('UTF-8', $properties['encoding']);
+        $this->assertSame('UTF-8', $properties['encoding']);
         $this->assertArrayHasKey('filesize', $properties);
         $this->assertSame(314, $properties['filesize']);
         $this->assertArrayHasKey('fileformat', $properties);
-        $this->assertEquals('cue', $properties['fileformat']);
+        $this->assertSame('cue', $properties['fileformat']);
         $this->assertArrayHasKey('cue', $properties);
         $this->assertArrayHasKey('tracks', $properties['cue']);
         $this->assertCount(8, $properties['cue']['tracks']);

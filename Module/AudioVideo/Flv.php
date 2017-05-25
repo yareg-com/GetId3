@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 use GetId3\Handler\BaseHandler;
@@ -60,20 +69,15 @@ use GetId3\Lib\Helper;
  * @author James Heinrich <info@getid3.org>
  * @author Seth Kaufman <seth@whirl-i-gig.com>
  *
- * @uses GetId3\Module\AudioVideo\AVCSequenceParameterSetReader
- * @uses GetId3\Module\AudioVideo\AMFReader
- * @uses GetId3\Module\AudioVideo\AMFStream
+ * @uses \GetId3\Module\AudioVideo\AVCSequenceParameterSetReader
+ * @uses \GetId3\Module\AudioVideo\AMFReader
+ * @uses \GetId3\Module\AudioVideo\AMFStream
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Flv extends BaseHandler
 {
-    /**
-     * @var int
-     */
-    public $max_frames = 100000; // break out of the loop if too many frames have been scanned; only scan this many if meta frame does not contain useful duration
-
     const GETID3_FLV_TAG_AUDIO = 8;
     const GETID3_FLV_TAG_VIDEO = 9;
     const GETID3_FLV_TAG_META = 18;
@@ -83,6 +87,10 @@ class Flv extends BaseHandler
     const GETID3_FLV_VIDEO_VP6FLV_ALPHA = 5;
     const GETID3_FLV_VIDEO_SCREENV2 = 6;
     const GETID3_FLV_VIDEO_H264 = 7;
+    /**
+     * @var int
+     */
+    public $max_frames = 100000; // break out of the loop if too many frames have been scanned; only scan this many if meta frame does not contain useful duration
 
     /**
      * @return bool
@@ -160,7 +168,6 @@ class Flv extends BaseHandler
                         $info['flv']['audio']['audioType'] = $LastHeaderByte & 0x01;
                     }
                     break;
-
                 case self::GETID3_FLV_TAG_VIDEO:
                     $flv_framecount['video']++;
                     if (!$found_video) {
@@ -237,7 +244,6 @@ class Flv extends BaseHandler
                                     $info['video']['resolution_x'] = $PictureSizeEnc['x'] & 0xFF;
                                     $info['video']['resolution_y'] = $PictureSizeEnc['y'] & 0xFF;
                                     break;
-
                                 case 1:
                                     $PictureSizeEnc['x'] = Helper::BigEndian2Int(substr($FLVvideoHeader,
                                                                                                    4,
@@ -250,32 +256,26 @@ class Flv extends BaseHandler
                                     $info['video']['resolution_x'] = $PictureSizeEnc['x'] & 0xFFFF;
                                     $info['video']['resolution_y'] = $PictureSizeEnc['y'] & 0xFFFF;
                                     break;
-
                                 case 2:
                                     $info['video']['resolution_x'] = 352;
                                     $info['video']['resolution_y'] = 288;
                                     break;
-
                                 case 3:
                                     $info['video']['resolution_x'] = 176;
                                     $info['video']['resolution_y'] = 144;
                                     break;
-
                                 case 4:
                                     $info['video']['resolution_x'] = 128;
                                     $info['video']['resolution_y'] = 96;
                                     break;
-
                                 case 5:
                                     $info['video']['resolution_x'] = 320;
                                     $info['video']['resolution_y'] = 240;
                                     break;
-
                                 case 6:
                                     $info['video']['resolution_x'] = 160;
                                     $info['video']['resolution_y'] = 120;
                                     break;
-
                                 default:
                                     $info['video']['resolution_x'] = 0;
                                     $info['video']['resolution_y'] = 0;
@@ -285,7 +285,6 @@ class Flv extends BaseHandler
                         $info['video']['pixel_aspect_ratio'] = $info['video']['resolution_x'] / $info['video']['resolution_y'];
                     }
                     break;
-
                 // Meta tag
                 case self::GETID3_FLV_TAG_META:
                     if (!$found_meta) {
@@ -304,7 +303,7 @@ class Flv extends BaseHandler
                                 switch ($sourcekey) {
                                     case 'width':
                                     case 'height':
-                                        $info['video'][$destkey] = intval(round($info['flv']['meta']['onMetaData'][$sourcekey]));
+                                        $info['video'][$destkey] = (int) (round($info['flv']['meta']['onMetaData'][$sourcekey]));
                                         break;
                                     case 'audiodatarate':
                                         $info['audio'][$destkey] = Helper::CastAsInt(round($info['flv']['meta']['onMetaData'][$sourcekey] * 1000));
@@ -322,7 +321,6 @@ class Flv extends BaseHandler
                         }
                     }
                     break;
-
                 default:
                     // noop
                     break;
@@ -391,7 +389,7 @@ class Flv extends BaseHandler
                 15 => 'Device-specific sound',
         );
 
-        return (isset($FLVaudioFormat[$id]) ? $FLVaudioFormat[$id] : false);
+        return isset($FLVaudioFormat[$id]) ? $FLVaudioFormat[$id] : false;
     }
 
     /**
@@ -408,7 +406,7 @@ class Flv extends BaseHandler
                 3 => 44100,
         );
 
-        return (isset($FLVaudioRate[$id]) ? $FLVaudioRate[$id] : false);
+        return isset($FLVaudioRate[$id]) ? $FLVaudioRate[$id] : false;
     }
 
     /**
@@ -423,7 +421,7 @@ class Flv extends BaseHandler
                 1 => 16,
         );
 
-        return (isset($FLVaudioBitDepth[$id]) ? $FLVaudioBitDepth[$id] : false);
+        return isset($FLVaudioBitDepth[$id]) ? $FLVaudioBitDepth[$id] : false;
     }
 
     /**
@@ -442,6 +440,6 @@ class Flv extends BaseHandler
             self::GETID3_FLV_VIDEO_H264 => 'Sorenson H.264',
         );
 
-        return (isset($FLVvideoCodec[$id]) ? $FLVvideoCodec[$id] : false);
+        return isset($FLVvideoCodec[$id]) ? $FLVvideoCodec[$id] : false;
     }
 }

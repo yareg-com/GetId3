@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 use GetId3\Lib\Helper;
@@ -24,20 +33,13 @@ use GetId3\Lib\Helper;
  * @author James Heinrich <info@getid3.org>
  * @author Seth Kaufman <seth@whirl-i-gig.com>
  *
- * @uses Flv
+ * @uses \Flv
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class AVCSequenceParameterSetReader
 {
-    public $sps;
-    public $start = 0;
-    public $currentBytes = 0;
-    public $currentBits = 0;
-    public $width;
-    public $height;
-
     const H264_AVC_SEQUENCE_HEADER = 0;
     const H264_PROFILE_BASELINE = 66;
     const H264_PROFILE_MAIN = 77;
@@ -47,6 +49,12 @@ class AVCSequenceParameterSetReader
     const H264_PROFILE_HIGH422 = 122;
     const H264_PROFILE_HIGH444 = 144;
     const H264_PROFILE_HIGH444_PREDICTIVE = 244;
+    public $sps;
+    public $start = 0;
+    public $currentBytes = 0;
+    public $currentBits = 0;
+    public $width;
+    public $height;
 
     /**
      * @param type $sps
@@ -56,9 +64,6 @@ class AVCSequenceParameterSetReader
         $this->sps = $sps;
     }
 
-    /**
-     *
-     */
     public function readData()
     {
         $this->skipBits(8);
@@ -179,9 +184,9 @@ class AVCSequenceParameterSetReader
         $result = $this->expGolombUe();
         if (($result & 0x01) == 0) {
             return -($result >> 1);
-        } else {
-            return ($result + 1) >> 1;
         }
+
+        return ($result + 1) >> 1;
     }
 
     /**

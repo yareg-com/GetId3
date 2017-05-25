@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Write;
 
-use GetId3\Lib\Helper;
 use GetId3\GetId3Core;
+use GetId3\Lib\Helper;
 use GetId3\Module\Tag;
 
 /////////////////////////////////////////////////////////////////
@@ -25,10 +34,10 @@ use GetId3\Module\Tag;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses Tag\Id3v2
+ * @uses \Tag\Id3v2
  */
 class Id3v2
 {
@@ -107,7 +116,6 @@ class Id3v2
 
             if ($NewID3v2Tag = $this->GenerateID3v2Tag()) {
                 if (file_exists($this->filename) && is_writable($this->filename) && isset($OldThisFileInfo['id3v2']['headerlength']) && ($OldThisFileInfo['id3v2']['headerlength'] == strlen($NewID3v2Tag))) {
-
                     // best and fastest method - insert-overwrite existing tag (padded to length of old tag if neccesary)
                     if (file_exists($this->filename)) {
                         if (is_readable($this->filename) && is_writable($this->filename) && is_file($this->filename) && ($fp = fopen($this->filename, 'r+b'))) {
@@ -147,9 +155,9 @@ class Id3v2
                                 unlink($tempfilename);
 
                                 return true;
-                            } else {
-                                $this->errors[] = 'Could not fopen("'.$tempfilename.'", "wb")';
                             }
+                            $this->errors[] = 'Could not fopen("'.$tempfilename.'", "wb")';
+
                             fclose($fp_source);
                         } else {
                             $this->errors[] = 'Could not fopen("'.$this->filename.'", "rb")';
@@ -167,9 +175,8 @@ class Id3v2
             }
 
             return true;
-        } else {
-            $this->errors[] = 'WriteID3v2() failed: !is_writeable('.$this->filename.')';
         }
+        $this->errors[] = 'WriteID3v2() failed: !is_writeable('.$this->filename.')';
 
         return false;
     }
@@ -179,11 +186,9 @@ class Id3v2
         // File MUST be writeable - CHMOD(646) at least. It's best if the
         // directory is also writeable, because that method is both faster and less susceptible to errors.
         if (is_writable(dirname($this->filename))) {
-
             // preferred method - only one copying operation, minimal chance of corrupting
             // original file if script is interrupted, but required directory to be writeable
             if (is_readable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'rb'))) {
-
                 // Initialize GetId3 engine
                 $getID3 = new GetId3Core();
                 $OldThisFileInfo = $getID3->analyze($this->filename);
@@ -214,11 +219,9 @@ class Id3v2
             }
             rename($this->filename.'getid3tmp', $this->filename);
         } elseif (is_writable($this->filename)) {
-
             // less desirable alternate method - double-copies the file, overwrites original file
             // and could corrupt source file if the script is interrupted or an error occurs.
             if (is_readable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'rb'))) {
-
                 // Initialize GetId3 engine
                 $getID3 = new GetId3Core();
                 $OldThisFileInfo = $getID3->analyze($this->filename);
@@ -281,7 +284,6 @@ class Id3v2
                 $flag .= (!empty($flags['footer']) ? '1' : '0'); // d - Footer present
                 $flag .= '0000';
                 break;
-
             case 3:
                 // %abc00000
                 $flag = (!empty($flags['unsynchronisation']) ? '1' : '0'); // a - Unsynchronisation
@@ -289,14 +291,12 @@ class Id3v2
                 $flag .= (!empty($flags['experimental']) ? '1' : '0'); // c - Experimental indicator
                 $flag .= '00000';
                 break;
-
             case 2:
                 // %ab000000
                 $flag = (!empty($flags['unsynchronisation']) ? '1' : '0'); // a - Unsynchronisation
                 $flag .= (!empty($flags['compression']) ? '1' : '0'); // b - Compression
                 $flag .= '000000';
                 break;
-
             default:
                 return false;
                 break;
@@ -323,37 +323,34 @@ class Id3v2
             case 4:
                 // %0abc0000 %0h00kmnp
                 $flag1 = '0';
-                $flag1 .= $TagAlter  ? '1' : '0'; // a - Tag alter preservation (true == discard)
+                $flag1 .= $TagAlter ? '1' : '0'; // a - Tag alter preservation (true == discard)
                 $flag1 .= $FileAlter ? '1' : '0'; // b - File alter preservation (true == discard)
-                $flag1 .= $ReadOnly  ? '1' : '0'; // c - Read only (true == read only)
+                $flag1 .= $ReadOnly ? '1' : '0'; // c - Read only (true == read only)
                 $flag1 .= '0000';
 
                 $flag2 = '0';
-                $flag2 .= $GroupingIdentity    ? '1' : '0'; // h - Grouping identity (true == contains group information)
+                $flag2 .= $GroupingIdentity ? '1' : '0'; // h - Grouping identity (true == contains group information)
                 $flag2 .= '00';
-                $flag2 .= $Compression         ? '1' : '0'; // k - Compression (true == compressed)
-                $flag2 .= $Encryption          ? '1' : '0'; // m - Encryption (true == encrypted)
-                $flag2 .= $Unsynchronisation   ? '1' : '0'; // n - Unsynchronisation (true == unsynchronised)
+                $flag2 .= $Compression ? '1' : '0'; // k - Compression (true == compressed)
+                $flag2 .= $Encryption ? '1' : '0'; // m - Encryption (true == encrypted)
+                $flag2 .= $Unsynchronisation ? '1' : '0'; // n - Unsynchronisation (true == unsynchronised)
                 $flag2 .= $DataLengthIndicator ? '1' : '0'; // p - Data length indicator (true == data length indicator added)
                 break;
-
             case 3:
                 // %abc00000 %ijk00000
-                $flag1 = $TagAlter  ? '1' : '0';  // a - Tag alter preservation (true == discard)
+                $flag1 = $TagAlter ? '1' : '0';  // a - Tag alter preservation (true == discard)
                 $flag1 .= $FileAlter ? '1' : '0';  // b - File alter preservation (true == discard)
-                $flag1 .= $ReadOnly  ? '1' : '0';  // c - Read only (true == read only)
+                $flag1 .= $ReadOnly ? '1' : '0';  // c - Read only (true == read only)
                 $flag1 .= '00000';
 
-                $flag2 = $Compression      ? '1' : '0';      // i - Compression (true == compressed)
-                $flag2 .= $Encryption       ? '1' : '0';      // j - Encryption (true == encrypted)
+                $flag2 = $Compression ? '1' : '0';      // i - Compression (true == compressed)
+                $flag2 .= $Encryption ? '1' : '0';      // j - Encryption (true == encrypted)
                 $flag2 .= $GroupingIdentity ? '1' : '0';      // k - Grouping identity (true == contains group information)
                 $flag2 .= '00000';
                 break;
-
             default:
                 return false;
                 break;
-
         }
 
         return chr(bindec($flag1)).chr(bindec($flag2));
@@ -375,7 +372,6 @@ class Id3v2
         if (($this->majorversion < 3) || ($this->majorversion > 4)) {
             $this->errors[] = 'Only ID3v2.3 and ID3v2.4 are supported in GenerateID3v2FrameData()';
         } else { // $this->majorversion 3 or 4
-
             switch ($frame_name) {
                 case 'UFID':
                     // 4.1   UFID Unique file identifier
@@ -388,7 +384,6 @@ class Id3v2
                         $framedata .= substr($source_data_array['data'], 0, 64); // max 64 bytes - truncate anything longer
                     }
                     break;
-
                 case 'TXXX':
                     // 4.2.2 TXXX User defined text information frame
                     // Text encoding     $xx
@@ -403,7 +398,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'WXXX':
                     // 4.3.2 WXXX User defined URL link frame
                     // Text encoding     $xx
@@ -422,7 +416,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'IPLS':
                     // 4.4  IPLS Involved people list (ID3v2.3 only)
                     // Text encoding     $xx
@@ -435,13 +428,11 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'MCDI':
                     // 4.4   MCDI Music CD identifier
                     // CD TOC                <binary data>
                     $framedata .= $source_data_array['data'];
                     break;
-
                 case 'ETCO':
                     // 4.5   ETCO Event timing codes
                     // Time stamp format    $xx
@@ -473,7 +464,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'MLLT':
                     // 4.6   MLLT MPEG location lookup table
                     // MPEG frames between reference  $xx xx
@@ -529,7 +519,6 @@ class Id3v2
                         $framedata .= chr($highnibble & $lownibble);
                     }
                     break;
-
                 case 'SYTC':
                     // 4.7   SYTC Synchronised tempo codes
                     // Time stamp format   $xx
@@ -559,7 +548,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'USLT':
                     // 4.8   USLT Unsynchronised lyric/text transcription
                     // Text encoding        $xx
@@ -578,7 +566,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'SYLT':
                     // 4.9   SYLT Synchronised lyric/text
                     // Text encoding        $xx
@@ -615,7 +602,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'COMM':
                     // 4.10  COMM Comments
                     // Text encoding          $xx
@@ -634,7 +620,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'RVA2':
                     // 4.11  RVA2 Relative volume adjustment (2) (ID3v2.4+ only)
                     // Identification          <text string> $00
@@ -661,7 +646,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'RVAD':
                     // 4.12  RVAD Relative volume adjustment (ID3v2.3 only)
                     // Increment/decrement     %00fedcba
@@ -682,12 +666,12 @@ class Id3v2
                         $this->errors[] = 'Invalid Bits For Volume Description byte in '.$frame_name.' ('.$source_data_array['bitsvolume'].') (range = 1 to 255)';
                     } else {
                         $incdecflag .= '00';
-                        $incdecflag .= $source_data_array['incdec']['right']     ? '1' : '0';     // a - Relative volume change, right
-                        $incdecflag .= $source_data_array['incdec']['left']      ? '1' : '0';      // b - Relative volume change, left
+                        $incdecflag .= $source_data_array['incdec']['right'] ? '1' : '0';     // a - Relative volume change, right
+                        $incdecflag .= $source_data_array['incdec']['left'] ? '1' : '0';      // b - Relative volume change, left
                         $incdecflag .= $source_data_array['incdec']['rightrear'] ? '1' : '0'; // c - Relative volume change, right back
-                        $incdecflag .= $source_data_array['incdec']['leftrear']  ? '1' : '0';  // d - Relative volume change, left back
-                        $incdecflag .= $source_data_array['incdec']['center']    ? '1' : '0';    // e - Relative volume change, center
-                        $incdecflag .= $source_data_array['incdec']['bass']      ? '1' : '0';      // f - Relative volume change, bass
+                        $incdecflag .= $source_data_array['incdec']['leftrear'] ? '1' : '0';  // d - Relative volume change, left back
+                        $incdecflag .= $source_data_array['incdec']['center'] ? '1' : '0';    // e - Relative volume change, center
+                        $incdecflag .= $source_data_array['incdec']['bass'] ? '1' : '0';      // f - Relative volume change, bass
                         $framedata .= chr(bindec($incdecflag));
                         $framedata .= chr($source_data_array['bitsvolume']);
                         $framedata .= Helper::BigEndian2String($source_data_array['volumechange']['right'], ceil($source_data_array['bitsvolume'] / 8), false);
@@ -714,7 +698,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'EQU2':
                     // 4.12  EQU2 Equalisation (2) (ID3v2.4+ only)
                     // Interpolation method  $xx
@@ -730,12 +713,11 @@ class Id3v2
                         $framedata .= chr($source_data_array['interpolationmethod']);
                         $framedata .= str_replace("\x00", '', $source_data_array['description'])."\x00";
                         foreach ($source_data_array['data'] as $key => $val) {
-                            $framedata .= Helper::BigEndian2String(intval(round($key * 2)), 2, false);
+                            $framedata .= Helper::BigEndian2String((int) (round($key * 2)), 2, false);
                             $framedata .= Helper::BigEndian2String($val, 2, false, true); // signed 16-bit
                         }
                     }
                     break;
-
                 case 'EQUA':
                     // 4.12  EQUA Equalisation (ID3v2.3 only)
                     // Adjustment bits    $xx
@@ -765,7 +747,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'RVRB':
                     // 4.13  RVRB Reverb
                     // Reverb left (ms)                 $xx xx
@@ -811,7 +792,6 @@ class Id3v2
                         $framedata .= chr($source_data_array['premixRL']);
                     }
                     break;
-
                 case 'APIC':
                     // 4.14  APIC Attached picture
                     // Text encoding      $xx
@@ -838,7 +818,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'GEOB':
                     // 4.15  GEOB General encapsulated object
                     // Text encoding          $xx
@@ -861,7 +840,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'PCNT':
                     // 4.16  PCNT Play counter
                     //   When the counter reaches all one's, one byte is inserted in
@@ -869,7 +847,6 @@ class Id3v2
                     // Counter        $xx xx xx xx (xx ...)
                     $framedata .= Helper::BigEndian2String($source_data_array['data'], 4, false);
                     break;
-
                 case 'POPM':
                     // 4.17  POPM Popularimeter
                     //   When the counter reaches all one's, one byte is inserted in
@@ -887,7 +864,6 @@ class Id3v2
                         $framedata .= Helper::BigEndian2String($source_data_array['data'], 4, false);
                     }
                     break;
-
                 case 'RBUF':
                     // 4.18  RBUF Recommended buffer size
                     // Buffer size               $xx xx xx
@@ -905,7 +881,6 @@ class Id3v2
                         $framedata .= Helper::BigEndian2String($source_data_array['nexttagoffset'], 4, false);
                     }
                     break;
-
                 case 'AENC':
                     // 4.19  AENC Audio encryption
                     // Owner identifier   <text string> $00
@@ -923,7 +898,6 @@ class Id3v2
                         $framedata .= $source_data_array['encryptioninfo'];
                     }
                     break;
-
                 case 'LINK':
                     // 4.20  LINK Linked information
                     // Frame identifier               $xx xx xx xx
@@ -989,7 +963,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'POSS':
                     // 4.21  POSS Position synchronisation frame (ID3v2.3+ only)
                     // Time stamp format         $xx
@@ -1003,7 +976,6 @@ class Id3v2
                         $framedata .= Helper::BigEndian2String($source_data_array['position'], 4, false);
                     }
                     break;
-
                 case 'USER':
                     // 4.22  USER Terms of use (ID3v2.3+ only)
                     // Text encoding        $xx
@@ -1020,7 +992,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'OWNE':
                     // 4.23  OWNE Ownership frame (ID3v2.3+ only)
                     // Text encoding     $xx
@@ -1041,7 +1012,6 @@ class Id3v2
                         $framedata .= $source_data_array['seller'];
                     }
                     break;
-
                 case 'COMR':
                     // 4.24  COMR Commercial frame (ID3v2.3+ only)
                     // Text encoding      $xx
@@ -1084,7 +1054,6 @@ class Id3v2
                         $framedata .= $source_data_array['logo'];
                     }
                     break;
-
                 case 'ENCR':
                     // 4.25  ENCR Encryption method registration (ID3v2.3+ only)
                     // Owner identifier    <text string> $00
@@ -1098,7 +1067,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'GRID':
                     // 4.26  GRID Group identification registration (ID3v2.3+ only)
                     // Owner identifier      <text string> $00
@@ -1112,7 +1080,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'PRIV':
                     // 4.27  PRIV Private frame (ID3v2.3+ only)
                     // Owner identifier      <text string> $00
@@ -1120,7 +1087,6 @@ class Id3v2
                     $framedata .= str_replace("\x00", '', $source_data_array['ownerid'])."\x00";
                     $framedata .= $source_data_array['data'];
                     break;
-
                 case 'SIGN':
                     // 4.28  SIGN Signature frame (ID3v2.4+ only)
                     // Group symbol      $xx
@@ -1132,7 +1098,6 @@ class Id3v2
                         $framedata .= $source_data_array['data'];
                     }
                     break;
-
                 case 'SEEK':
                     // 4.29  SEEK Seek frame (ID3v2.4+ only)
                     // Minimum offset to next tag       $xx xx xx xx
@@ -1142,7 +1107,6 @@ class Id3v2
                         $framedata .= Helper::BigEndian2String($source_data_array['data'], 4, false);
                     }
                     break;
-
                 case 'ASPI':
                     // 4.30  ASPI Audio seek point index (ID3v2.4+ only)
                     // Indexed data start (S)         $xx xx xx xx
@@ -1171,7 +1135,6 @@ class Id3v2
                         }
                     }
                     break;
-
                 case 'RGAD':
                     //   RGAD Replay Gain Adjustment
                     //   http://privatewww.essex.ac.uk/~djmrob/replaygain/
@@ -1201,11 +1164,10 @@ class Id3v2
                         $framedata .= Helper::RGADgainString($source_data_array['raw']['album_name'], $source_data_array['raw']['album_originator'], $source_data_array['album_adjustment']);
                     }
                     break;
-
                 default:
                     if ((($this->majorversion == 2) && (strlen($frame_name) != 3)) || (($this->majorversion > 2) && (strlen($frame_name) != 4))) {
                         $this->errors[] = 'Invalid frame name "'.$frame_name.'" for ID3v2.'.$this->majorversion;
-                    } elseif ($frame_name{0} == 'T') {
+                    } elseif ($frame_name[0] == 'T') {
                         // 4.2. T???  Text information frames
                         // Text encoding                $xx
                         // Information                  <text string(s) according to encoding>
@@ -1216,7 +1178,7 @@ class Id3v2
                             $framedata .= chr($source_data_array['encodingid']);
                             $framedata .= $source_data_array['data'];
                         }
-                    } elseif ($frame_name{0} == 'W') {
+                    } elseif ($frame_name[0] == 'W') {
                         // 4.3. W???  URL link frames
                         // URL              <text string>
                         if (!$this->IsValidURL($source_data_array['data'], false, false)) {
@@ -1265,7 +1227,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['ownerid'];
                     }
                     break;
-
                 case 'TXXX':
                 case 'WXXX':
                 case 'RVA2':
@@ -1280,7 +1241,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['description'];
                     }
                     break;
-
                 case 'USER':
                     if (!isset($source_data_array['language'])) {
                         $this->errors[] = '[language] not specified for '.$frame_name;
@@ -1290,7 +1250,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['language'];
                     }
                     break;
-
                 case 'USLT':
                 case 'SYLT':
                 case 'COMM':
@@ -1304,7 +1263,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['language'].$source_data_array['description'];
                     }
                     break;
-
                 case 'POPM':
                     if (!isset($source_data_array['email'])) {
                         $this->errors[] = '[email] not specified for '.$frame_name;
@@ -1314,7 +1272,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['email'];
                     }
                     break;
-
                 case 'IPLS':
                 case 'MCDI':
                 case 'ETCO':
@@ -1334,7 +1291,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name;
                     }
                     break;
-
                 case 'LINK':
                     // this isn't implemented quite right (yet) - it should check the target frame data for compliance
                     // but right now it just allows one linked frame of each type, to be safe.
@@ -1350,12 +1306,10 @@ class Id3v2
                         $PreviousFrames[] = $source_data_array['frameid'];             // no non-linked singleton tags of this type
                     }
                     break;
-
                 case 'COMR':
                     //   There may be more than one 'commercial frame' in a tag, but no two may be identical
                     // Checking isn't implemented at all (yet) - just assumes that it's OK.
                     break;
-
                 case 'PRIV':
                 case 'SIGN':
                     if (!isset($source_data_array['ownerid'])) {
@@ -1368,9 +1322,8 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['ownerid'].$source_data_array['data'];
                     }
                     break;
-
                 default:
-                    if (($frame_name{0} != 'T') && ($frame_name{0} != 'W')) {
+                    if (($frame_name[0] != 'T') && ($frame_name[0] != 'W')) {
                         $this->errors[] = 'Frame not allowed in ID3v2.'.$this->majorversion.': '.$frame_name;
                     }
                     break;
@@ -1389,7 +1342,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['ownerid'];
                     }
                     break;
-
                 case 'TXXX':
                 case 'WXXX':
                 case 'APIC':
@@ -1402,7 +1354,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['description'];
                     }
                     break;
-
                 case 'USER':
                     if (!isset($source_data_array['language'])) {
                         $this->errors[] = '[language] not specified for '.$frame_name;
@@ -1412,7 +1363,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['language'];
                     }
                     break;
-
                 case 'USLT':
                 case 'SYLT':
                 case 'COMM':
@@ -1426,7 +1376,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['language'].$source_data_array['description'];
                     }
                     break;
-
                 case 'POPM':
                     if (!isset($source_data_array['email'])) {
                         $this->errors[] = '[email] not specified for '.$frame_name;
@@ -1436,7 +1385,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['email'];
                     }
                     break;
-
                 case 'IPLS':
                 case 'MCDI':
                 case 'ETCO':
@@ -1456,7 +1404,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name;
                     }
                     break;
-
                 case 'LINK':
                     // this isn't implemented quite right (yet) - it should check the target frame data for compliance
                     // but right now it just allows one linked frame of each type, to be safe.
@@ -1472,12 +1419,10 @@ class Id3v2
                         $PreviousFrames[] = $source_data_array['frameid'];             // no non-linked singleton tags of this type
                     }
                     break;
-
                 case 'COMR':
                     //   There may be more than one 'commercial frame' in a tag, but no two may be identical
                     // Checking isn't implemented at all (yet) - just assumes that it's OK.
                     break;
-
                 case 'PRIV':
                     if (!isset($source_data_array['ownerid'])) {
                         $this->errors[] = '[ownerid] not specified for '.$frame_name;
@@ -1489,9 +1434,8 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['ownerid'].$source_data_array['data'];
                     }
                     break;
-
                 default:
-                    if (($frame_name{0} != 'T') && ($frame_name{0} != 'W')) {
+                    if (($frame_name[0] != 'T') && ($frame_name[0] != 'W')) {
                         $this->errors[] = 'Frame not allowed in ID3v2.'.$this->majorversion.': '.$frame_name;
                     }
                     break;
@@ -1509,7 +1453,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['ownerid'];
                     }
                     break;
-
                 case 'TXX':
                 case 'WXX':
                 case 'PIC':
@@ -1522,7 +1465,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['description'];
                     }
                     break;
-
                 case 'ULT':
                 case 'SLT':
                 case 'COM':
@@ -1536,7 +1478,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['language'].$source_data_array['description'];
                     }
                     break;
-
                 case 'POP':
                     if (!isset($source_data_array['email'])) {
                         $this->errors[] = '[email] not specified for '.$frame_name;
@@ -1546,7 +1487,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name.$source_data_array['email'];
                     }
                     break;
-
                 case 'IPL':
                 case 'MCI':
                 case 'ETC':
@@ -1563,7 +1503,6 @@ class Id3v2
                         $PreviousFrames[] = $frame_name;
                     }
                     break;
-
                 case 'LNK':
                     // this isn't implemented quite right (yet) - it should check the target frame data for compliance
                     // but right now it just allows one linked frame of each type, to be safe.
@@ -1579,9 +1518,8 @@ class Id3v2
                         $PreviousFrames[] = $source_data_array['frameid'];             // no non-linked singleton tags of this type
                     }
                     break;
-
                 default:
-                    if (($frame_name{0} != 'T') && ($frame_name{0} != 'W')) {
+                    if (($frame_name[0] != 'T') && ($frame_name[0] != 'W')) {
                         $this->errors[] = 'Frame not allowed in ID3v2.'.$this->majorversion.': '.$frame_name;
                     }
                     break;
@@ -1650,9 +1588,8 @@ class Id3v2
                             $this->errors[] = '$this->GenerateID3v2FrameData() failed for "'.$frame_name.'"';
                             if ($noerrorsonly) {
                                 return false;
-                            } else {
-                                unset($frame_name);
                             }
+                            unset($frame_name);
                         }
                     } else {
                         // ignore any invalid frame names, including 'title', 'header', etc
@@ -1760,7 +1697,6 @@ class Id3v2
             case 'RGAD':
                 return false;
                 break;
-
             default:
                 return false;
                 break;
@@ -1942,10 +1878,10 @@ class Id3v2
         $unsyncheddata = '';
         $datalength = strlen($data);
         for ($i = 0; $i < $datalength; ++$i) {
-            $thischar = $data{$i};
+            $thischar = $data[$i];
             $unsyncheddata .= $thischar;
             if ($thischar == "\xFF") {
-                $nextchar = ord($data{$i + 1});
+                $nextchar = ord($data[$i + 1]);
                 if (($nextchar & 0xE0) == 0xE0) {
                     // previous byte = 11111111, this byte = 111?????
                     $unsyncheddata .= "\x00";
@@ -2004,10 +1940,9 @@ class Id3v2
             }
 
             return $new_array;
-        } else {
+        }
             // not the same ... take new one if defined, else the old one stays
             return $arr2 ? $arr2 : $arr1;
-        }
     }
 
     /**
@@ -2055,11 +1990,11 @@ class Id3v2
     {
         $parts = @parse_url($url);
         $parts['scheme'] = (isset($parts['scheme']) ? $parts['scheme'] : '');
-        $parts['host'] = (isset($parts['host'])   ? $parts['host']   : '');
-        $parts['user'] = (isset($parts['user'])   ? $parts['user']   : '');
-        $parts['pass'] = (isset($parts['pass'])   ? $parts['pass']   : '');
-        $parts['path'] = (isset($parts['path'])   ? $parts['path']   : '');
-        $parts['query'] = (isset($parts['query'])  ? $parts['query']  : '');
+        $parts['host'] = (isset($parts['host']) ? $parts['host'] : '');
+        $parts['user'] = (isset($parts['user']) ? $parts['user'] : '');
+        $parts['pass'] = (isset($parts['pass']) ? $parts['pass'] : '');
+        $parts['path'] = (isset($parts['path']) ? $parts['path'] : '');
+        $parts['query'] = (isset($parts['query']) ? $parts['query'] : '');
 
         return $parts;
     }
@@ -2095,9 +2030,9 @@ class Id3v2
                 return false;
             } elseif (!empty($parts['query']) && !preg_match('#^[[:alnum:]?&=+:;_()%\\#/,\\.-]*$#i', $parts['query'], $regs)) {
                 return false;
-            } else {
-                return true;
             }
+
+            return true;
         }
 
         return false;
@@ -2116,7 +2051,6 @@ class Id3v2
         $long_description = str_replace(' ', '_', strtolower(trim($long_description)));
         static $ID3v2ShortFrameNameLookup = array();
         if (empty($ID3v2ShortFrameNameLookup)) {
-
             // The following are unique to ID3v2.2
             $ID3v2ShortFrameNameLookup[2]['comment'] = 'COM';
             $ID3v2ShortFrameNameLookup[2]['album'] = 'TAL';
@@ -2260,6 +2194,6 @@ class Id3v2
             $ID3v2ShortFrameNameLookup[4]['set_subtitle'] = 'TSST';
         }
 
-        return (isset($ID3v2ShortFrameNameLookup[$majorversion][strtolower($long_description)]) ? $ID3v2ShortFrameNameLookup[$majorversion][strtolower($long_description)] : '');
+        return isset($ID3v2ShortFrameNameLookup[$majorversion][strtolower($long_description)]) ? $ID3v2ShortFrameNameLookup[$majorversion][strtolower($long_description)] : '';
     }
 }

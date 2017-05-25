@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Write;
 
-use GetId3\Lib\Helper;
 use GetId3\GetId3Core;
+use GetId3\Lib\Helper;
 use GetId3\Module\Tag;
 
 /////////////////////////////////////////////////////////////////
@@ -25,10 +34,10 @@ use GetId3\Module\Tag;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Tag\Id3v1
+ * @uses \GetId3\Module\Tag\Id3v1
  */
 class Id3v1
 {
@@ -75,22 +84,21 @@ class Id3v1
                 $this->tag_data['track'] = (isset($this->tag_data['track']) ? $this->tag_data['track'] : (isset($this->tag_data['track_number']) ? $this->tag_data['track_number'] : (isset($this->tag_data['tracknumber']) ? $this->tag_data['tracknumber'] : '')));
 
                 $new_id3v1_tag_data = Tag\Id3v1::GenerateID3v1Tag(
-                                                        (isset($this->tag_data['title']) ? $this->tag_data['title']   : ''),
-                                                        (isset($this->tag_data['artist']) ? $this->tag_data['artist']  : ''),
-                                                        (isset($this->tag_data['album']) ? $this->tag_data['album']   : ''),
-                                                        (isset($this->tag_data['year']) ? $this->tag_data['year']    : ''),
+                                                        (isset($this->tag_data['title']) ? $this->tag_data['title'] : ''),
+                                                        (isset($this->tag_data['artist']) ? $this->tag_data['artist'] : ''),
+                                                        (isset($this->tag_data['album']) ? $this->tag_data['album'] : ''),
+                                                        (isset($this->tag_data['year']) ? $this->tag_data['year'] : ''),
                                                         (isset($this->tag_data['genreid']) ? $this->tag_data['genreid'] : ''),
                                                         (isset($this->tag_data['comment']) ? $this->tag_data['comment'] : ''),
-                                                        (isset($this->tag_data['track']) ? $this->tag_data['track']   : ''));
+                                                        (isset($this->tag_data['track']) ? $this->tag_data['track'] : ''));
                 fwrite($fp_source, $new_id3v1_tag_data, 128);
                 fclose($fp_source);
 
                 return true;
-            } else {
-                $this->errors[] = 'Could not fopen('.$this->filename.', "r+b")';
-
-                return false;
             }
+            $this->errors[] = 'Could not fopen('.$this->filename.', "r+b")';
+
+            return false;
         }
         $this->errors[] = 'File is not writeable: '.$this->filename;
 
@@ -139,15 +147,14 @@ class Id3v1
                 fseek($fp_source, -128, SEEK_END);
                 if (fread($fp_source, 3) == 'TAG') {
                     ftruncate($fp_source, $this->filesize - 128);
-                } else {
-                    // no ID3v1 tag to begin with - do nothing
                 }
+                    // no ID3v1 tag to begin with - do nothing
+
                 fclose($fp_source);
 
                 return true;
-            } else {
-                $this->errors[] = 'Could not fopen('.$this->filename.', "r+b")';
             }
+            $this->errors[] = 'Could not fopen('.$this->filename.', "r+b")';
         } else {
             $this->errors[] = $this->filename.' is not writeable';
         }

@@ -1,11 +1,11 @@
 <?php
 
 /*
- * this file is part of the symfony package.
+ * This file is part of GetID3.
  *
- * (c) fabien potencier <fabien.potencier@symfony-project.com>
+ * (c) James Heinrich <info@getid3.org>
  *
- * for the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 

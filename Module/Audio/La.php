@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\AudioVideo\Riff;
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +35,8 @@ use GetId3\Module\AudioVideo\Riff;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class La extends BaseHandler
 {
@@ -77,7 +86,6 @@ class La extends BaseHandler
                     $info['la']['header_size'] = 49 + $info['la']['fmt_size'] - 24;
                     $offset += 4;
                 } else {
-
                     // version 0.2 didn't support additional data blocks
                     $info['la']['header_size'] = 41;
                 }
@@ -156,7 +164,6 @@ class La extends BaseHandler
                 }
 
                 if ($info['la']['version'] >= 0.3) {
-
                     // Following the main header information, the program outputs all of the
                     // seekpoints. Following these is what I called the 'footer start',
                     // i.e. the position immediately after the La audio data is finished.
@@ -168,7 +175,6 @@ class La extends BaseHandler
                         $info['la']['footerstart'] = $info['filesize'];
                     }
                 } else {
-
                     // La v0.2 didn't have FooterStart value
                     $info['la']['footerstart'] = $info['avdataend'];
                 }
@@ -223,7 +229,6 @@ class La extends BaseHandler
                 //$info['audio']['codec']              = $info['la']['codec'];
                 $info['audio']['bits_per_sample'] = $info['la']['bits_per_sample'];
                 break;
-
             default:
                 if (substr($rawdata, $offset, 2) == 'LA') {
                     $info['error'][] = 'This version of GetId3Core() ['.$this->getid3->version().'] does not support LA version '.substr($rawdata, $offset + 2, 1).'.'.substr($rawdata, $offset + 3, 1).' which this appears to be - check http://getid3.sourceforge.net for updates.';

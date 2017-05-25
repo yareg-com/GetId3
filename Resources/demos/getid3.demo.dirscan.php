@@ -1,6 +1,14 @@
 <?php
 
-/////////////////////////////////////////////////////////////////////////////////
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 /// getID3() by James Heinrich <info@getid3.org>                               //
 //  available at http://getid3.sourceforge.net                                 //
 //            or http://www.getid3.org                                        ///
@@ -60,7 +68,7 @@ $database['hide'] = true;
 /**
  * id3 tags class file
  */
-require_once dirname(__FILE__).'/getid3.php';
+require_once __DIR__.'/getid3.php';
 /**
  * dirscan scans all directories for files that match your selected filetypes into the cache database
  * this is useful for a lot of media files
@@ -70,6 +78,82 @@ require_once dirname(__FILE__).'/getid3.php';
  */
 class dirscan
 {
+    public static function getTime()
+    {
+        return microtime(true);
+        // old method for PHP < 5
+        //$a = explode(' ', microtime());
+        //return (double) $a[0] + $a[1];
+    }
+
+    /**
+     * @param type $dir
+     * @param type $match  search type name extentions, can be an array or csv list
+     * @param type $cache caching extention, select one of sqlite3, mysql, dbm
+     * @param array $opt database options,
+     */
+    public static function scan_files($dir, $match, $cache = 'sqlite3', $opt = array('table' => 'getid3_cache', 'hide' => true))
+    {
+        $Start = self::getTime();
+        switch ($cache) { // load the caching module
+            case 'sqlite3':
+                if (!class_exists('getID3_cached_sqlite3')) {
+                    require_once(__DIR__).'/extension.cache.sqlite3.php';
+                }
+                $id3 = new GetId3_Extension_Cache_Sqlite3($opt['table'], $opt['hide']);
+                break;
+            case 'mysql':
+                if (!class_exists('getID3_cached_mysql')) {
+                    require_once(__DIR__).'/extension.cache.mysql.php';
+                }
+                $id3 = new GetId3_Extension_Cache_Mysql($opt['host'], $opt['database'], $opt['username'], $opt['password'], $opt['table']);
+                break;
+        // I'll leave this for some one else
+            //case 'dbm':
+            //	if (!class_exists('getID3_cached_dbm')) {
+            //		require_once(dirname(__FILE__)).'/extension.cache.dbm.php';
+            //	}
+            //	die(' This has not be implemented, sorry for the inconvenience');
+            //	break;
+            default:
+                die(' You have selected an Invalid cache type, only "sqlite3" and "mysql" are valid'."\n");
+                break;
+        }
+        $count = array('dir' => 0, 'file' => 0);
+        $dirs = self::getDirs($dir);
+        if ($dirs !== null) {
+            foreach ($dirs as $d) {
+                echo ' Scanning: '.$d."\n";
+                $search = self::type_brace($d, $match);
+                if ($search !== null) {
+                    $files = self::file_check($search);
+                    if ($files !== null) {
+                        foreach ($files as $f) {
+                            echo ' * Analyzing '.$f.' '."\n";
+                            $id3->analyze($f);
+                            ++$count['file'];
+                        }
+                        ++$count['dir'];
+                    } else {
+                        echo 'Failed to get files '."\n";
+                    }
+                } else {
+                    echo 'Failed to create match string '."\n";
+                }
+            }
+            echo '**************************************'."\n";
+            echo '* Finished Scanning your directories '."\n*\n";
+            echo '* Directories '.$count['dir']."\n";
+            echo '* Files '.$count['file']."\n";
+            $End = self::getTime();
+            $t = number_format(($End - $Start) / 60, 2);
+            echo '* Time taken to scan '.$dir.' '.$t.' min '."\n";
+            echo '**************************************'."\n";
+        } else {
+            echo ' failed to get directories '."\n";
+        }
+    }
+
     /**
      * type_brace()  * Might not work on Solaris and other non GNU systems *
      *
@@ -78,6 +162,7 @@ class dirscan
      *
      * @param string $dir directory to use
      * @param mixed cvs list of extentions or an array
+     * @param mixed $search
      *
      * @return string or null if checks fail
      */
@@ -161,84 +246,6 @@ class dirscan
         }
         if (count($t) > 0) {
             return $t;
-        }
-
-        return;
-    }
-
-    public static function getTime()
-    {
-        return microtime(true);
-        // old method for PHP < 5
-        //$a = explode(' ', microtime());
-        //return (double) $a[0] + $a[1];
-    }
-
-    /**
-     * @param type $dir
-     * @param type $match  search type name extentions, can be an array or csv list
-     * @param type $cache caching extention, select one of sqlite3, mysql, dbm
-     * @param array $opt database options,
-     */
-    public static function scan_files($dir, $match, $cache = 'sqlite3', $opt = array('table' => 'getid3_cache', 'hide' => true))
-    {
-        $Start = self::getTime();
-        switch ($cache) { // load the caching module
-            case 'sqlite3':
-                if (!class_exists('getID3_cached_sqlite3')) {
-                    require_once(dirname(__FILE__)).'/extension.cache.sqlite3.php';
-                }
-                $id3 = new GetId3_Extension_Cache_Sqlite3($opt['table'], $opt['hide']);
-                break;
-            case 'mysql':
-                if (!class_exists('getID3_cached_mysql')) {
-                    require_once(dirname(__FILE__)).'/extension.cache.mysql.php';
-                }
-                $id3 = new GetId3_Extension_Cache_Mysql($opt['host'], $opt['database'], $opt['username'], $opt['password'], $opt['table']);
-                break;
-        // I'll leave this for some one else
-            //case 'dbm':
-            //	if (!class_exists('getID3_cached_dbm')) {
-            //		require_once(dirname(__FILE__)).'/extension.cache.dbm.php';
-            //	}
-            //	die(' This has not be implemented, sorry for the inconvenience');
-            //	break;
-            default:
-                die(' You have selected an Invalid cache type, only "sqlite3" and "mysql" are valid'."\n");
-                break;
-        }
-        $count = array('dir' => 0, 'file' => 0);
-        $dirs = self::getDirs($dir);
-        if ($dirs !== null) {
-            foreach ($dirs as $d) {
-                echo ' Scanning: '.$d."\n";
-                $search = self::type_brace($d, $match);
-                if ($search !== null) {
-                    $files = self::file_check($search);
-                    if ($files !== null) {
-                        foreach ($files as $f) {
-                            echo ' * Analyzing '.$f.' '."\n";
-                            $id3->analyze($f);
-                            ++$count['file'];
-                        }
-                        ++$count['dir'];
-                    } else {
-                        echo 'Failed to get files '."\n";
-                    }
-                } else {
-                    echo 'Failed to create match string '."\n";
-                }
-            }
-            echo '**************************************'."\n";
-            echo '* Finished Scanning your directories '."\n*\n";
-            echo '* Directories '.$count['dir']."\n";
-            echo '* Files '.$count['file']."\n";
-            $End = self::getTime();
-            $t = number_format(($End - $Start) / 60, 2);
-            echo '* Time taken to scan '.$dir.' '.$t.' min '."\n";
-            echo '**************************************'."\n";
-        } else {
-            echo ' failed to get directories '."\n";
         }
     }
 }

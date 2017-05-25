@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Graphic;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Png extends BaseHandler
 {
@@ -82,7 +91,6 @@ class Png extends BaseHandler
             $thisfile_png_chunk_type_text = &$thisfile_png[$chunk['type_text']];
 
             switch ($chunk['type_text']) {
-
                 case 'IHDR': // Image Header
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['width'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 4));
@@ -103,7 +111,6 @@ class Png extends BaseHandler
 
                     $info['video']['bits_per_sample'] = $this->IHDRcalculateBitsPerSample($thisfile_png_chunk_type_text['raw']['color_type'], $thisfile_png_chunk_type_text['raw']['bit_depth']);
                     break;
-
                 case 'PLTE': // Palette
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $paletteoffset = 0;
@@ -117,26 +124,22 @@ class Png extends BaseHandler
                         $thisfile_png_chunk_type_text[$i] = (($red << 16) | ($green << 8) | ($blue));
                     }
                     break;
-
                 case 'tRNS': // Transparency
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     switch ($thisfile_png['IHDR']['raw']['color_type']) {
                         case 0:
                             $thisfile_png_chunk_type_text['transparent_color_gray'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 2));
                             break;
-
                         case 2:
                             $thisfile_png_chunk_type_text['transparent_color_red'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 2));
                             $thisfile_png_chunk_type_text['transparent_color_green'] = Helper::BigEndian2Int(substr($chunk['data'], 2, 2));
                             $thisfile_png_chunk_type_text['transparent_color_blue'] = Helper::BigEndian2Int(substr($chunk['data'], 4, 2));
                             break;
-
                         case 3:
                             for ($i = 0; $i < strlen($chunk['data']); ++$i) {
                                 $thisfile_png_chunk_type_text['palette_opacity'][$i] = Helper::BigEndian2Int(substr($chunk['data'], $i, 1));
                             }
                             break;
-
                         case 4:
                         case 6:
                             $info['error'][] = 'Invalid color_type in tRNS chunk: '.$thisfile_png['IHDR']['raw']['color_type'];
@@ -146,12 +149,10 @@ class Png extends BaseHandler
                             break;
                     }
                     break;
-
                 case 'gAMA': // Image Gamma
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['gamma'] = Helper::BigEndian2Int($chunk['data']) / 100000;
                     break;
-
                 case 'cHRM': // Primary Chromaticities
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['white_x'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 4)) / 100000;
@@ -163,13 +164,11 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text['blue_y'] = Helper::BigEndian2Int(substr($chunk['data'], 24, 4)) / 100000;
                     $thisfile_png_chunk_type_text['blue_y'] = Helper::BigEndian2Int(substr($chunk['data'], 28, 4)) / 100000;
                     break;
-
                 case 'sRGB': // Standard RGB Color Space
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['reindering_intent'] = Helper::BigEndian2Int($chunk['data']);
                     $thisfile_png_chunk_type_text['reindering_intent_text'] = $this->PNGsRGBintentLookup($thisfile_png_chunk_type_text['reindering_intent']);
                     break;
-
                 case 'iCCP': // Embedded ICC Profile
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     list($profilename, $compressiondata) = explode("\x00", $chunk['data'], 2);
@@ -179,7 +178,6 @@ class Png extends BaseHandler
 
                     $thisfile_png_chunk_type_text['compression_method_text'] = $this->PNGcompressionMethodLookup($thisfile_png_chunk_type_text['compression_method']);
                     break;
-
                 case 'tEXt': // Textual Data
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     list($keyword, $text) = explode("\x00", $chunk['data'], 2);
@@ -188,7 +186,6 @@ class Png extends BaseHandler
 
                     $thisfile_png['comments'][$thisfile_png_chunk_type_text['keyword']][] = $thisfile_png_chunk_type_text['text'];
                     break;
-
                 case 'zTXt': // Compressed Textual Data
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     list($keyword, $otherdata) = explode("\x00", $chunk['data'], 2);
@@ -200,7 +197,6 @@ class Png extends BaseHandler
                         case 0:
                             $thisfile_png_chunk_type_text['text'] = gzuncompress($thisfile_png_chunk_type_text['compressed_text']);
                             break;
-
                         default:
                             // unknown compression method
                             break;
@@ -210,7 +206,6 @@ class Png extends BaseHandler
                         $thisfile_png['comments'][$thisfile_png_chunk_type_text['keyword']][] = $thisfile_png_chunk_type_text['text'];
                     }
                     break;
-
                 case 'iTXt': // International Textual Data
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     list($keyword, $otherdata) = explode("\x00", $chunk['data'], 2);
@@ -227,7 +222,6 @@ class Png extends BaseHandler
                             case 0:
                                 $thisfile_png_chunk_type_text['text'] = gzuncompress($text);
                                 break;
-
                             default:
                                 // unknown compression method
                                 break;
@@ -240,7 +234,6 @@ class Png extends BaseHandler
                         $thisfile_png['comments'][$thisfile_png_chunk_type_text['keyword']][] = $thisfile_png_chunk_type_text['text'];
                     }
                     break;
-
                 case 'bKGD': // Background Color
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     switch ($thisfile_png['IHDR']['raw']['color_type']) {
@@ -248,23 +241,19 @@ class Png extends BaseHandler
                         case 4:
                             $thisfile_png_chunk_type_text['background_gray'] = Helper::BigEndian2Int($chunk['data']);
                             break;
-
                         case 2:
                         case 6:
                             $thisfile_png_chunk_type_text['background_red'] = Helper::BigEndian2Int(substr($chunk['data'], 0 * $thisfile_png['IHDR']['raw']['bit_depth'], $thisfile_png['IHDR']['raw']['bit_depth']));
                             $thisfile_png_chunk_type_text['background_green'] = Helper::BigEndian2Int(substr($chunk['data'], 1 * $thisfile_png['IHDR']['raw']['bit_depth'], $thisfile_png['IHDR']['raw']['bit_depth']));
                             $thisfile_png_chunk_type_text['background_blue'] = Helper::BigEndian2Int(substr($chunk['data'], 2 * $thisfile_png['IHDR']['raw']['bit_depth'], $thisfile_png['IHDR']['raw']['bit_depth']));
                             break;
-
                         case 3:
                             $thisfile_png_chunk_type_text['background_index'] = Helper::BigEndian2Int($chunk['data']);
                             break;
-
                         default:
                             break;
                     }
                     break;
-
                 case 'pHYs': // Physical Pixel Dimensions
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['pixels_per_unit_x'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 4));
@@ -272,38 +261,32 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text['unit_specifier'] = Helper::BigEndian2Int(substr($chunk['data'], 8, 1));
                     $thisfile_png_chunk_type_text['unit'] = $this->PNGpHYsUnitLookup($thisfile_png_chunk_type_text['unit_specifier']);
                     break;
-
                 case 'sBIT': // Significant Bits
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     switch ($thisfile_png['IHDR']['raw']['color_type']) {
                         case 0:
                             $thisfile_png_chunk_type_text['significant_bits_gray'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 1));
                             break;
-
                         case 2:
                         case 3:
                             $thisfile_png_chunk_type_text['significant_bits_red'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 1));
                             $thisfile_png_chunk_type_text['significant_bits_green'] = Helper::BigEndian2Int(substr($chunk['data'], 1, 1));
                             $thisfile_png_chunk_type_text['significant_bits_blue'] = Helper::BigEndian2Int(substr($chunk['data'], 2, 1));
                             break;
-
                         case 4:
                             $thisfile_png_chunk_type_text['significant_bits_gray'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 1));
                             $thisfile_png_chunk_type_text['significant_bits_alpha'] = Helper::BigEndian2Int(substr($chunk['data'], 1, 1));
                             break;
-
                         case 6:
                             $thisfile_png_chunk_type_text['significant_bits_red'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 1));
                             $thisfile_png_chunk_type_text['significant_bits_green'] = Helper::BigEndian2Int(substr($chunk['data'], 1, 1));
                             $thisfile_png_chunk_type_text['significant_bits_blue'] = Helper::BigEndian2Int(substr($chunk['data'], 2, 1));
                             $thisfile_png_chunk_type_text['significant_bits_alpha'] = Helper::BigEndian2Int(substr($chunk['data'], 3, 1));
                             break;
-
                         default:
                             break;
                     }
                     break;
-
                 case 'sPLT': // Suggested Palette
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     list($palettename, $otherdata) = explode("\x00", $chunk['data'], 2);
@@ -327,7 +310,6 @@ class Png extends BaseHandler
                         ++$paletteCounter;
                     }
                     break;
-
                 case 'hIST': // Palette Histogram
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $hISTcounter = 0;
@@ -336,7 +318,6 @@ class Png extends BaseHandler
                         $hISTcounter += 2;
                     }
                     break;
-
                 case 'tIME': // Image Last-Modification Time
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['year'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 2));
@@ -347,7 +328,6 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text['second'] = Helper::BigEndian2Int(substr($chunk['data'], 6, 1));
                     $thisfile_png_chunk_type_text['unix'] = gmmktime($thisfile_png_chunk_type_text['hour'], $thisfile_png_chunk_type_text['minute'], $thisfile_png_chunk_type_text['second'], $thisfile_png_chunk_type_text['month'], $thisfile_png_chunk_type_text['day'], $thisfile_png_chunk_type_text['year']);
                     break;
-
                 case 'oFFs': // Image Offset
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['position_x'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 4), false, true);
@@ -355,7 +335,6 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text['unit_specifier'] = Helper::BigEndian2Int(substr($chunk['data'], 8, 1));
                     $thisfile_png_chunk_type_text['unit'] = $this->PNGoFFsUnitLookup($thisfile_png_chunk_type_text['unit_specifier']);
                     break;
-
                 case 'pCAL': // Calibration Of Pixel Values
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     list($calibrationname, $otherdata) = explode("\x00", $chunk['data'], 2);
@@ -372,7 +351,6 @@ class Png extends BaseHandler
                     $pCALoffset += 1;
                     $thisfile_png_chunk_type_text['parameters'] = explode("\x00", substr($chunk['data'], $pCALoffset));
                     break;
-
                 case 'sCAL': // Physical Scale Of Image Subject
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     $thisfile_png_chunk_type_text['unit_specifier'] = Helper::BigEndian2Int(substr($chunk['data'], 0, 1));
@@ -381,7 +359,6 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text['pixel_width'] = $pixelwidth;
                     $thisfile_png_chunk_type_text['pixel_height'] = $pixelheight;
                     break;
-
                 case 'gIFg': // GIF Graphic Control Extension
                     $gIFgCounter = 0;
                     if (isset($thisfile_png_chunk_type_text) && is_array($thisfile_png_chunk_type_text)) {
@@ -392,7 +369,6 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text[$gIFgCounter]['user_input_flag'] = Helper::BigEndian2Int(substr($chunk['data'], 1, 1));
                     $thisfile_png_chunk_type_text[$gIFgCounter]['delay_time'] = Helper::BigEndian2Int(substr($chunk['data'], 2, 2));
                     break;
-
                 case 'gIFx': // GIF Application Extension
                     $gIFxCounter = 0;
                     if (isset($thisfile_png_chunk_type_text) && is_array($thisfile_png_chunk_type_text)) {
@@ -403,7 +379,6 @@ class Png extends BaseHandler
                     $thisfile_png_chunk_type_text[$gIFxCounter]['authentication_code'] = substr($chunk['data'], 8, 3);
                     $thisfile_png_chunk_type_text[$gIFxCounter]['application_data'] = substr($chunk['data'], 11);
                     break;
-
                 case 'IDAT': // Image Data
                     $idatinformationfieldindex = 0;
                     if (isset($thisfile_png['IDAT']) && is_array($thisfile_png['IDAT'])) {
@@ -412,11 +387,9 @@ class Png extends BaseHandler
                     unset($chunk['data']);
                     $thisfile_png_chunk_type_text[$idatinformationfieldindex]['header'] = $chunk;
                     break;
-
                 case 'IEND': // Image Trailer
                     $thisfile_png_chunk_type_text['header'] = $chunk;
                     break;
-
                 default:
                     //unset($chunk['data']);
                     $thisfile_png_chunk_type_text['header'] = $chunk;
@@ -444,7 +417,7 @@ class Png extends BaseHandler
             3 => 'Absolute colorimetric',
         );
 
-        return (isset($PNGsRGBintentLookup[$sRGB]) ? $PNGsRGBintentLookup[$sRGB] : 'invalid');
+        return isset($PNGsRGBintentLookup[$sRGB]) ? $PNGsRGBintentLookup[$sRGB] : 'invalid';
     }
 
     /**
@@ -460,7 +433,7 @@ class Png extends BaseHandler
             0 => 'deflate/inflate',
         );
 
-        return (isset($PNGcompressionMethodLookup[$compressionmethod]) ? $PNGcompressionMethodLookup[$compressionmethod] : 'invalid');
+        return isset($PNGcompressionMethodLookup[$compressionmethod]) ? $PNGcompressionMethodLookup[$compressionmethod] : 'invalid';
     }
 
     /**
@@ -477,7 +450,7 @@ class Png extends BaseHandler
             1 => 'meter',
         );
 
-        return (isset($PNGpHYsUnitLookup[$unitid]) ? $PNGpHYsUnitLookup[$unitid] : 'invalid');
+        return isset($PNGpHYsUnitLookup[$unitid]) ? $PNGpHYsUnitLookup[$unitid] : 'invalid';
     }
 
     /**
@@ -494,7 +467,7 @@ class Png extends BaseHandler
             1 => 'micrometer',
         );
 
-        return (isset($PNGoFFsUnitLookup[$unitid]) ? $PNGoFFsUnitLookup[$unitid] : 'invalid');
+        return isset($PNGoFFsUnitLookup[$unitid]) ? $PNGoFFsUnitLookup[$unitid] : 'invalid';
     }
 
     /**
@@ -513,7 +486,7 @@ class Png extends BaseHandler
             3 => 'Hyperbolic mapping',
         );
 
-        return (isset($PNGpCALequationTypeLookup[$equationtype]) ? $PNGpCALequationTypeLookup[$equationtype] : 'invalid');
+        return isset($PNGpCALequationTypeLookup[$equationtype]) ? $PNGpCALequationTypeLookup[$equationtype] : 'invalid';
     }
 
     /**
@@ -530,7 +503,7 @@ class Png extends BaseHandler
             1 => 'radian',
         );
 
-        return (isset($PNGsCALUnitLookup[$unitid]) ? $PNGsCALUnitLookup[$unitid] : 'invalid');
+        return isset($PNGsCALUnitLookup[$unitid]) ? $PNGsCALUnitLookup[$unitid] : 'invalid';
     }
 
     /**
@@ -546,22 +519,18 @@ class Png extends BaseHandler
 
                 return $bit_depth;
                 break;
-
             case 2: // Each pixel is an R,G,B triple
 
                 return 3 * $bit_depth;
                 break;
-
             case 3: // Each pixel is a palette index; a PLTE chunk must appear.
 
                 return $bit_depth;
                 break;
-
             case 4: // Each pixel is a grayscale sample, followed by an alpha sample.
 
                 return 2 * $bit_depth;
                 break;
-
             case 6: // Each pixel is an R,G,B triple, followed by an alpha sample.
 
                 return 4 * $bit_depth;

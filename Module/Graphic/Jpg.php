@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Graphic;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\Tag\Xmp;
 
 /////////////////////////////////////////////////////////////////
@@ -27,11 +36,11 @@ use GetId3\Module\Tag\Xmp;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Tag\Xmp (optional)
- * @uses ext-exif (optional)
+ * @uses \GetId3\Module\Tag\Xmp (optional)
+ * @uses \ext-exif (optional)
  */
 class Jpg extends BaseHandler
 {
@@ -60,7 +69,7 @@ class Jpg extends BaseHandler
             if (is_array($iptc_parsed)) {
                 foreach ($iptc_parsed as $iptc_key_raw => $iptc_values) {
                     list($iptc_record, $iptc_tagkey) = explode('#', $iptc_key_raw);
-                    $iptc_tagkey = intval(ltrim($iptc_tagkey, '0'));
+                    $iptc_tagkey = (int) (ltrim($iptc_tagkey, '0'));
                     foreach ($iptc_values as $key => $value) {
                         $IPTCrecordName = $this->IPTCrecordName($iptc_record);
                         $IPTCrecordTagName = $this->IPTCrecordTagName($iptc_record, $iptc_tagkey);
@@ -93,7 +102,6 @@ class Jpg extends BaseHandler
                 }
                 $returnOK = true;
                 break;
-
             default:
                 break;
         }
@@ -220,7 +228,7 @@ class Jpg extends BaseHandler
             );
         }
 
-        return (isset($IPTCrecordName[$iptc_record]) ? $IPTCrecordName[$iptc_record] : '');
+        return isset($IPTCrecordName[$iptc_record]) ? $IPTCrecordName[$iptc_record] : '';
     }
 
     /**
@@ -231,7 +239,7 @@ class Jpg extends BaseHandler
      *
      * @return type
      *
-     * @link http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/IPTC.html
+     * @see http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/IPTC.html
      */
     public function IPTCrecordTagName($iptc_record, $iptc_tagkey)
     {
@@ -368,6 +376,6 @@ class Jpg extends BaseHandler
             );
         }
 
-        return (isset($IPTCrecordTagName[$iptc_record][$iptc_tagkey]) ? $IPTCrecordTagName[$iptc_record][$iptc_tagkey] : $iptc_tagkey);
+        return isset($IPTCrecordTagName[$iptc_record][$iptc_tagkey]) ? $IPTCrecordTagName[$iptc_record][$iptc_tagkey] : $iptc_tagkey;
     }
 }

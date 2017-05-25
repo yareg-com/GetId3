@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 if (!function_exists('PrintHexBytes')) {
     function PrintHexBytes($string)
     {
@@ -59,35 +68,30 @@ if (!function_exists('table_var_dump')) {
                 }
                 $returnstring .= '</TABLE>';
                 break;
-
             case 'boolean':
                 $returnstring .= ($variable ? 'TRUE' : 'FALSE');
                 break;
-
             case 'integer':
             case 'double':
             case 'float':
                 $returnstring .= $variable;
                 break;
-
             case 'object':
             case 'null':
                 $returnstring .= string_var_dump($variable);
                 break;
-
             case 'string':
                 $variable = str_replace(chr(0), ' ', $variable);
                 $varlen = strlen($variable);
                 for ($i = 0; $i < $varlen; ++$i) {
-                    if (preg_match('#['.chr(0x0A).chr(0x0D).' -;0-9A-Za-z]#', $variable{$i})) {
-                        $returnstring .= $variable{$i};
+                    if (preg_match('#['.chr(0x0A).chr(0x0D).' -;0-9A-Za-z]#', $variable[$i])) {
+                        $returnstring .= $variable[$i];
                     } else {
-                        $returnstring .= '&#'.str_pad(ord($variable{$i}), 3, '0', STR_PAD_LEFT).';';
+                        $returnstring .= '&#'.str_pad(ord($variable[$i]), 3, '0', STR_PAD_LEFT).';';
                     }
                 }
                 $returnstring = nl2br($returnstring);
                 break;
-
             default:
                 require_once GETID3_INCLUDEPATH.'getid3.getimagesize.php';
                 $imageinfo = array();
@@ -234,7 +238,7 @@ if (!function_exists('getmicrotime')) {
     {
         list($usec, $sec) = explode(' ', microtime());
 
-        return ((float) $usec + (float) $sec);
+        return (float) $usec + (float) $sec;
     }
 }
 
@@ -244,7 +248,7 @@ if (!function_exists('DecimalBinary2Float')) {
         $numerator = Bin2Dec($binarynumerator);
         $denominator = Bin2Dec(str_repeat('1', strlen($binarynumerator)));
 
-        return ($numerator / $denominator);
+        return $numerator / $denominator;
     }
 }
 
@@ -254,11 +258,11 @@ if (!function_exists('NormalizeBinaryPoint')) {
         // http://www.scri.fsu.edu/~jac/MAD3401/Backgrnd/binary.html
         if (strpos($binarypointnumber, '.') === false) {
             $binarypointnumber = '0.'.$binarypointnumber;
-        } elseif ($binarypointnumber{0} == '.') {
+        } elseif ($binarypointnumber[0] == '.') {
             $binarypointnumber = '0'.$binarypointnumber;
         }
         $exponent = 0;
-        while (($binarypointnumber{0} != '1') || (substr($binarypointnumber, 1, 1) != '.')) {
+        while (($binarypointnumber[0] != '1') || (substr($binarypointnumber, 1, 1) != '.')) {
             if (substr($binarypointnumber, 1, 1) == '.') {
                 --$exponent;
                 $binarypointnumber = substr($binarypointnumber, 2, 1).'.'.substr($binarypointnumber, 3);
@@ -266,7 +270,7 @@ if (!function_exists('NormalizeBinaryPoint')) {
                 $pointpos = strpos($binarypointnumber, '.');
                 $exponent += ($pointpos - 1);
                 $binarypointnumber = str_replace('.', '', $binarypointnumber);
-                $binarypointnumber = $binarypointnumber{0}
+                $binarypointnumber = $binarypointnumber[0]
                 .'.'.substr($binarypointnumber, 1);
             }
         }
@@ -304,12 +308,10 @@ if (!function_exists('Float2String')) {
                 $exponentbits = 8;
                 $fractionbits = 23;
                 break;
-
             case 64:
                 $exponentbits = 11;
                 $fractionbits = 52;
                 break;
-
             default:
                 return false;
                 break;
@@ -343,24 +345,21 @@ if (!function_exists('BigEndian2Float')) {
         // http://www.scri.fsu.edu/~jac/MAD3401/Backgrnd/ieee.html
 
         $bitword = BigEndian2Bin($byteword);
-        $signbit = $bitword{0};
+        $signbit = $bitword[0];
 
         switch (strlen($byteword) * 8) {
             case 32:
                 $exponentbits = 8;
                 $fractionbits = 23;
                 break;
-
             case 64:
                 $exponentbits = 11;
                 $fractionbits = 52;
                 break;
-
             case 80:
                 $exponentbits = 16;
                 $fractionbits = 64;
                 break;
-
             default:
                 return false;
                 break;
@@ -374,7 +373,7 @@ if (!function_exists('BigEndian2Float')) {
             // 80-bit
             // As used in Apple AIFF for sample_rate
             // A bit of a hack, but it works ;)
-            return pow(2, ($exponent  - 16382)) * DecimalBinary2Float($fractionstring);
+            return pow(2, ($exponent - 16382)) * DecimalBinary2Float($fractionstring);
         }
 
         if (($exponent == (pow(2, $exponentbits) - 1)) && ($fraction != 0)) {
@@ -417,9 +416,9 @@ if (!function_exists('BigEndian2Int')) {
         $bytewordlen = strlen($byteword);
         for ($i = 0; $i < $bytewordlen; ++$i) {
             if ($synchsafe) { // disregard MSB, effectively 7-bit bytes
-                $intvalue = $intvalue | (ord($byteword{$i}) & 0x7F) << (($bytewordlen - 1 - $i) * 7);
+                $intvalue = $intvalue | (ord($byteword[$i]) & 0x7F) << (($bytewordlen - 1 - $i) * 7);
             } else {
-                $intvalue += ord($byteword{$i}) * pow(256, ($bytewordlen - 1 - $i));
+                $intvalue += ord($byteword[$i]) * pow(256, ($bytewordlen - 1 - $i));
             }
         }
         if ($signed && !$synchsafe) {
@@ -434,7 +433,6 @@ if (!function_exists('BigEndian2Int')) {
                         $intvalue = 0 - ($intvalue & ($signmaskbit - 1));
                     }
                     break;
-
                 default:
                     die('ERROR: Cannot have signed integers larger than 32-bits in BigEndian2Int()');
                     break;
@@ -458,7 +456,7 @@ if (!function_exists('BigEndian2Bin')) {
         $binvalue = '';
         $bytewordlen = strlen($byteword);
         for ($i = 0; $i < $bytewordlen; ++$i) {
-            $binvalue .= str_pad(decbin(ord($byteword{$i})), 8, '0', STR_PAD_LEFT);
+            $binvalue .= str_pad(decbin(ord($byteword[$i])), 8, '0', STR_PAD_LEFT);
         }
 
         return $binvalue;
@@ -553,7 +551,7 @@ if (!function_exists('LittleEndian2String')) {
 if (!function_exists('Bool2IntString')) {
     function Bool2IntString($intvalue)
     {
-        return ($intvalue ? '1' : '0');
+        return $intvalue ? '1' : '0';
     }
 }
 
@@ -565,15 +563,13 @@ if (!function_exists('IntString2Bool')) {
         } elseif ($char == '0') {
             return false;
         }
-
-        return;
     }
 }
 
 if (!function_exists('InverseBoolean')) {
     function InverseBoolean($value)
     {
-        return ($value ? false : true);
+        return $value ? false : true;
     }
 }
 
@@ -602,7 +598,7 @@ if (!function_exists('Unsynchronise')) {
         $data = str_replace(chr(0xFF).chr(0x00), chr(0xFF).chr(0x00).chr(0x00), $data);
         $unsyncheddata = '';
         for ($i = 0; $i < strlen($data); ++$i) {
-            $thischar = $data{$i};
+            $thischar = $data[$i];
             $unsyncheddata .= $thischar;
             if ($thischar == chr(255)) {
                 $nextchar = ord(substr($data, $i + 1, 1));
@@ -659,10 +655,9 @@ if (!function_exists('array_join_merge')) {
             }
 
             return $new_array;
-        } else {
+        }
             // not the same ... take new one if defined, else the old one stays
             return $arr2 ? $arr2 : $arr1;
-        }
     }
 }
 
@@ -716,7 +711,6 @@ if (!function_exists('RoughTranslateUnicodeToASCII')) {
             case 0: // ISO-8859-1. Terminated with $00.
                 $asciidata = $rawdata;
                 break;
-
             case 1: // UTF-16 encoded Unicode with BOM. Terminated with $00 00.
                 $asciidata = $rawdata;
                 if (substr($asciidata, 0, 2) == chr(0xFF).chr(0xFE)) {
@@ -727,49 +721,45 @@ if (!function_exists('RoughTranslateUnicodeToASCII')) {
                     $asciidata = substr($asciidata, 0, strlen($asciidata) - 2); // remove terminator, only if present (it should be, but...)
                 }
                 for ($i = 0; $i < strlen($asciidata); $i += 2) {
-                    if ((ord($asciidata{$i}) <= 0x7F) || (ord($asciidata{$i}) >= 0xA0)) {
-                        $tempstring .= $asciidata{$i};
+                    if ((ord($asciidata[$i]) <= 0x7F) || (ord($asciidata[$i]) >= 0xA0)) {
+                        $tempstring .= $asciidata[$i];
                     } else {
                         $tempstring .= '?';
                     }
                 }
                 $asciidata = $tempstring;
                 break;
-
             case 2: // UTF-16BE encoded Unicode without BOM. Terminated with $00 00.
                 $asciidata = $rawdata;
                 if (substr($asciidata, strlen($asciidata) - 2, 2) == chr(0).chr(0)) {
                     $asciidata = substr($asciidata, 0, strlen($asciidata) - 2); // remove terminator, only if present (it should be, but...)
                 }
                 for ($i = 0; $i < strlen($asciidata); $i += 2) {
-                    if ((ord($asciidata{$i}) <= 0x7F) || (ord($asciidata{$i}) >= 0xA0)) {
-                        $tempstring .= $asciidata{$i};
+                    if ((ord($asciidata[$i]) <= 0x7F) || (ord($asciidata[$i]) >= 0xA0)) {
+                        $tempstring .= $asciidata[$i];
                     } else {
                         $tempstring .= '?';
                     }
                 }
                 $asciidata = $tempstring;
                 break;
-
             case 3: // UTF-8 encoded Unicode. Terminated with $00.
                 $asciidata = utf8_decode($rawdata);
                 break;
-
             case 255: // Unicode, Big-Endian. Terminated with $00 00.
                 $asciidata = $rawdata;
                 if (substr($asciidata, strlen($asciidata) - 2, 2) == chr(0).chr(0)) {
                     $asciidata = substr($asciidata, 0, strlen($asciidata) - 2); // remove terminator, only if present (it should be, but...)
                 }
                 for ($i = 0; ($i + 1) < strlen($asciidata); $i += 2) {
-                    if ((ord($asciidata{($i + 1)}) <= 0x7F) || (ord($asciidata{($i + 1)}) >= 0xA0)) {
-                        $tempstring .= $asciidata{($i + 1)};
+                    if ((ord($asciidata[($i + 1)]) <= 0x7F) || (ord($asciidata[($i + 1)]) >= 0xA0)) {
+                        $tempstring .= $asciidata[($i + 1)];
                     } else {
                         $tempstring .= '?';
                     }
                 }
                 $asciidata = $tempstring;
                 break;
-
             default:
                 // shouldn't happen, but in case $frame_textencoding is not 1 <= $frame_textencoding <= 4
                 // just pass the data through unchanged.
@@ -803,7 +793,7 @@ if (!function_exists('PlaytimeString')) {
 if (!function_exists('CloseMatch')) {
     function CloseMatch($value1, $value2, $tolerance)
     {
-        return (abs($value1 - $value2) <= $tolerance);
+        return abs($value1 - $value2) <= $tolerance;
     }
 }
 
@@ -908,26 +898,26 @@ if (!function_exists('GUIDtoBytestring')) {
 if (!function_exists('BytestringToGUID')) {
     function BytestringToGUID($Bytestring)
     {
-        $GUIDstring = str_pad(dechex(ord($Bytestring{3})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{2})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{1})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{0})), 2, '0', STR_PAD_LEFT);
+        $GUIDstring = str_pad(dechex(ord($Bytestring[3])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[2])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[1])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[0])), 2, '0', STR_PAD_LEFT);
         $GUIDstring .= '-';
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{5})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{4})), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[5])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[4])), 2, '0', STR_PAD_LEFT);
         $GUIDstring .= '-';
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{7})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{6})), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[7])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[6])), 2, '0', STR_PAD_LEFT);
         $GUIDstring .= '-';
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{8})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{9})), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[8])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[9])), 2, '0', STR_PAD_LEFT);
         $GUIDstring .= '-';
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{10})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{11})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{12})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{13})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{14})), 2, '0', STR_PAD_LEFT);
-        $GUIDstring .= str_pad(dechex(ord($Bytestring{15})), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[10])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[11])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[12])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[13])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[14])), 2, '0', STR_PAD_LEFT);
+        $GUIDstring .= str_pad(dechex(ord($Bytestring[15])), 2, '0', STR_PAD_LEFT);
 
         return strtoupper($GUIDstring);
     }
@@ -985,7 +975,7 @@ if (!function_exists('image_type_to_mime_type')) {
             $image_type_to_mime_type[14] = 'image/iff';                     // IFF
         }
 
-        return (isset($image_type_to_mime_type[$imagetypeid]) ? $image_type_to_mime_type[$imagetypeid] : 'application/octet-stream');
+        return isset($image_type_to_mime_type[$imagetypeid]) ? $image_type_to_mime_type[$imagetypeid] : 'application/octet-stream';
     }
 }
 
@@ -1004,17 +994,17 @@ if (!function_exists('utf8_decode')) {
         $utf8length = strlen($utf8text);
         $decodedtext = '';
         for ($i = 0; $i < $utf8length; ++$i) {
-            if ((ord($utf8text{$i}) & 0x80) == 0) {
-                $decodedtext .= $utf8text{$i};
-            } elseif ((ord($utf8text{$i}) & 0xF0) == 0xF0) {
+            if ((ord($utf8text[$i]) & 0x80) == 0) {
+                $decodedtext .= $utf8text[$i];
+            } elseif ((ord($utf8text[$i]) & 0xF0) == 0xF0) {
                 $decodedtext .= '?';
                 $i += 3;
-            } elseif ((ord($utf8text{$i}) & 0xE0) == 0xE0) {
+            } elseif ((ord($utf8text[$i]) & 0xE0) == 0xE0) {
                 $decodedtext .= '?';
                 $i += 2;
-            } elseif ((ord($utf8text{$i}) & 0xC0) == 0xC0) {
+            } elseif ((ord($utf8text[$i]) & 0xC0) == 0xC0) {
                 //   2     11   110bbbbb 10bbbbbb
-                $decodedchar = Bin2Dec(substr(Dec2Bin(ord($utf8text{$i})), 3, 5).substr(Dec2Bin(ord($utf8text{($i + 1)})), 2, 6));
+                $decodedchar = Bin2Dec(substr(Dec2Bin(ord($utf8text[$i])), 3, 5).substr(Dec2Bin(ord($utf8text[($i + 1)])), 2, 6));
                 if ($decodedchar <= 255) {
                     $decodedtext .= chr($decodedchar);
                 } else {
@@ -1141,7 +1131,7 @@ if (!function_exists('CreateDeepArray')) {
         //   $foo = array('path'=>array('to'=>'array('my'=>array('file.txt'))));
         // or
         //   $foo['path']['to']['my'] = 'file.txt';
-        while ($ArrayPath{0} == $Separator) {
+        while ($ArrayPath[0] == $Separator) {
             $ArrayPath = substr($ArrayPath, 1);
         }
         if (($pos = strpos($ArrayPath, $Separator)) !== false) {
@@ -1207,11 +1197,11 @@ if (!function_exists('md5_data')) {
                     $to = '';
                     for ($i = 0; $i < 128; ++$i) {
                         $from .= chr($i);
-                        $to   .= chr($i + 128);
+                        $to .= chr($i + 128);
                     }
                     for ($i = 128; $i < 256; ++$i) {
                         $from .= chr($i);
-                        $to   .= chr($i - 128);
+                        $to .= chr($i - 128);
                     }
                 }
 
@@ -1262,14 +1252,12 @@ if (!function_exists('TwosCompliment2Decimal')) {
         // The negative of this number is the value of the original binary.
 
         if ($BinaryValue & 0x80) {
-
             // negative number
-            return (0 - ((~$BinaryValue & 0xFF) + 1));
-        } else {
+            return 0 - ((~$BinaryValue & 0xFF) + 1);
+        }
 
             // positive number
             return $BinaryValue;
-        }
     }
 }
 
@@ -1326,7 +1314,6 @@ if (!function_exists('CalculateCompressionRatioVideo')) {
                 $PlaytimeSeconds = 1;
                 $BitrateCompressed = $ThisFileInfo['filesize'] * 8;
                 break;
-
             default:
                 if (!empty($ThisFileInfo['video']['frame_rate'])) {
                     $FrameRate = $ThisFileInfo['video']['frame_rate'];
@@ -1401,11 +1388,11 @@ if (!function_exists('safe_parse_url')) {
         $errormessage = ob_get_contents();
         ob_end_clean();
         $parts['scheme'] = (isset($parts['scheme']) ? $parts['scheme'] : '');
-        $parts['host'] = (isset($parts['host'])   ? $parts['host']   : '');
-        $parts['user'] = (isset($parts['user'])   ? $parts['user']   : '');
-        $parts['pass'] = (isset($parts['pass'])   ? $parts['pass']   : '');
-        $parts['path'] = (isset($parts['path'])   ? $parts['path']   : '');
-        $parts['query'] = (isset($parts['query'])  ? $parts['query']  : '');
+        $parts['host'] = (isset($parts['host']) ? $parts['host'] : '');
+        $parts['user'] = (isset($parts['user']) ? $parts['user'] : '');
+        $parts['pass'] = (isset($parts['pass']) ? $parts['pass'] : '');
+        $parts['path'] = (isset($parts['path']) ? $parts['path'] : '');
+        $parts['query'] = (isset($parts['query']) ? $parts['query'] : '');
 
         return $parts;
     }
@@ -1437,9 +1424,9 @@ if (!function_exists('IsValidURL')) {
                 return false;
             } elseif (!preg_match("#^[[:alnum:]?&=+:;_()%#/,\.-]*$#i", $parts['query'], $regs)) {
                 return false;
-            } else {
-                return true;
             }
+
+            return true;
         }
 
         return false;
@@ -1537,7 +1524,6 @@ if (isset($_POST['Analyze']) && $_POST['HeaderHexBytes']) {
 
     echo table_var_dump($MP3fileInfo);
 } elseif (isset($_POST['Generate'])) {
-
     // AAAA AAAA  AAAB BCCD  EEEE FFGH  IIJJ KLMM
 
     $headerbitstream = '11111111111';                               // A - Frame sync (all bits set)
@@ -1594,7 +1580,7 @@ if (isset($_POST['Analyze']) && $_POST['HeaderHexBytes']) {
 
     $headerbitstream .= (($_POST['copyright'] == 'Y') ? '1' : '0');          // K - Copyright
 
-    $headerbitstream .= (($_POST['original']  == 'Y') ? '1' : '0');          // L - Original
+    $headerbitstream .= (($_POST['original'] == 'Y') ? '1' : '0');          // L - Original
 
     $MPEGaudioEmphasisLookup = array('none' => '00', '50/15ms' => '01', 'CCIT J.17' => '11');
     if (isset($MPEGaudioEmphasisLookup[$_POST['emphasis']])) {
@@ -1613,14 +1599,14 @@ function MPEGaudioVersionLookup($rawversion)
 {
     $MPEGaudioVersionLookup = array('2.5', false, '2', '1');
 
-    return (isset($MPEGaudioVersionLookup["$rawversion"]) ? $MPEGaudioVersionLookup["$rawversion"] : false);
+    return isset($MPEGaudioVersionLookup["$rawversion"]) ? $MPEGaudioVersionLookup["$rawversion"] : false;
 }
 
 function MPEGaudioLayerLookup($rawlayer)
 {
     $MPEGaudioLayerLookup = array(false, 'III', 'II', 'I');
 
-    return (isset($MPEGaudioLayerLookup["$rawlayer"]) ? $MPEGaudioLayerLookup["$rawlayer"] : false);
+    return isset($MPEGaudioLayerLookup["$rawlayer"]) ? $MPEGaudioLayerLookup["$rawlayer"] : false;
 }
 
 function MPEGaudioBitrateLookup($version, $layer, $rawbitrate)
@@ -1630,7 +1616,7 @@ function MPEGaudioBitrateLookup($version, $layer, $rawbitrate)
         $MPEGaudioBitrateLookup = MPEGaudioBitrateArray();
     }
 
-    return (isset($MPEGaudioBitrateLookup["$version"]["$layer"]["$rawbitrate"]) ? $MPEGaudioBitrateLookup["$version"]["$layer"]["$rawbitrate"] : false);
+    return isset($MPEGaudioBitrateLookup["$version"]["$layer"]["$rawbitrate"]) ? $MPEGaudioBitrateLookup["$version"]["$layer"]["$rawbitrate"] : false;
 }
 
 function MPEGaudioFrequencyLookup($version, $rawfrequency)
@@ -1640,14 +1626,14 @@ function MPEGaudioFrequencyLookup($version, $rawfrequency)
         $MPEGaudioFrequencyLookup = MPEGaudioFrequencyArray();
     }
 
-    return (isset($MPEGaudioFrequencyLookup["$version"]["$rawfrequency"]) ? $MPEGaudioFrequencyLookup["$version"]["$rawfrequency"] : false);
+    return isset($MPEGaudioFrequencyLookup["$version"]["$rawfrequency"]) ? $MPEGaudioFrequencyLookup["$version"]["$rawfrequency"] : false;
 }
 
 function MPEGaudioChannelModeLookup($rawchannelmode)
 {
     $MPEGaudioChannelModeLookup = array('stereo', 'joint stereo', 'dual channel', 'mono');
 
-    return (isset($MPEGaudioChannelModeLookup["$rawchannelmode"]) ? $MPEGaudioChannelModeLookup["$rawchannelmode"] : false);
+    return isset($MPEGaudioChannelModeLookup["$rawchannelmode"]) ? $MPEGaudioChannelModeLookup["$rawchannelmode"] : false;
 }
 
 function MPEGaudioModeExtensionLookup($layer, $rawmodeextension)
@@ -1656,14 +1642,14 @@ function MPEGaudioModeExtensionLookup($layer, $rawmodeextension)
     $MPEGaudioModeExtensionLookup['II'] = array('4-31', '8-31', '12-31', '16-31');
     $MPEGaudioModeExtensionLookup['III'] = array('', 'IS', 'MS', 'IS+MS');
 
-    return (isset($MPEGaudioModeExtensionLookup["$layer"]["$rawmodeextension"]) ? $MPEGaudioModeExtensionLookup["$layer"]["$rawmodeextension"] : false);
+    return isset($MPEGaudioModeExtensionLookup["$layer"]["$rawmodeextension"]) ? $MPEGaudioModeExtensionLookup["$layer"]["$rawmodeextension"] : false;
 }
 
 function MPEGaudioEmphasisLookup($rawemphasis)
 {
     $MPEGaudioEmphasisLookup = array('none', '50/15ms', false, 'CCIT J.17');
 
-    return (isset($MPEGaudioEmphasisLookup["$rawemphasis"]) ? $MPEGaudioEmphasisLookup["$rawemphasis"] : false);
+    return isset($MPEGaudioEmphasisLookup["$rawemphasis"]) ? $MPEGaudioEmphasisLookup["$rawemphasis"] : false;
 }
 
 function MPEGaudioCRCLookup($CRCbit)
@@ -1671,9 +1657,9 @@ function MPEGaudioCRCLookup($CRCbit)
     // inverse boolean cast :)
     if ($CRCbit == '0') {
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -1732,7 +1718,6 @@ function getMP3headerFilepointer(&$fd, &$ThisFileInfo)
             case 'mp3':
                 $ThisFileInfo['fileformat'] = $ThisFileInfo['audio']['dataformat'];
                 break;
-
             default:
                 $ThisFileInfo['warning'] .= "\n".'Expecting [audio][dataformat] to be mp1/mp2/mp3 when fileformat == mp3, [audio][dataformat] actually "'.$ThisFileInfo['audio']['dataformat'].'"';
                 break;
@@ -1865,7 +1850,6 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
     if (!$FastMPEGheaderScan && ($ThisFileInfo['mpeg']['audio']['layer'] == 'II')) {
         $ThisFileInfo['audio']['dataformat'] = 'mp2';
         switch ($ThisFileInfo['mpeg']['audio']['channelmode']) {
-
             case 'mono':
                 if (($ThisFileInfo['mpeg']['audio']['bitrate'] == 'free') || ($ThisFileInfo['mpeg']['audio']['bitrate'] <= 192)) {
                     // these are ok
@@ -1875,7 +1859,6 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
                     return false;
                 }
                 break;
-
             case 'stereo':
             case 'joint stereo':
             case 'dual channel':
@@ -1887,7 +1870,6 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
                     return false;
                 }
                 break;
-
         }
     }
 
@@ -1924,9 +1906,9 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
 
         $FraunhoferVBROffset = 36;
 
-        $ThisFileInfo['mpeg']['audio']['VBR_encoder_version'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset +  4, 2));
-        $ThisFileInfo['mpeg']['audio']['VBR_encoder_delay'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset +  6, 2));
-        $ThisFileInfo['mpeg']['audio']['VBR_quality'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset +  8, 2));
+        $ThisFileInfo['mpeg']['audio']['VBR_encoder_version'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset + 4, 2));
+        $ThisFileInfo['mpeg']['audio']['VBR_encoder_delay'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset + 6, 2));
+        $ThisFileInfo['mpeg']['audio']['VBR_quality'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset + 8, 2));
         $ThisFileInfo['mpeg']['audio']['VBR_bytes'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset + 10, 4));
         $ThisFileInfo['mpeg']['audio']['VBR_frames'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset + 14, 4));
         $ThisFileInfo['mpeg']['audio']['VBR_seek_offsets'] = BigEndian2Int(substr($headerstring, $FraunhoferVBROffset + 18, 2));
@@ -1944,7 +1926,6 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
             $previousbyteoffset += $Fraunhofer_OffsetN;
         }
     } else {
-
         // Xing VBR header is hardcoded 'Xing' at a offset 0x0D (13), 0x15 (21) or 0x24 (36)
         // depending on MPEG layer and number of channels
 
@@ -1985,7 +1966,7 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
             $ThisFileInfo['mpeg']['audio']['xing_flags']['vbr_scale'] = (bool) ($ThisFileInfo['mpeg']['audio']['xing_flags_raw'] & 0x00000008);
 
             if ($ThisFileInfo['mpeg']['audio']['xing_flags']['frames']) {
-                $ThisFileInfo['mpeg']['audio']['VBR_frames'] = BigEndian2Int(substr($headerstring, $VBRidOffset +  8, 4));
+                $ThisFileInfo['mpeg']['audio']['VBR_frames'] = BigEndian2Int(substr($headerstring, $VBRidOffset + 8, 4));
             }
             if ($ThisFileInfo['mpeg']['audio']['xing_flags']['bytes']) {
                 $ThisFileInfo['mpeg']['audio']['VBR_bytes'] = BigEndian2Int(substr($headerstring, $VBRidOffset + 12, 4));
@@ -1995,10 +1976,10 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
                 $framelengthfloat = $ThisFileInfo['mpeg']['audio']['VBR_bytes'] / $ThisFileInfo['mpeg']['audio']['VBR_frames'];
                 if ($ThisFileInfo['mpeg']['audio']['layer'] == 'I') {
                     // BitRate = (((FrameLengthInBytes / 4) - Padding) * SampleRate) / 12
-                    $ThisFileInfo['audio']['bitrate'] = ((($framelengthfloat / 4) - intval($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 12;
+                    $ThisFileInfo['audio']['bitrate'] = ((($framelengthfloat / 4) - (int) ($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 12;
                 } else {
                     // Bitrate = ((FrameLengthInBytes - Padding) * SampleRate) / 144
-                    $ThisFileInfo['audio']['bitrate'] = (($framelengthfloat - intval($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 144;
+                    $ThisFileInfo['audio']['bitrate'] = (($framelengthfloat - (int) ($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 144;
                 }
                 $ThisFileInfo['mpeg']['audio']['framelength'] = floor($framelengthfloat);
             }
@@ -2006,7 +1987,7 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
             if ($ThisFileInfo['mpeg']['audio']['xing_flags']['toc']) {
                 $LAMEtocData = substr($headerstring, $VBRidOffset + 16, 100);
                 for ($i = 0; $i < 100; ++$i) {
-                    $ThisFileInfo['mpeg']['audio']['toc'][$i] = ord($LAMEtocData{$i});
+                    $ThisFileInfo['mpeg']['audio']['toc'][$i] = ord($LAMEtocData[$i]);
                 }
             }
             if ($ThisFileInfo['mpeg']['audio']['xing_flags']['vbr_scale']) {
@@ -2020,7 +2001,6 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
                 $ThisFileInfo['mpeg']['audio']['LAME']['long_version'] = rtrim($ThisFileInfo['mpeg']['audio']['LAME']['long_version'], "\x55\xAA");
 
                 if ($ThisFileInfo['mpeg']['audio']['LAME']['short_version'] >= 'LAME3.90.') {
-
                     // It the LAME tag was only introduced in LAME v3.90
                     // http://www.hydrogenaudio.org/?act=ST&f=15&t=9933
 
@@ -2159,7 +2139,6 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
                 }
             }
         } else {
-
             // not Fraunhofer or Xing VBR methods, most likely CBR (but could be VBR with no header)
             $ThisFileInfo['mpeg']['audio']['bitrate_mode'] = 'cbr';
             if ($recursivesearch) {
@@ -2192,10 +2171,10 @@ function decodeMPEGaudioHeader($fd, $offset, &$ThisFileInfo, $recursivesearch = 
                 $ThisFileInfo['mpeg']['audio']['framelength'] = $framebytelength;
                 if ($ThisFileInfo['mpeg']['audio']['layer'] == 'I') {
                     // BitRate = (((FrameLengthInBytes / 4) - Padding) * SampleRate) / 12
-                    $ThisFileInfo['audio']['bitrate'] = ((($framebytelength / 4) - intval($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 12;
+                    $ThisFileInfo['audio']['bitrate'] = ((($framebytelength / 4) - (int) ($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 12;
                 } else {
                     // Bitrate = ((FrameLengthInBytes - Padding) * SampleRate) / 144
-                    $ThisFileInfo['audio']['bitrate'] = (($framebytelength - intval($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 144;
+                    $ThisFileInfo['audio']['bitrate'] = (($framebytelength - (int) ($ThisFileInfo['mpeg']['audio']['padding'])) * $ThisFileInfo['mpeg']['audio']['sample_rate']) / 144;
                 }
             } else {
                 $ThisFileInfo['error'] .= "\n".'Error calculating frame length of free-format MP3 without Xing/LAME header';
@@ -2359,7 +2338,6 @@ function RecursiveFrameScanning(&$fd, &$ThisFileInfo, &$offset, &$nextframetesto
                 return false;
             }
         } else {
-
             // next frame is not valid, note the error and fail, so scanning can contiue for a valid frame sequence
             $ThisFileInfo['error'] .= "\n".'Frame at offset ('.$offset.') is valid, but the next one at ('.$nextframetestoffset.') is not.';
 
@@ -2377,13 +2355,13 @@ function FreeFormatFrameLength($fd, $offset, &$ThisFileInfo, $deepscan = false)
 
     $SyncPattern1 = substr($MPEGaudioData, 0, 4);
     // may be different pattern due to padding
-    $SyncPattern2 = $SyncPattern1{0}
-    .$SyncPattern1{1}
-    .chr(ord($SyncPattern1{2}) | 0x02).$SyncPattern1{3};
+    $SyncPattern2 = $SyncPattern1[0]
+    .$SyncPattern1[1]
+    .chr(ord($SyncPattern1[2]) | 0x02).$SyncPattern1[3];
     if ($SyncPattern2 === $SyncPattern1) {
-        $SyncPattern2 = $SyncPattern1{0}
-        .$SyncPattern1{1}
-        .chr(ord($SyncPattern1{2}) & 0xFD).$SyncPattern1{3};
+        $SyncPattern2 = $SyncPattern1[0]
+        .$SyncPattern1[1]
+        .chr(ord($SyncPattern1[2]) & 0xFD).$SyncPattern1[3];
     }
 
     $framelength = false;
@@ -2396,7 +2374,6 @@ function FreeFormatFrameLength($fd, $offset, &$ThisFileInfo, $deepscan = false)
         $framelength = $framelength2;
     }
     if (!$framelength) {
-
         // LAME 3.88 has a different value for modeextension on the first frame vs the rest
         $framelength1 = strpos($MPEGaudioData, substr($SyncPattern1, 0, 3), 4);
         $framelength2 = strpos($MPEGaudioData, substr($SyncPattern2, 0, 3), 4);
@@ -2411,13 +2388,12 @@ function FreeFormatFrameLength($fd, $offset, &$ThisFileInfo, $deepscan = false)
             $ThisFileInfo['error'] .= "\n".'Cannot find next free-format synch pattern ('.PrintHexBytes($SyncPattern1).' or '.PrintHexBytes($SyncPattern2).') after offset '.$offset;
 
             return false;
-        } else {
-            $ThisFileInfo['warning'] .= "\n".'ModeExtension varies between first frame and other frames (known free-format issue in LAME 3.88)';
-            $ThisFileInfo['audio']['codec'] = 'LAME';
-            $ThisFileInfo['audio']['encoder'] = 'LAME3.88';
-            $SyncPattern1 = substr($SyncPattern1, 0, 3);
-            $SyncPattern2 = substr($SyncPattern2, 0, 3);
         }
+        $ThisFileInfo['warning'] .= "\n".'ModeExtension varies between first frame and other frames (known free-format issue in LAME 3.88)';
+        $ThisFileInfo['audio']['codec'] = 'LAME';
+        $ThisFileInfo['audio']['encoder'] = 'LAME3.88';
+        $SyncPattern1 = substr($SyncPattern1, 0, 3);
+        $SyncPattern2 = substr($SyncPattern2, 0, 3);
     }
 
     if ($deepscan) {
@@ -2476,7 +2452,7 @@ function getOnlyMPEGaudioInfo($fd, &$ThisFileInfo, $avdataoffset, $BitrateHistog
 
     $header_len = strlen($header) - round(32768 / 2);
     while (true) {
-        if (($SynchSeekOffset > $header_len) && (($avdataoffset + $SynchSeekOffset)  < $ThisFileInfo['avdataend']) && !feof($fd)) {
+        if (($SynchSeekOffset > $header_len) && (($avdataoffset + $SynchSeekOffset) < $ThisFileInfo['avdataend']) && !feof($fd)) {
             if ($SynchSeekOffset > 131072) {
                 // if a synch's not found within the first 128k bytes, then give up
                 $ThisFileInfo['error'] .= "\n".'could not find valid MPEG synch within the first 131072 bytes';
@@ -2492,7 +2468,6 @@ function getOnlyMPEGaudioInfo($fd, &$ThisFileInfo, $avdataoffset, $BitrateHistog
 
                 return false;
             } elseif ($header .= fread($fd, 32768)) {
-
                 // great
                 $header_len = strlen($header) - round(32768 / 2);
             } else {
@@ -2517,8 +2492,7 @@ function getOnlyMPEGaudioInfo($fd, &$ThisFileInfo, $avdataoffset, $BitrateHistog
             return false;
         }
 
-        if (($header{$SynchSeekOffset} == CONST_FF) && ($header{($SynchSeekOffset + 1)} > CONST_E0)) { // synch detected
-
+        if (($header[$SynchSeekOffset] == CONST_FF) && ($header[($SynchSeekOffset + 1)] > CONST_E0)) { // synch detected
             if (!isset($FirstFrameThisfileInfo) && !isset($ThisFileInfo['mpeg']['audio'])) {
                 $FirstFrameThisfileInfo = $ThisFileInfo;
                 $FirstFrameAVDataOffset = $avdataoffset + $SynchSeekOffset;
@@ -2857,18 +2831,18 @@ function MPEGaudioHeaderDecode($Header4Bytes)
     }
 
     $MPEGrawHeader['synch'] = (BigEndian2Int(substr($Header4Bytes, 0, 2)) & 0xFFE0) >> 4;
-    $MPEGrawHeader['version'] = (ord($Header4Bytes{1}) & 0x18) >> 3; //    BB
-    $MPEGrawHeader['layer'] = (ord($Header4Bytes{1}) & 0x06) >> 1; //      CC
-    $MPEGrawHeader['protection'] = (ord($Header4Bytes{1}) & 0x01);      //        D
-    $MPEGrawHeader['bitrate'] = (ord($Header4Bytes{2}) & 0xF0) >> 4; // EEEE
-    $MPEGrawHeader['sample_rate'] = (ord($Header4Bytes{2}) & 0x0C) >> 2; //     FF
-    $MPEGrawHeader['padding'] = (ord($Header4Bytes{2}) & 0x02) >> 1; //       G
-    $MPEGrawHeader['private'] = (ord($Header4Bytes{2}) & 0x01);      //        H
-    $MPEGrawHeader['channelmode'] = (ord($Header4Bytes{3}) & 0xC0) >> 6; // II
-    $MPEGrawHeader['modeextension'] = (ord($Header4Bytes{3}) & 0x30) >> 4; //   JJ
-    $MPEGrawHeader['copyright'] = (ord($Header4Bytes{3}) & 0x08) >> 3; //     K
-    $MPEGrawHeader['original'] = (ord($Header4Bytes{3}) & 0x04) >> 2; //      L
-    $MPEGrawHeader['emphasis'] = (ord($Header4Bytes{3}) & 0x03);      //       MM
+    $MPEGrawHeader['version'] = (ord($Header4Bytes[1]) & 0x18) >> 3; //    BB
+    $MPEGrawHeader['layer'] = (ord($Header4Bytes[1]) & 0x06) >> 1; //      CC
+    $MPEGrawHeader['protection'] = (ord($Header4Bytes[1]) & 0x01);      //        D
+    $MPEGrawHeader['bitrate'] = (ord($Header4Bytes[2]) & 0xF0) >> 4; // EEEE
+    $MPEGrawHeader['sample_rate'] = (ord($Header4Bytes[2]) & 0x0C) >> 2; //     FF
+    $MPEGrawHeader['padding'] = (ord($Header4Bytes[2]) & 0x02) >> 1; //       G
+    $MPEGrawHeader['private'] = (ord($Header4Bytes[2]) & 0x01);      //        H
+    $MPEGrawHeader['channelmode'] = (ord($Header4Bytes[3]) & 0xC0) >> 6; // II
+    $MPEGrawHeader['modeextension'] = (ord($Header4Bytes[3]) & 0x30) >> 4; //   JJ
+    $MPEGrawHeader['copyright'] = (ord($Header4Bytes[3]) & 0x08) >> 3; //     K
+    $MPEGrawHeader['original'] = (ord($Header4Bytes[3]) & 0x04) >> 2; //      L
+    $MPEGrawHeader['emphasis'] = (ord($Header4Bytes[3]) & 0x03);      //       MM
 
     return $MPEGrawHeader;
 }
@@ -2882,30 +2856,24 @@ function MPEGaudioFrameLength(&$bitrate, &$version, &$layer, $padding, &$sampler
         if ($bitrate != 'free') {
             if ($version == '1') {
                 if ($layer == 'I') {
-
                     // For Layer I slot is 32 bits long
                     $FrameLengthCoefficient = 48;
                     $SlotLength = 4;
                 } else { // Layer II / III
-
                     // for Layer II and Layer III slot is 8 bits long.
                     $FrameLengthCoefficient = 144;
                     $SlotLength = 1;
                 }
             } else { // MPEG-2 / MPEG-2.5
-
                 if ($layer == 'I') {
-
                     // For Layer I slot is 32 bits long
                     $FrameLengthCoefficient = 24;
                     $SlotLength = 4;
                 } elseif ($layer == 'II') {
-
                     // for Layer II and Layer III slot is 8 bits long.
                     $FrameLengthCoefficient = 144;
                     $SlotLength = 1;
                 } else { // III
-
                     // for Layer II and Layer III slot is 8 bits long.
                     $FrameLengthCoefficient = 72;
                     $SlotLength = 1;
@@ -2941,7 +2909,7 @@ function LAMEvbrMethodLookup($VBRmethodID)
         $LAMEvbrMethodLookup[0x05] = 'vbr-new / vbr-mt';
     }
 
-    return (isset($LAMEvbrMethodLookup[$VBRmethodID]) ? $LAMEvbrMethodLookup[$VBRmethodID] : '');
+    return isset($LAMEvbrMethodLookup[$VBRmethodID]) ? $LAMEvbrMethodLookup[$VBRmethodID] : '';
 }
 
 function LAMEmiscStereoModeLookup($StereoModeID)
@@ -2958,7 +2926,7 @@ function LAMEmiscStereoModeLookup($StereoModeID)
         $LAMEmiscStereoModeLookup[7] = 'other';
     }
 
-    return (isset($LAMEmiscStereoModeLookup[$StereoModeID]) ? $LAMEmiscStereoModeLookup[$StereoModeID] : '');
+    return isset($LAMEmiscStereoModeLookup[$StereoModeID]) ? $LAMEmiscStereoModeLookup[$StereoModeID] : '';
 }
 
 function LAMEmiscSourceSampleFrequencyLookup($SourceSampleFrequencyID)
@@ -2971,7 +2939,7 @@ function LAMEmiscSourceSampleFrequencyLookup($SourceSampleFrequencyID)
         $LAMEmiscSourceSampleFrequencyLookup[3] = '> 48kHz';
     }
 
-    return (isset($LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID]) ? $LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID] : '');
+    return isset($LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID]) ? $LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID] : '';
 }
 
 function LAMEsurroundInfoLookup($SurroundInfoID)
@@ -2984,7 +2952,7 @@ function LAMEsurroundInfoLookup($SurroundInfoID)
         $LAMEsurroundInfoLookup[3] = 'Ambisonic encoding';
     }
 
-    return (isset($LAMEsurroundInfoLookup[$SurroundInfoID]) ? $LAMEsurroundInfoLookup[$SurroundInfoID] : 'reserved');
+    return isset($LAMEsurroundInfoLookup[$SurroundInfoID]) ? $LAMEsurroundInfoLookup[$SurroundInfoID] : 'reserved';
 }
 
 for ($i = 0x00; $i <= 0xFF; ++$i) {

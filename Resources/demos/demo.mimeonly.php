@@ -45,7 +45,6 @@ function GetMIMEtype($filename)
     if ($fp = fopen($filename, 'rb')) {
         $getID3->openfile($filename);
         if (empty($getID3->info['error'])) {
-
             // ID3v2 is the only tag format that might be prepended in front of files, and it's non-trivial to skip, easier just to parse it and know where to skip to
             getid3_lib::IncludeDependency(GETID3_INCLUDEPATH.'module.tag.id3v2.php', __FILE__, true);
             $getid3_id3v2 = new GetId3\Module\Tag\Id3v2($getID3);

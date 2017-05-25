@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Mpc extends BaseHandler
 {
@@ -49,30 +58,24 @@ class Mpc extends BaseHandler
         $MPCheaderData = fread($this->getid3->fp, 4);
         $info['mpc']['header']['preamble'] = substr($MPCheaderData, 0, 4); // should be 'MPCK' (SV8) or 'MP+' (SV7), otherwise possible stream data (SV4-SV6)
         if (preg_match('#^MPCK#', $info['mpc']['header']['preamble'])) {
-
             // this is SV8
             return $this->ParseMPCsv8();
         } elseif (preg_match('#^MP\+#', $info['mpc']['header']['preamble'])) {
-
             // this is SV7
             return $this->ParseMPCsv7();
         } elseif (preg_match('/^[\x00\x01\x10\x11\x40\x41\x50\x51\x80\x81\x90\x91\xC0\xC1\xD0\xD1][\x20-37][\x00\x20\x40\x60\x80\xA0\xC0\xE0]/s', $MPCheaderData)) {
-
             // this is SV4 - SV6, handle seperately
             return $this->ParseMPCsv6();
-        } else {
-            $info['error'][] = 'Expecting "MP+" or "MPCK" at offset '.$info['avdataoffset'].', found "'.Helper::PrintHexBytes(substr($MPCheaderData, 0, 4)).'"';
-            unset($info['fileformat']);
-            unset($info['mpc']);
-
-            return false;
         }
+        $info['error'][] = 'Expecting "MP+" or "MPCK" at offset '.$info['avdataoffset'].', found "'.Helper::PrintHexBytes(substr($MPCheaderData, 0, 4)).'"';
+        unset($info['fileformat']);
+        unset($info['mpc']);
 
         return false;
     }
 
     /**
-     * @link http://trac.musepack.net/trac/wiki/SV8Specification
+     * @see http://trac.musepack.net/trac/wiki/SV8Specification
      */
     public function ParseMPCsv8()
     {
@@ -133,10 +136,10 @@ class Mpc extends BaseHandler
                     $otherUsefulData = Helper::BigEndian2Int(substr($MPCheaderData, $packet_offset, 2));
                     $packet_offset += 2;
                     $thisPacket['sample_frequency_raw'] = (($otherUsefulData & 0xE000) >> 13);
-                    $thisPacket['max_bands_used'] = (($otherUsefulData & 0x1F00) >>  8);
-                    $thisPacket['channels'] = (($otherUsefulData & 0x00F0) >>  4) + 1;
-                    $thisPacket['ms_used'] = (bool) (($otherUsefulData & 0x0008) >>  3);
-                    $thisPacket['audio_block_frames'] = (($otherUsefulData & 0x0007) >>  0);
+                    $thisPacket['max_bands_used'] = (($otherUsefulData & 0x1F00) >> 8);
+                    $thisPacket['channels'] = (($otherUsefulData & 0x00F0) >> 4) + 1;
+                    $thisPacket['ms_used'] = (bool) (($otherUsefulData & 0x0008) >> 3);
+                    $thisPacket['audio_block_frames'] = (($otherUsefulData & 0x0007) >> 0);
                     $thisPacket['sample_frequency'] = $this->MPCfrequencyLookup($thisPacket['sample_frequency_raw']);
 
                     $thisfile_mpc_header['mid_side_stereo'] = $thisPacket['ms_used'];
@@ -149,7 +152,6 @@ class Mpc extends BaseHandler
                     $info['playtime_seconds'] = $thisPacket['sample_count'] / $thisPacket['sample_frequency'];
                     $info['audio']['bitrate'] = (($info['avdataend'] - $info['avdataoffset']) * 8) / $info['playtime_seconds'];
                     break;
-
                 case 'RG': // Replay Gain
                     $moreBytesToRead = $thisPacket['packet_size'] - $keyNameSize - $maxHandledPacketLength;
                     if ($moreBytesToRead > 0) {
@@ -179,7 +181,6 @@ class Mpc extends BaseHandler
                         $info['replay_gain']['album']['peak'] = $thisPacket['replaygain_album_peak'];
                     }
                     break;
-
                 case 'EI': // Encoder Info
                     $moreBytesToRead = $thisPacket['packet_size'] - $keyNameSize - $maxHandledPacketLength;
                     if ($moreBytesToRead > 0) {
@@ -204,25 +205,21 @@ class Mpc extends BaseHandler
                     //$thisfile_mpc_header['quality']         = (float) ($thisPacket['quality'] / 1.5875); // values can range from 0.000 to 15.875, mapped to qualities of 0.0 to 10.0
                     $thisfile_mpc_header['quality'] = (float) ($thisPacket['quality'] - 5); // values can range from 0.000 to 15.875, of which 0..4 are "reserved/experimental", and 5..15 are mapped to qualities of 0.0 to 10.0
                     break;
-
                 case 'SO': // Seek Table Offset
                     $packetLength = 0;
                     $thisPacket['seek_table_offset'] = $thisPacket['offset'] + $this->SV8variableLengthInteger(substr($MPCheaderData, $packet_offset, $maxHandledPacketLength), $packetLength);
                     $packet_offset += $packetLength;
                     break;
-
                 case 'ST': // Seek Table
                 case 'SE': // Stream End
                 case 'AP': // Audio Data
                     // nothing useful here, just skip this packet
                     $thisPacket = array();
                     break;
-
                 default:
                     $info['error'][] = 'Found unhandled key type "'.$thisPacket['key'].'" at offset '.$thisPacket['offset'];
 
                     return false;
-                    break;
             }
             if (!empty($thisPacket)) {
                 $info['mpc']['packets'][] = $thisPacket;
@@ -237,7 +234,7 @@ class Mpc extends BaseHandler
     /**
      * @return bool
      *
-     * @link http://www.uni-jena.de/~pfk/mpp/sv8/header.html
+     * @see http://www.uni-jena.de/~pfk/mpp/sv8/header.html
      */
     public function ParseMPCsv7()
     {
@@ -392,25 +389,22 @@ class Mpc extends BaseHandler
         $thisfile_mpc_header['mid_side_stereo'] = (bool) (($HeaderDWORD[0] & 0x00200000) >> 21);
         $thisfile_mpc_header['stream_version_major'] = ($HeaderDWORD[0] & 0x001FF800) >> 11;
         $thisfile_mpc_header['stream_version_minor'] = 0; // no sub-version numbers before SV7
-        $thisfile_mpc_header['max_band'] = ($HeaderDWORD[0] & 0x000007C0) >>  6;  // related to lowpass frequency, not sure how it translates exactly
+        $thisfile_mpc_header['max_band'] = ($HeaderDWORD[0] & 0x000007C0) >> 6;  // related to lowpass frequency, not sure how it translates exactly
         $thisfile_mpc_header['block_size'] = ($HeaderDWORD[0] & 0x0000003F);
 
         switch ($thisfile_mpc_header['stream_version_major']) {
             case 4:
                 $thisfile_mpc_header['frame_count'] = ($HeaderDWORD[1] >> 16);
                 break;
-
             case 5:
             case 6:
                 $thisfile_mpc_header['frame_count'] = $HeaderDWORD[1];
                 break;
-
             default:
                 $info['error'] = 'Expecting 4, 5 or 6 in version field, found '.$thisfile_mpc_header['stream_version_major'].' instead';
                 unset($info['mpc']);
 
                 return false;
-                break;
         }
 
         if (($thisfile_mpc_header['stream_version_major'] > 4) && ($thisfile_mpc_header['block_size'] != 1)) {
@@ -462,7 +456,7 @@ class Mpc extends BaseHandler
             15 => 'above BrainDead (q = 10.0)',
         );
 
-        return (isset($MPCprofileNameLookup[$profileid]) ? $MPCprofileNameLookup[$profileid] : 'invalid');
+        return isset($MPCprofileNameLookup[$profileid]) ? $MPCprofileNameLookup[$profileid] : 'invalid';
     }
 
     /**
@@ -481,7 +475,7 @@ class Mpc extends BaseHandler
             3 => 32000,
         );
 
-        return (isset($MPCfrequencyLookup[$frequencyid]) ? $MPCfrequencyLookup[$frequencyid] : 'invalid');
+        return isset($MPCfrequencyLookup[$frequencyid]) ? $MPCfrequencyLookup[$frequencyid] : 'invalid';
     }
 
     /**
@@ -516,11 +510,9 @@ class Mpc extends BaseHandler
         }
 
         if (($encoderversion % 10) == 0) {
-
             // release version
             return number_format($encoderversion / 100, 2);
         } elseif (($encoderversion % 2) == 0) {
-
             // beta version
             return number_format($encoderversion / 100, 2).' beta';
         }
@@ -585,6 +577,6 @@ class Mpc extends BaseHandler
             );
         }
 
-        return (isset($MPCsv8PacketName[$packetKey]) ? $MPCsv8PacketName[$packetKey] : $packetKey);
+        return isset($MPCsv8PacketName[$packetKey]) ? $MPCsv8PacketName[$packetKey] : $packetKey;
     }
 }

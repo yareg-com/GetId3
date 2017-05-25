@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Tag;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -25,10 +34,10 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Tag\Apetag
+ * @uses \GetId3\Module\Tag\Apetag
  */
 class Lyrics3 extends BaseHandler
 {
@@ -74,7 +83,6 @@ class Lyrics3 extends BaseHandler
             $lyrics3version = 1;
             $lyrics3offset = $info['filesize'] - $lyrics3size;
         } elseif (substr(strrev($lyrics3_id3v1), 0, 9) == strrev('LYRICS200')) {
-
             // Lyrics3v2, no ID3v1, no APE
 
             $lyrics3size = strrev(substr(strrev($lyrics3_id3v1), 9, 6)) + 6 + strlen('LYRICS200'); // LSZ = lyrics + 'LYRICSBEGIN'; add 6-byte size field; add 'LYRICS200'
@@ -139,7 +147,7 @@ class Lyrics3 extends BaseHandler
      *
      * @return bool
      *
-     * @link http://www.volweb.cz/str/tags.htm
+     * @see http://www.volweb.cz/str/tags.htm
      */
     public function getLyrics3Data($endoffset, $version, $length)
     {
@@ -178,7 +186,6 @@ class Lyrics3 extends BaseHandler
         }
 
         switch ($version) {
-
             case 1:
                 if (substr($rawdata, strlen($rawdata) - 9, 9) == 'LYRICSEND') {
                     $ParsedLyrics3['raw']['LYR'] = trim(substr($rawdata, 11, strlen($rawdata) - 11 - 9));
@@ -189,7 +196,6 @@ class Lyrics3 extends BaseHandler
                     return false;
                 }
                 break;
-
             case 2:
                 if (substr($rawdata, strlen($rawdata) - 9, 9) == 'LYRICS200') {
                     $ParsedLyrics3['raw']['unparsed'] = substr($rawdata, 11, strlen($rawdata) - 11 - 9 - 6); // LYRICSBEGIN + LYRICS200 + LSZ
@@ -238,7 +244,6 @@ class Lyrics3 extends BaseHandler
                     return false;
                 }
                 break;
-
             default:
                 $info['error'][] = 'Cannot process Lyrics3 version '.$version.' (only v1 and v2)';
 
@@ -326,7 +331,5 @@ class Lyrics3 extends BaseHandler
         } elseif ($char == '0') {
             return false;
         }
-
-        return;
     }
 }

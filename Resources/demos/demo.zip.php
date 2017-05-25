@@ -1,6 +1,14 @@
 <?php
 
-/////////////////////////////////////////////////////////////////
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 /// getID3() by James Heinrich <info@getid3.org>               //
 //  available at http://getid3.sourceforge.net                 //
 //            or http://www.getid3.org                         //
@@ -50,7 +58,6 @@ function UnzipFileContents($filename, &$errors)
                                 // store - great, do nothing at all
                                 $uncompressedFileData = $compressedFileData;
                                 break;
-
                             case 8:
                                 ob_start();
                                 $uncompressedFileData = gzinflate($compressedFileData);
@@ -61,7 +68,6 @@ function UnzipFileContents($filename, &$errors)
                                     continue 2;
                                 }
                                 break;
-
                             default:
                                 $DecompressedFileContents[$valuearray['filename']] = '';
                                 $errors[] = 'unknown ZIP compression method ('.$LocalFileHeader['raw']['compression_method'].')';

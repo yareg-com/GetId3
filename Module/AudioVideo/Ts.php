@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Ts extends BaseHandler
 {
@@ -60,10 +69,10 @@ class Ts extends BaseHandler
         $info['ts']['packet']['flags']['transport_high_priority'] = (bool) ($pid_flags_raw & 0x2000);      // 1 means higher priority than other packets with the same PID.
         $info['ts']['packet']['packet_id'] = ($pid_flags_raw & 0x1FFF) >> 0;
 
-        $info['ts']['packet']['raw']['scrambling_control'] = ($SAC_raw &   0xC0) >> 6;
-        $info['ts']['packet']['flags']['adaption_field_exists'] = (bool) ($SAC_raw &   0x20);
-        $info['ts']['packet']['flags']['payload_exists'] = (bool) ($SAC_raw &   0x10);
-        $info['ts']['packet']['continuity_counter'] = ($SAC_raw &   0x0F) >> 0; // Incremented only when a payload is present
+        $info['ts']['packet']['raw']['scrambling_control'] = ($SAC_raw & 0xC0) >> 6;
+        $info['ts']['packet']['flags']['adaption_field_exists'] = (bool) ($SAC_raw & 0x20);
+        $info['ts']['packet']['flags']['payload_exists'] = (bool) ($SAC_raw & 0x10);
+        $info['ts']['packet']['continuity_counter'] = ($SAC_raw & 0x0F) >> 0; // Incremented only when a payload is present
         $info['ts']['packet']['scrambling_control'] = $this->TSscramblingControlLookup($info['ts']['packet']['raw']['scrambling_control']);
 
         if ($info['ts']['packet']['flags']['adaption_field_exists']) {
@@ -102,6 +111,6 @@ class Ts extends BaseHandler
     {
         $TSscramblingControlLookup = array(0x00 => 'not scrambled', 0x01 => 'reserved', 0x02 => 'scrambled, even key', 0x03 => 'scrambled, odd key');
 
-        return (isset($TSscramblingControlLookup[$raw]) ? $TSscramblingControlLookup[$raw] : 'invalid');
+        return isset($TSscramblingControlLookup[$raw]) ? $TSscramblingControlLookup[$raw] : 'invalid';
     }
 }
