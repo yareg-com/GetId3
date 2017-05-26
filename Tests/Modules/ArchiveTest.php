@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Tests\Modules;
 
 use GetId3\GetId3Core;
@@ -52,10 +61,10 @@ class ArchiveTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayNotHasKey('error', $archive);
         $this->assertArrayHasKey('mime_type', $archive);
-        $this->assertEquals('application/zip', $archive['mime_type']);
+        $this->assertSame('application/zip', $archive['mime_type']);
         $this->assertArrayHasKey('zip', $archive);
         $this->assertArrayHasKey('fileformat', $archive);
-        $this->assertEquals('zip', $archive['fileformat']);
+        $this->assertSame('zip', $archive['fileformat']);
         $this->assertArrayHasKey('encoding', $archive['zip']);
         $this->assertArrayHasKey('files', $archive['zip']);
         $this->assertArrayHasKey('entries_count', $archive['zip']);

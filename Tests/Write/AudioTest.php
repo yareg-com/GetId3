@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Tests\Write;
 
 use GetId3\GetId3Core;
@@ -95,17 +104,17 @@ class AudioTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('mp3', $audio['audio']['dataformat']);
+        $this->assertSame('mp3', $audio['audio']['dataformat']);
         $this->assertArrayHasKey('tags', $audio);
         $this->assertArrayHasKey('id3v1', $audio['tags']);
         $this->assertArrayHasKey('id3v2', $audio['tags']);
 
         $this->assertArrayHasKey('title', $audio['tags']['id3v1']);
         $this->assertArrayHasKey(0, $audio['tags']['id3v1']['title']);
-        $this->assertEquals($tagData['title'][0], $audio['tags']['id3v1']['title'][0]);
+        $this->assertSame($tagData['title'][0], $audio['tags']['id3v1']['title'][0]);
 
         $this->assertArrayHasKey('title', $audio['tags']['id3v2']);
         $this->assertArrayHasKey(0, $audio['tags']['id3v2']['title']);
-        $this->assertEquals($tagData['title'][0], $audio['tags']['id3v2']['title'][0]);
+        $this->assertSame($tagData['title'][0], $audio['tags']['id3v2']['title'][0]);
     }
 }

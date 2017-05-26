@@ -42,9 +42,9 @@ while (($file = readdir($dir)) !== false) {
         echo '<tr>';
         echo '<td>'.$ThisFileInfo['filenamepath'].'</TD>';
         echo '<td>'.(!empty($ThisFileInfo['comments_html']['artist']) ? implode('<BR>', $ThisFileInfo['comments_html']['artist']) : '&nbsp;').'</td>';
-        echo '<td>'.(!empty($ThisFileInfo['comments_html']['title'])  ? implode('<BR>', $ThisFileInfo['comments_html']['title'])  : '&nbsp;').'</td>';
-        echo '<td align="right">'.(!empty($ThisFileInfo['audio']['bitrate'])        ? round($ThisFileInfo['audio']['bitrate'] / 1000).' kbps'   : '&nbsp;').'</td>';
-        echo '<td align="right">'.(!empty($ThisFileInfo['playtime_string'])         ? $ThisFileInfo['playtime_string']                          : '&nbsp;').'</td>';
+        echo '<td>'.(!empty($ThisFileInfo['comments_html']['title']) ? implode('<BR>', $ThisFileInfo['comments_html']['title']) : '&nbsp;').'</td>';
+        echo '<td align="right">'.(!empty($ThisFileInfo['audio']['bitrate']) ? round($ThisFileInfo['audio']['bitrate'] / 1000).' kbps' : '&nbsp;').'</td>';
+        echo '<td align="right">'.(!empty($ThisFileInfo['playtime_string']) ? $ThisFileInfo['playtime_string'] : '&nbsp;').'</td>';
         echo '</tr>';
     }
 }

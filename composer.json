@@ -13,13 +13,27 @@
         }
     ],
     "require": {
-        "php": "~5.3"
+        "php": ">=5.3.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=4.8,<5.4.3"
     },
     "suggest": {
         "ext-rar": "RAR extension is required for RAR archive module.",
-        "ext-exif": "EXIF extension is required for graphic modules."
+        "ext-exif": "EXIF extension is required for graphic modules.",
+        "ext-mysqli": "MySQLi extension is required in order to use MySQL database as cache storage.",
+        "ext-sqlite": "SQLite extension is required in order to use SQLite database as cache storage.",
+        "ext-dba": "DBA extension is required in order to use DBA database as cache storage."
+    },
+    "conflict": {
+        "james-heinrich/getid3": "*"
     },
     "autoload": {
         "psr-4": { "GetId3\\": "" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.1-dev"
+        }
     }
 }

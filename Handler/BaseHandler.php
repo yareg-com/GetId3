@@ -1,24 +1,25 @@
 <?php
 
-/**
- * GetId3() by James Heinrich <info@getid3.org>
- * available at http://getid3.sourceforge.net
- * or http://www.getid3.org
+/*
+ * This file is part of GetID3.
  *
- * Please see readme.txt for more information
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace GetId3\Handler;
 
-use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Exception\DefaultException;
+use GetId3\GetId3Core;
+use GetId3\Lib\Helper;
 
 /**
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 abstract class BaseHandler
 {
@@ -111,116 +112,14 @@ abstract class BaseHandler
     }
 
     /**
-     * @return type
-     */
-    protected function ftell()
-    {
-        if ($this->getDataStringFlag()) {
-            return $this->getDataStringPosition();
-        }
-
-        return ftell($this->getGetId3()->getFp());
-    }
-
-    /**
-     * @param  type $bytes
-     *
-     * @return type
-     */
-    protected function fread($bytes)
-    {
-        if ($this->getDataStringFlag()) {
-            $this->setDataStringPosition($this->getDataStringPosition() + $bytes);
-
-            return substr($this->getDataString(),
-                          $this->getDataStringPosition() - $bytes, $bytes);
-        }
-
-        return fread($this->getGetId3()->getFp(), $bytes);
-    }
-
-    /**
-     * @param  type $bytes
-     * @param  type $whence
-     *
-     * @return int
-     */
-    protected function fseek($bytes, $whence = SEEK_SET)
-    {
-        if ($this->getDataStringFlag()) {
-            switch ($whence) {
-                case SEEK_SET:
-                    $this->setDataStringPosition($bytes);
-                    break;
-
-                case SEEK_CUR:
-                    $this->setDataStringPosition($this->getDataStringPosition() + $bytes);
-                    break;
-
-                case SEEK_END:
-                    $this->setDataStringPosition($this->getDataStringLength() + $bytes);
-                    break;
-            }
-
-            return 0;
-        }
-
-        return fseek($this->getGetId3()->getFp(), $bytes, $whence);
-    }
-
-    /**
-     * @return type
-     */
-    protected function feof()
-    {
-        if ($this->getDataStringFlag()) {
-            return $this->getDataStringPosition() >= $this->getDataStringLength();
-        }
-
-        return feof($this->getGetId3()->getFp());
-    }
-
-    /**
-     * @param  type $module
-     *
-     * @return type
-     */
-    final protected function isDependencyFor($module)
-    {
-        return $this->dependency_to == $module;
-    }
-
-    /**
-     * @param  string  $text
-     *
-     * @return bool
-     */
-    protected function error($text)
-    {
-        $this->getGetId3()->info['error'][] = $text;
-
-        return false;
-    }
-
-    /**
-     * @param  string  $text
-     *
-     * @return bool
-     */
-    protected function warning($text)
-    {
-        return $this->getGetId3()->warning($text);
-    }
-
-    /**
      * @param  type      $ThisFileInfoIndex
      * @param  type      $filename
      * @param  type      $offset
      * @param  type      $length
      *
-     * @return bool
-     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function saveAttachment(&$ThisFileInfoIndex, $filename, $offset,
                                    $length)
@@ -339,5 +238,105 @@ abstract class BaseHandler
     public function setDataStringLength($data_string_length)
     {
         $this->data_string_length = $data_string_length;
+    }
+
+    /**
+     * @return type
+     */
+    protected function ftell()
+    {
+        if ($this->getDataStringFlag()) {
+            return $this->getDataStringPosition();
+        }
+
+        return ftell($this->getGetId3()->getFp());
+    }
+
+    /**
+     * @param  type $bytes
+     *
+     * @return type
+     */
+    protected function fread($bytes)
+    {
+        if ($this->getDataStringFlag()) {
+            $this->setDataStringPosition($this->getDataStringPosition() + $bytes);
+
+            return substr($this->getDataString(),
+                          $this->getDataStringPosition() - $bytes, $bytes);
+        }
+
+        return fread($this->getGetId3()->getFp(), $bytes);
+    }
+
+    /**
+     * @param  type $bytes
+     * @param  type $whence
+     *
+     * @return int
+     */
+    protected function fseek($bytes, $whence = SEEK_SET)
+    {
+        if ($this->getDataStringFlag()) {
+            switch ($whence) {
+                case SEEK_SET:
+                    $this->setDataStringPosition($bytes);
+                    break;
+                case SEEK_CUR:
+                    $this->setDataStringPosition($this->getDataStringPosition() + $bytes);
+                    break;
+                case SEEK_END:
+                    $this->setDataStringPosition($this->getDataStringLength() + $bytes);
+                    break;
+            }
+
+            return 0;
+        }
+
+        return fseek($this->getGetId3()->getFp(), $bytes, $whence);
+    }
+
+    /**
+     * @return type
+     */
+    protected function feof()
+    {
+        if ($this->getDataStringFlag()) {
+            return $this->getDataStringPosition() >= $this->getDataStringLength();
+        }
+
+        return feof($this->getGetId3()->getFp());
+    }
+
+    /**
+     * @param  type $module
+     *
+     * @return type
+     */
+    final protected function isDependencyFor($module)
+    {
+        return $this->dependency_to == $module;
+    }
+
+    /**
+     * @param  string  $text
+     *
+     * @return bool
+     */
+    protected function error($text)
+    {
+        $this->getGetId3()->info['error'][] = $text;
+
+        return false;
+    }
+
+    /**
+     * @param  string  $text
+     *
+     * @return bool
+     */
+    protected function warning($text)
+    {
+        return $this->getGetId3()->warning($text);
     }
 }

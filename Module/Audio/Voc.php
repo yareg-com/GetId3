@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Voc extends BaseHandler
 {
@@ -74,7 +83,7 @@ class Voc extends BaseHandler
         do {
             $BlockOffset = ftell($this->getid3->fp);
             $BlockData = fread($this->getid3->fp, 4);
-            $BlockType = ord($BlockData{0});
+            $BlockType = ord($BlockData[0]);
             $BlockSize = Helper::LittleEndian2Int(substr($BlockData, 1, 3));
             $ThisBlock = array();
 
@@ -83,7 +92,6 @@ class Voc extends BaseHandler
                 case 0:  // Terminator
                     // do nothing, we'll break out of the loop down below
                     break;
-
                 case 1:  // Sound data
                     $BlockData .= fread($this->getid3->fp, 2);
                     if ($info['avdataoffset'] <= $OriginalAVdataOffset) {
@@ -105,7 +113,6 @@ class Voc extends BaseHandler
                         $thisfile_audio['sample_rate'] = Helper::trunc((1000000 / (256 - $ThisBlock['sample_rate_id'])) / $thisfile_audio['channels']);
                     }
                     break;
-
                 case 2:  // Sound continue
                 case 3:  // Silence
                 case 4:  // Marker
@@ -114,7 +121,6 @@ class Voc extends BaseHandler
                     // nothing useful, just skip
                     fseek($this->getid3->fp, $BlockSize, SEEK_CUR);
                     break;
-
                 case 8:  // Extended
                     $BlockData .= fread($this->getid3->fp, 4);
 
@@ -128,7 +134,6 @@ class Voc extends BaseHandler
                     $thisfile_audio['channels'] = ($ThisBlock['stereo'] ? 2 : 1);
                     $thisfile_audio['sample_rate'] = Helper::trunc((256000000 / (65536 - $ThisBlock['time_constant'])) / $thisfile_audio['channels']);
                     break;
-
                 case 9:  // data block that supersedes blocks 1 and 8. Used for stereo, 16 bit
                     $BlockData .= fread($this->getid3->fp, 12);
                     if ($info['avdataoffset'] <= $OriginalAVdataOffset) {
@@ -150,7 +155,6 @@ class Voc extends BaseHandler
                     $thisfile_audio['bits_per_sample'] = $ThisBlock['bits_per_sample'];
                     $thisfile_audio['channels'] = $ThisBlock['channels'];
                     break;
-
                 default:
                     $info['warning'][] = 'Unhandled block type "'.$BlockType.'" at offset '.$BlockOffset;
                     fseek($this->getid3->fp, $BlockSize, SEEK_CUR);
@@ -194,7 +198,7 @@ class Voc extends BaseHandler
             3 => '2-bit',
         );
 
-        return (isset($VOCcompressionTypeLookup[$index]) ? $VOCcompressionTypeLookup[$index] : 'Multi DAC ('.($index - 3).') channels');
+        return isset($VOCcompressionTypeLookup[$index]) ? $VOCcompressionTypeLookup[$index] : 'Multi DAC ('.($index - 3).') channels';
     }
 
     /**
@@ -217,7 +221,7 @@ class Voc extends BaseHandler
             0x2000 => 'Creative 16-bit to 4-bit ADPCM',
         );
 
-        return (isset($VOCwFormatLookup[$index]) ? $VOCwFormatLookup[$index] : false);
+        return isset($VOCwFormatLookup[$index]) ? $VOCwFormatLookup[$index] : false;
     }
 
     /**
@@ -240,6 +244,6 @@ class Voc extends BaseHandler
             0x2000 => 4,
         );
 
-        return (isset($VOCwFormatLookup[$index]) ? $VOCwFormatLookup[$index] : false);
+        return isset($VOCwFormatLookup[$index]) ? $VOCwFormatLookup[$index] : false;
     }
 }

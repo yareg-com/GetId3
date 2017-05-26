@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module;
 
 /////////////////////////////////////////////////////////////////
@@ -26,10 +35,10 @@ use GetId3\Module;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses Module\Audio\Mp3
+ * @uses \Module\Audio\Mp3
  */
 class Quicktime extends BaseHandler
 {
@@ -128,13 +137,11 @@ class Quicktime extends BaseHandler
                         unset($OldAVDataEnd);
                     }
                     break;
-
                 case 'free': // FREE space atom
                 case 'skip': // SKIP atom
                 case 'wide': // 64-bit expansion placeholder atom
                     // 'free', 'skip' and 'wide' are just padding, contains no useful data at all
                     break;
-
                 default:
                     $atomHierarchy = array();
                     $info['quicktime'][$atomname] = $this->QuicktimeParseAtom($atomname, $atomsize, fread($this->getid3->fp, $atomsize), $offset, $atomHierarchy, $this->ParseAllPossibleAtoms);
@@ -199,7 +206,7 @@ class Quicktime extends BaseHandler
      *
      * @return bool
      *
-     * @link http://developer.apple.com/techpubs/quicktime/qtdevdocs/APIREF/INDEX/atomalphaindex.htm
+     * @see http://developer.apple.com/techpubs/quicktime/qtdevdocs/APIREF/INDEX/atomalphaindex.htm
      */
     public function QuicktimeParseAtom($atomname, $atomsize, $atom_data, $baseoffset, &$atomHierarchy, $ParseAllPossibleAtoms)
     {
@@ -230,7 +237,6 @@ class Quicktime extends BaseHandler
             case 'gmhd': // Generic Media info HeaDer atom (seen on QTVR)
                 $atom_structure['subatoms'] = $this->QuicktimeParseContainerAtom($atom_data, $baseoffset + 8, $atomHierarchy, $ParseAllPossibleAtoms);
                 break;
-
             case 'ilst': // Item LiST container atom
                 $atom_structure['subatoms'] = $this->QuicktimeParseContainerAtom($atom_data, $baseoffset + 8, $atomHierarchy, $ParseAllPossibleAtoms);
 
@@ -255,7 +261,6 @@ class Quicktime extends BaseHandler
                     unset($atom_structure['subatoms']);
                 }
                 break;
-
             case "\x00\x00\x00\x01":
             case "\x00\x00\x00\x02":
             case "\x00\x00\x00\x03":
@@ -265,7 +270,6 @@ class Quicktime extends BaseHandler
                 $atom_structure['name'] = $atomname;
                 $atom_structure['subatoms'] = $this->QuicktimeParseContainerAtom($atom_data, $baseoffset + 8, $atomHierarchy, $ParseAllPossibleAtoms);
                 break;
-
             case 'stbl': // Sample TaBLe container atom
                 $atom_structure['subatoms'] = $this->QuicktimeParseContainerAtom($atom_data, $baseoffset + 8, $atomHierarchy, $ParseAllPossibleAtoms);
                 $isVideo = false;
@@ -304,7 +308,6 @@ class Quicktime extends BaseHandler
                     $info['quicktime']['video']['frame_count'] = $framecount;
                 }
                 break;
-
             case 'aART': // Album ARTist
             case 'catg': // CaTeGory
             case 'covr': // COVeR artwork
@@ -429,7 +432,6 @@ class Quicktime extends BaseHandler
                                 case 'name':
                                     $atom_structure[$boxtype] = substr($boxdata, 4);
                                     break;
-
                                 case 'data':
                                     $atom_structure['version'] = Helper::BigEndian2Int(substr($boxdata, 0, 1));
                                     $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($boxdata, 1, 3));
@@ -442,11 +444,9 @@ class Quicktime extends BaseHandler
                                                 case 'pgap':
                                                     $atom_structure['data'] = Helper::BigEndian2Int(substr($boxdata, 8, 1));
                                                     break;
-
                                                 case 'tmpo':
                                                     $atom_structure['data'] = Helper::BigEndian2Int(substr($boxdata, 8, 2));
                                                     break;
-
                                                 case 'disk':
                                                 case 'trkn':
                                                     $num = Helper::BigEndian2Int(substr($boxdata, 10, 2));
@@ -454,81 +454,66 @@ class Quicktime extends BaseHandler
                                                     $atom_structure['data'] = empty($num) ? '' : $num;
                                                     $atom_structure['data'] .= empty($num_total) ? '' : '/'.$num_total;
                                                     break;
-
                                                 case 'gnre':
                                                     $GenreID = Helper::BigEndian2Int(substr($boxdata, 8, 4));
                                                     $atom_structure['data'] = Module\Tag\Id3v1::LookupGenreName($GenreID - 1);
                                                     break;
-
                                                 case 'rtng':
                                                     $atom_structure[$atomname] = Helper::BigEndian2Int(substr($boxdata, 8, 1));
                                                     $atom_structure['data'] = $this->QuicktimeContentRatingLookup($atom_structure[$atomname]);
                                                     break;
-
                                                 case 'stik':
                                                     $atom_structure[$atomname] = Helper::BigEndian2Int(substr($boxdata, 8, 1));
                                                     $atom_structure['data'] = $this->QuicktimeSTIKLookup($atom_structure[$atomname]);
                                                     break;
-
                                                 case 'sfID':
                                                     $atom_structure[$atomname] = Helper::BigEndian2Int(substr($boxdata, 8, 4));
                                                     $atom_structure['data'] = $this->QuicktimeStoreFrontCodeLookup($atom_structure[$atomname]);
                                                     break;
-
                                                 case 'egid':
                                                 case 'purl':
                                                     $atom_structure['data'] = substr($boxdata, 8);
                                                     break;
-
                                                 default:
                                                     $atom_structure['data'] = Helper::BigEndian2Int(substr($boxdata, 8, 4));
                                             }
                                             break;
-
                                         case 1:  // text flag
                                         case 13: // image flag
                                         default:
                                             $atom_structure['data'] = substr($boxdata, 8);
                                             break;
-
                                     }
                                     break;
-
                                 default:
                                     $info['warning'][] = 'Unknown QuickTime box type: "'.Helper::PrintHexBytes($boxtype).'" at offset '.$baseoffset;
                                     $atom_structure['data'] = $atom_data;
-
                             }
                         }
                     }
                 }
                 $this->CopyToAppropriateCommentsSection($atomname, $atom_structure['data'], $atom_structure['name']);
                 break;
-
             case 'play': // auto-PLAY atom
                 $atom_structure['autoplay'] = (bool) Helper::BigEndian2Int(substr($atom_data, 0, 1));
 
                 $info['quicktime']['autoplay'] = $atom_structure['autoplay'];
                 break;
-
             case 'WLOC': // Window LOCation atom
                 $atom_structure['location_x'] = Helper::BigEndian2Int(substr($atom_data, 0, 2));
                 $atom_structure['location_y'] = Helper::BigEndian2Int(substr($atom_data, 2, 2));
                 break;
-
             case 'LOOP': // LOOPing atom
             case 'SelO': // play SELection Only atom
             case 'AllF': // play ALL Frames atom
                 $atom_structure['data'] = Helper::BigEndian2Int($atom_data);
                 break;
-
-            case 'name': //
+            case 'name':
             case 'MCPS': // Media Cleaner PRo
             case '@PRM': // adobe PReMiere version
             case '@PRQ': // adobe PRemiere Quicktime version
                 $atom_structure['data'] = $atom_data;
                 break;
-
             case 'cmvd': // Compressed MooV Data atom
                 // Code by ubergeekØubergeek*tv based on information from
                 // http://developer.apple.com/quicktime/icefloe/dispatch012.html
@@ -541,12 +526,10 @@ class Quicktime extends BaseHandler
                     $info['warning'][] = 'Error decompressing compressed MOV atom at offset '.$atom_structure['offset'];
                 }
                 break;
-
             case 'dcom': // Data COMpression atom
                 $atom_structure['compression_id'] = $atom_data;
                 $atom_structure['compression_text'] = $this->QuicktimeDCOMLookup($atom_data);
                 break;
-
             case 'rdrf': // Reference movie Data ReFerence atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3));
@@ -558,31 +541,25 @@ class Quicktime extends BaseHandler
                     case 'url ':
                         $atom_structure['url'] = $this->NoNullString(substr($atom_data, 12));
                         break;
-
                     case 'alis':
                         $atom_structure['file_alias'] = substr($atom_data, 12);
                         break;
-
                     case 'rsrc':
                         $atom_structure['resource_alias'] = substr($atom_data, 12);
                         break;
-
                     default:
                         $atom_structure['data'] = substr($atom_data, 12);
                         break;
                 }
                 break;
-
             case 'rmqu': // Reference Movie QUality atom
                 $atom_structure['movie_quality'] = Helper::BigEndian2Int($atom_data);
                 break;
-
             case 'rmcs': // Reference Movie Cpu Speed atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
                 $atom_structure['cpu_speed_rating'] = Helper::BigEndian2Int(substr($atom_data, 4, 2));
                 break;
-
             case 'rmvc': // Reference Movie Version Check atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -591,7 +568,6 @@ class Quicktime extends BaseHandler
                 $atom_structure['gestalt_value'] = Helper::BigEndian2Int(substr($atom_data, 12, 4));
                 $atom_structure['gestalt_check_type'] = Helper::BigEndian2Int(substr($atom_data, 14, 2));
                 break;
-
             case 'rmcd': // Reference Movie Component check atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -602,7 +578,6 @@ class Quicktime extends BaseHandler
                 $atom_structure['component_flags_mask'] = Helper::BigEndian2Int(substr($atom_data, 20, 4));
                 $atom_structure['component_min_version'] = Helper::BigEndian2Int(substr($atom_data, 24, 4));
                 break;
-
             case 'rmdr': // Reference Movie Data Rate atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -610,7 +585,6 @@ class Quicktime extends BaseHandler
 
                 $atom_structure['data_rate_bps'] = $atom_structure['data_rate'] * 10;
                 break;
-
             case 'rmla': // Reference Movie Language Atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -621,13 +595,11 @@ class Quicktime extends BaseHandler
                     $info['comments']['language'][] = $atom_structure['language'];
                 }
                 break;
-
             case 'rmla': // Reference Movie Language Atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
                 $atom_structure['track_id'] = Helper::BigEndian2Int(substr($atom_data, 4, 2));
                 break;
-
             case 'ptv ': // Print To Video - defines a movie's full screen mode
                 // http://developer.apple.com/documentation/QuickTime/APIREF/SOURCESIV/at_ptv-_pg.htm
                 $atom_structure['display_size_raw'] = Helper::BigEndian2Int(substr($atom_data, 0, 2));
@@ -650,7 +622,6 @@ class Quicktime extends BaseHandler
                     $info['warning'][] = 'unknown "ptv " display constant ('.$atom_structure['display_size_raw'].')';
                 }
                 break;
-
             case 'stsd': // Sample Table Sample Description atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -673,7 +644,6 @@ class Quicktime extends BaseHandler
                     $atom_structure['sample_description_table'][$i]['encoder_vendor'] = substr($atom_structure['sample_description_table'][$i]['data'], 4, 4);
 
                     switch ($atom_structure['sample_description_table'][$i]['encoder_vendor']) {
-
                         case "\x00\x00\x00\x00":
                             // audio atom
                             $atom_structure['sample_description_table'][$i]['audio_channels'] = Helper::BigEndian2Int(substr($atom_structure['sample_description_table'][$i]['data'], 8, 2));
@@ -689,11 +659,9 @@ class Quicktime extends BaseHandler
                                     $info['video']['fourcc'] = $atom_structure['sample_description_table'][$i]['data_format'];
                                     //$info['warning'][] = 'This version of GetId3Core() ['.$this->getid3->version().'] does not fully support MPEG-4 audio/video streams'; // 2011-02-18: why am I warning about this again? What's not supported?
                                     break;
-
                                 case 'qtvr':
                                     $info['video']['dataformat'] = 'quicktimevr';
                                     break;
-
                                 case 'mp4a':
                                 default:
                                     $info['quicktime']['audio']['codec'] = $this->QuicktimeAudioCodecLookup($atom_structure['sample_description_table'][$i]['data_format']);
@@ -716,13 +684,11 @@ class Quicktime extends BaseHandler
                                     break;
                             }
                             break;
-
                         default:
                             switch ($atom_structure['sample_description_table'][$i]['data_format']) {
                                 case 'mp4s':
                                     $info['fileformat'] = 'mp4';
                                     break;
-
                                 default:
                                     // video atom
                                     $atom_structure['sample_description_table'][$i]['video_temporal_quality'] = Helper::BigEndian2Int(substr($atom_structure['sample_description_table'][$i]['data'], 8, 4));
@@ -762,21 +728,17 @@ class Quicktime extends BaseHandler
                             $info['audio']['dataformat'] = 'mp4';
                             $info['quicktime']['audio']['codec'] = 'mp4';
                             break;
-
                         case '3ivx':
                         case '3iv1':
                         case '3iv2':
                             $info['video']['dataformat'] = '3ivx';
                             break;
-
                         case 'xvid':
                             $info['video']['dataformat'] = 'xvid';
                             break;
-
                         case 'mp4v':
                             $info['video']['dataformat'] = 'mpeg4';
                             break;
-
                         case 'divx':
                         case 'div1':
                         case 'div2':
@@ -786,7 +748,6 @@ class Quicktime extends BaseHandler
                         case 'div6':
                             $info['video']['dataformat'] = 'divx';
                             break;
-
                         default:
                             // do nothing
                             break;
@@ -794,7 +755,6 @@ class Quicktime extends BaseHandler
                     unset($atom_structure['sample_description_table'][$i]['data']);
                 }
                 break;
-
             case 'stts': // Sample Table Time-to-Sample atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -840,7 +800,6 @@ class Quicktime extends BaseHandler
                 //	}
                 //}
                 break;
-
             case 'stss': // Sample Table Sync Sample (key frames) atom
                 if ($ParseAllPossibleAtoms) {
                     $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
@@ -853,7 +812,6 @@ class Quicktime extends BaseHandler
                     }
                 }
                 break;
-
             case 'stsc': // Sample Table Sample-to-Chunk atom
                 if ($ParseAllPossibleAtoms) {
                     $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
@@ -870,7 +828,6 @@ class Quicktime extends BaseHandler
                     }
                 }
                 break;
-
             case 'stsz': // Sample Table SiZe atom
                 if ($ParseAllPossibleAtoms) {
                     $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
@@ -886,7 +843,6 @@ class Quicktime extends BaseHandler
                     }
                 }
                 break;
-
             case 'stco': // Sample Table Chunk Offset atom
                 if ($ParseAllPossibleAtoms) {
                     $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
@@ -899,7 +855,6 @@ class Quicktime extends BaseHandler
                     }
                 }
                 break;
-
             case 'co64': // Chunk Offset 64-bit (version of "stco" that supports > 2GB files)
                 if ($ParseAllPossibleAtoms) {
                     $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
@@ -912,7 +867,6 @@ class Quicktime extends BaseHandler
                     }
                 }
                 break;
-
             case 'dref': // Data REFerence atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -933,7 +887,6 @@ class Quicktime extends BaseHandler
                     $atom_structure['data_references'][$i]['flags']['self_reference'] = (bool) ($atom_structure['data_references'][$i]['flags_raw'] & 0x001);
                 }
                 break;
-
             case 'gmin': // base Media INformation atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -944,14 +897,12 @@ class Quicktime extends BaseHandler
                 $atom_structure['balance'] = Helper::BigEndian2Int(substr($atom_data, 12, 2));
                 $atom_structure['reserved'] = Helper::BigEndian2Int(substr($atom_data, 14, 2));
                 break;
-
             case 'smhd': // Sound Media information HeaDer atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
                 $atom_structure['balance'] = Helper::BigEndian2Int(substr($atom_data, 4, 2));
                 $atom_structure['reserved'] = Helper::BigEndian2Int(substr($atom_data, 6, 2));
                 break;
-
             case 'vmhd': // Video Media information HeaDer atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3));
@@ -962,7 +913,6 @@ class Quicktime extends BaseHandler
 
                 $atom_structure['flags']['no_lean_ahead'] = (bool) ($atom_structure['flags_raw'] & 0x001);
                 break;
-
             case 'hdlr': // HanDLeR reference atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -977,7 +927,6 @@ class Quicktime extends BaseHandler
                     $info['video']['dataformat'] = 'quicktimevr';
                 }
                 break;
-
             case 'mdhd': // MeDia HeaDer atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -1003,7 +952,6 @@ class Quicktime extends BaseHandler
                     $info['comments']['language'][] = $atom_structure['language'];
                 }
                 break;
-
             case 'pnot': // Preview atom
                 $atom_structure['modification_date'] = Helper::BigEndian2Int(substr($atom_data, 0, 4)); // "standard Macintosh format"
                 $atom_structure['version_number'] = Helper::BigEndian2Int(substr($atom_data, 4, 2)); // hardcoded: 0x00
@@ -1012,13 +960,11 @@ class Quicktime extends BaseHandler
 
                 $atom_structure['modification_date_unix'] = Helper::DateMac2Unix($atom_structure['modification_date']);
                 break;
-
             case 'crgn': // Clipping ReGioN atom
                 $atom_structure['region_size'] = Helper::BigEndian2Int(substr($atom_data, 0, 2)); // The Region size, Region boundary box,
                 $atom_structure['boundary_box'] = Helper::BigEndian2Int(substr($atom_data, 2, 8)); // and Clipping region data fields
                 $atom_structure['clipping_data'] = substr($atom_data, 10);           // constitute a QuickDraw region.
                 break;
-
             case 'load': // track LOAD settings atom
                 $atom_structure['preload_start_time'] = Helper::BigEndian2Int(substr($atom_data, 0, 4));
                 $atom_structure['preload_duration'] = Helper::BigEndian2Int(substr($atom_data, 4, 4));
@@ -1028,7 +974,6 @@ class Quicktime extends BaseHandler
                 $atom_structure['default_hints']['double_buffer'] = (bool) ($atom_structure['default_hints_raw'] & 0x0020);
                 $atom_structure['default_hints']['high_quality'] = (bool) ($atom_structure['default_hints_raw'] & 0x0100);
                 break;
-
             case 'tmcd': // TiMe CoDe atom
             case 'chap': // CHAPter list atom
             case 'sync': // SYNChronization atom
@@ -1038,7 +983,6 @@ class Quicktime extends BaseHandler
                     $atom_structure['track_id'][$i] = Helper::BigEndian2Int(substr($atom_data, $i * 4, 4));
                 }
                 break;
-
             case 'elst': // Edit LiST atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
@@ -1049,13 +993,11 @@ class Quicktime extends BaseHandler
                     $atom_structure['edit_list'][$i]['media_rate'] = Helper::FixedPoint16_16(substr($atom_data, 8 + ($i * 12) + 8, 4));
                 }
                 break;
-
             case 'kmat': // compressed MATte atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3)); // hardcoded: 0x0000
                 $atom_structure['matte_data_raw'] = substr($atom_data, 4);
                 break;
-
             case 'ctab': // Color TABle atom
                 $atom_structure['color_table_seed'] = Helper::BigEndian2Int(substr($atom_data, 0, 4)); // hardcoded: 0x00000000
                 $atom_structure['color_table_flags'] = Helper::BigEndian2Int(substr($atom_data, 4, 2)); // hardcoded: 0x8000
@@ -1067,7 +1009,6 @@ class Quicktime extends BaseHandler
                     $atom_structure['color_table'][$colortableentry]['blue'] = Helper::BigEndian2Int(substr($atom_data, 8 + ($colortableentry * 8) + 6, 2));
                 }
                 break;
-
             case 'mvhd': // MoVie HeaDer atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3));
@@ -1106,7 +1047,6 @@ class Quicktime extends BaseHandler
                 $info['quicktime']['display_scale'] = $atom_structure['matrix_a'];
                 $info['playtime_seconds'] = $atom_structure['duration'] / $atom_structure['time_scale'];
                 break;
-
             case 'tkhd': // TracK HeaDer atom
                 $atom_structure['version'] = Helper::BigEndian2Int(substr($atom_data, 0, 1));
                 $atom_structure['flags_raw'] = Helper::BigEndian2Int(substr($atom_data, 1, 3));
@@ -1160,7 +1100,6 @@ class Quicktime extends BaseHandler
                     }
                 }
                 break;
-
             case 'iods': // Initial Object DeScriptor atom
                 // http://www.koders.com/c/fid1FAB3E762903DC482D8A246D4A4BF9F28E049594.aspx?s=windows.h
                 // http://libquicktime.sourcearchive.com/documentation/1.0.2plus-pdebian/iods_8c-source.html
@@ -1199,13 +1138,11 @@ class Quicktime extends BaseHandler
                 $atom_structure['audio_profile_name'] = $this->QuicktimeIODSaudioProfileName($atom_structure['audio_profile_id']);
                 $atom_structure['video_profile_name'] = $this->QuicktimeIODSvideoProfileName($atom_structure['video_profile_id']);
                 break;
-
             case 'ftyp': // FileTYPe (?) atom (for MP4 it seems)
                 $atom_structure['signature'] = substr($atom_data, 0, 4);
                 $atom_structure['unknown_1'] = Helper::BigEndian2Int(substr($atom_data, 4, 4));
                 $atom_structure['fourcc'] = substr($atom_data, 8, 4);
                 break;
-
             case 'mdat': // Media DATa atom
             case 'free': // FREE space atom
             case 'skip': // SKIP atom
@@ -1221,12 +1158,10 @@ class Quicktime extends BaseHandler
                 // placeholder atom can be overwritten to obtain the necessary 8 extra bytes.
                 // The placeholder atom has a type of kWideAtomPlaceholderType ( 'wide' ).
                 break;
-
             case 'nsav': // NoSAVe atom
                 // http://developer.apple.com/technotes/tn/tn2038.html
                 $atom_structure['data'] = Helper::BigEndian2Int(substr($atom_data, 0, 4));
                 break;
-
             case 'ctyp': // Controller TYPe atom (seen on QTVR)
                 // http://homepages.slingshot.co.nz/~helmboy/quicktime/formats/qtm-layout.txt
                 // some controller names are:
@@ -1240,24 +1175,20 @@ class Quicktime extends BaseHandler
                         break;
                 }
                 break;
-
             case 'pano': // PANOrama track (seen on QTVR)
                 $atom_structure['pano'] = Helper::BigEndian2Int(substr($atom_data, 0, 4));
                 break;
-
             case 'hint': // HINT track
-            case 'hinf': //
-            case 'hinv': //
-            case 'hnti': //
+            case 'hinf':
+            case 'hinv':
+            case 'hnti':
                 $info['quicktime']['hinting'] = true;
                 break;
-
             case 'imgt': // IMaGe Track reference (kQTVRImageTrackRefType) (seen on QTVR)
                 for ($i = 0; $i < ($atom_structure['size'] - 8); $i += 4) {
                     $atom_structure['imgt'][] = Helper::BigEndian2Int(substr($atom_data, $i, 4));
                 }
                 break;
-
             // Observed-but-not-handled atom types are just listed here to prevent warnings being generated
             case 'FXTC': // Something to do with Adobe After Effects (?)
             case 'PrmA':
@@ -1273,21 +1204,19 @@ class Quicktime extends BaseHandler
             case 'stps'://  STPartialSyncSampleAID             - http://developer.apple.com/documentation/QuickTime/Reference/QTRef_Constants/Reference/reference.html
                 //$atom_structure['data'] = $atom_data;
                 break;
-
             case '©xyz':  // GPS latitude+longitude+altitude
                 $atom_structure['data'] = $atom_data;
                 if (preg_match('#([\\+\\-][0-9\\.]+)([\\+\\-][0-9\\.]+)([\\+\\-][0-9\\.]+)?/$#i', $atom_data, $matches)) {
                     @list($all, $latitude, $longitude, $altitude) = $matches;
-                    $info['quicktime']['comments']['gps_latitude'][] = floatval($latitude);
-                    $info['quicktime']['comments']['gps_longitude'][] = floatval($longitude);
+                    $info['quicktime']['comments']['gps_latitude'][] = (float) $latitude;
+                    $info['quicktime']['comments']['gps_longitude'][] = (float) $longitude;
                     if (!empty($altitude)) {
-                        $info['quicktime']['comments']['gps_altitude'][] = floatval($altitude);
+                        $info['quicktime']['comments']['gps_altitude'][] = (float) $altitude;
                     }
                 } else {
                     $info['warning'][] = 'QuickTime atom "©xyz" data does not match expected data pattern at offset '.$baseoffset.'. Please report as GetId3Core() bug.';
                 }
                 break;
-
             case 'NCDT':
                 // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Nikon.html
                 // Nikon-specific QuickTime tags found in the NCDT atom of MOV videos from some Nikon cameras such as the Coolpix S8000 and D5100
@@ -1315,7 +1244,6 @@ class Quicktime extends BaseHandler
                 // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Nikon.html
                 $atom_structure['data'] = $atom_data;
                 break;
-
             case "\x00\x00\x00\x00":
             case 'meta': // METAdata atom
                 // some kind of metacontainer, may contain a big data dump such as:
@@ -1327,14 +1255,12 @@ class Quicktime extends BaseHandler
                 $atom_structure['subatoms'] = $this->QuicktimeParseContainerAtom(substr($atom_data, 4), $baseoffset + 8, $atomHierarchy, $ParseAllPossibleAtoms);
                 //$atom_structure['subatoms']  = $this->QuicktimeParseContainerAtom($atom_data, $baseoffset + 8, $atomHierarchy, $ParseAllPossibleAtoms);
                 break;
-
             case 'data': // metaDATA atom
                 // seems to be 2 bytes language code (ASCII), 2 bytes unknown (set to 0x10B5 in sample I have), remainder is useful data
                 $atom_structure['language'] = substr($atom_data, 4 + 0, 2);
                 $atom_structure['unknown'] = Helper::BigEndian2Int(substr($atom_data, 4 + 2, 2));
                 $atom_structure['data'] = substr($atom_data, 4 + 4);
                 break;
-
             default:
                 $info['warning'][] = 'Unknown QuickTime atom type: "'.$atomname.'" ('.trim(Helper::PrintHexBytes($atomname)).') at offset '.$baseoffset;
                 $atom_structure['data'] = $atom_data;
@@ -1388,7 +1314,7 @@ class Quicktime extends BaseHandler
      *
      * @return type
      *
-     * @link http://libquicktime.sourcearchive.com/documentation/2:1.0.2plus-pdebian-2build1/esds_8c-source.html
+     * @see http://libquicktime.sourcearchive.com/documentation/2:1.0.2plus-pdebian-2build1/esds_8c-source.html
      */
     public function quicktime_read_mp4_descr_length($data, &$offset)
     {
@@ -1525,7 +1451,7 @@ class Quicktime extends BaseHandler
             $QuicktimeLanguageLookup[138] = 'JavaneseRom';
         }
 
-        return (isset($QuicktimeLanguageLookup[$languageid]) ? $QuicktimeLanguageLookup[$languageid] : 'invalid');
+        return isset($QuicktimeLanguageLookup[$languageid]) ? $QuicktimeLanguageLookup[$languageid] : 'invalid';
     }
 
     /**
@@ -1593,7 +1519,7 @@ class Quicktime extends BaseHandler
             $QuicktimeVideoCodecLookup['yuvu'] = 'ComponentVideoSigned';
         }
 
-        return (isset($QuicktimeVideoCodecLookup[$codecid]) ? $QuicktimeVideoCodecLookup[$codecid] : '');
+        return isset($QuicktimeVideoCodecLookup[$codecid]) ? $QuicktimeVideoCodecLookup[$codecid] : '';
     }
 
     /**
@@ -1647,7 +1573,7 @@ class Quicktime extends BaseHandler
             $QuicktimeAudioCodecLookup['ulaw'] = 'mu-law 2:1';
         }
 
-        return (isset($QuicktimeAudioCodecLookup[$codecid]) ? $QuicktimeAudioCodecLookup[$codecid] : '');
+        return isset($QuicktimeAudioCodecLookup[$codecid]) ? $QuicktimeAudioCodecLookup[$codecid] : '';
     }
 
     /**
@@ -1665,7 +1591,7 @@ class Quicktime extends BaseHandler
             $QuicktimeDCOMLookup['adec'] = 'Apple Compression';
         }
 
-        return (isset($QuicktimeDCOMLookup[$compressionid]) ? $QuicktimeDCOMLookup[$compressionid] : '');
+        return isset($QuicktimeDCOMLookup[$compressionid]) ? $QuicktimeDCOMLookup[$compressionid] : '';
     }
 
     /**
@@ -1692,7 +1618,7 @@ class Quicktime extends BaseHandler
             $QuicktimeColorNameLookup[40] = '256-gray';
         }
 
-        return (isset($QuicktimeColorNameLookup[$colordepthid]) ? $QuicktimeColorNameLookup[$colordepthid] : 'invalid');
+        return isset($QuicktimeColorNameLookup[$colordepthid]) ? $QuicktimeColorNameLookup[$colordepthid] : 'invalid';
     }
 
     /**
@@ -1718,7 +1644,7 @@ class Quicktime extends BaseHandler
             $QuicktimeSTIKLookup[21] = 'Podcast';
         }
 
-        return (isset($QuicktimeSTIKLookup[$stik]) ? $QuicktimeSTIKLookup[$stik] : 'invalid');
+        return isset($QuicktimeSTIKLookup[$stik]) ? $QuicktimeSTIKLookup[$stik] : 'invalid';
     }
 
     /**
@@ -1786,7 +1712,7 @@ class Quicktime extends BaseHandler
             );
         }
 
-        return (isset($QuicktimeIODSaudioProfileNameLookup[$audio_profile_id]) ? $QuicktimeIODSaudioProfileNameLookup[$audio_profile_id] : 'ISO Reserved / User Private');
+        return isset($QuicktimeIODSaudioProfileNameLookup[$audio_profile_id]) ? $QuicktimeIODSaudioProfileNameLookup[$audio_profile_id] : 'ISO Reserved / User Private';
     }
 
     /**
@@ -1866,7 +1792,7 @@ class Quicktime extends BaseHandler
             );
         }
 
-        return (isset($QuicktimeIODSvideoProfileNameLookup[$video_profile_id]) ? $QuicktimeIODSvideoProfileNameLookup[$video_profile_id] : 'ISO Reserved Profile');
+        return isset($QuicktimeIODSvideoProfileNameLookup[$video_profile_id]) ? $QuicktimeIODSvideoProfileNameLookup[$video_profile_id] : 'ISO Reserved Profile';
     }
 
     /**
@@ -1885,7 +1811,7 @@ class Quicktime extends BaseHandler
             $QuicktimeContentRatingLookup[4] = 'Explicit';
         }
 
-        return (isset($QuicktimeContentRatingLookup[$rtng]) ? $QuicktimeContentRatingLookup[$rtng] : 'invalid');
+        return isset($QuicktimeContentRatingLookup[$rtng]) ? $QuicktimeContentRatingLookup[$rtng] : 'invalid';
     }
 
     /**
@@ -1903,7 +1829,7 @@ class Quicktime extends BaseHandler
             $QuicktimeStoreAccountTypeLookup[1] = 'AOL';
         }
 
-        return (isset($QuicktimeStoreAccountTypeLookup[$akid]) ? $QuicktimeStoreAccountTypeLookup[$akid] : 'invalid');
+        return isset($QuicktimeStoreAccountTypeLookup[$akid]) ? $QuicktimeStoreAccountTypeLookup[$akid] : 'invalid';
     }
 
     /**
@@ -1941,7 +1867,7 @@ class Quicktime extends BaseHandler
             $QuicktimeStoreFrontCodeLookup[143441] = 'United States';
         }
 
-        return (isset($QuicktimeStoreFrontCodeLookup[$sfid]) ? $QuicktimeStoreFrontCodeLookup[$sfid] : 'invalid');
+        return isset($QuicktimeStoreFrontCodeLookup[$sfid]) ? $QuicktimeStoreFrontCodeLookup[$sfid] : 'invalid';
     }
 
     /**
@@ -1949,7 +1875,7 @@ class Quicktime extends BaseHandler
      *
      * @return type
      *
-     * @link http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Nikon.html#NCTG
+     * @see http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Nikon.html#NCTG
      */
     public function QuicktimeParseNikonNCTG($atom_data)
     {
@@ -2037,7 +1963,7 @@ class Quicktime extends BaseHandler
                         if ($denomninator == 0) {
                             $data[$i] = false;
                         } else {
-                            $data[$i] = (double) $numerator / $denomninator;
+                            $data[$i] = (float) $numerator / $denomninator;
                         }
                     }
                     $offset += (8 * $data_size);
@@ -2114,7 +2040,7 @@ echo 'QuicktimeParseNikonNCTG()::unknown $data_size_type: '.$data_size_type.'<br
                             $datedisplayformat = 'Y/M/D'; break;
                     }
 
-                    $data = array('timezone' => floatval($timezone), 'dst' => $dst, 'display' => $datedisplayformat);
+                    $data = array('timezone' => (float) $timezone, 'dst' => $dst, 'display' => $datedisplayformat);
                     break;
                 case 0x02000083: // LensType
                     $data = array(

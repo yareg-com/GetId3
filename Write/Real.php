@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Write;
 
-use GetId3\Lib\Helper;
 use GetId3\GetId3Core;
+use GetId3\Lib\Helper;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -24,8 +33,8 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Real
 {
@@ -69,7 +78,6 @@ class Real
     {
         // File MUST be writeable - CHMOD(646) at least
         if (is_writable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'r+b'))) {
-
             // Initialize GetId3 engine
             $getID3 = new GetId3Core();
             $OldThisFileInfo = $getID3->analyze($this->filename);
@@ -118,50 +126,48 @@ class Real
             }
 
             if (isset($oldChunkInfo['CONT']['length']) && ($oldChunkInfo['CONT']['length'] == strlen($new_CONT_tag_data))) {
-
                 // new data length is same as old data length - just overwrite
                 fseek($fp_source, $oldChunkInfo['CONT']['offset'], SEEK_SET);
                 fwrite($fp_source, $new_CONT_tag_data);
                 fclose($fp_source);
 
                 return true;
-            } else {
-                if (empty($oldChunkInfo['CONT'])) {
-                    // no existing CONT chunk
-                    $BeforeOffset = $oldChunkInfo['DATA']['offset'];
-                    $AfterOffset = $oldChunkInfo['DATA']['offset'];
-                } else {
-                    // new data is longer than old data
-                    $BeforeOffset = $oldChunkInfo['CONT']['offset'];
-                    $AfterOffset = $oldChunkInfo['CONT']['offset'] + $oldChunkInfo['CONT']['length'];
-                }
-                if ($tempfilename = tempnam(GetId3Core::getTempDir(), 'getID3')) {
-                    if (is_writable($tempfilename) && is_file($tempfilename) && ($fp_temp = fopen($tempfilename, 'wb'))) {
-                        rewind($fp_source);
-                        fwrite($fp_temp, fread($fp_source, $BeforeOffset));
-                        fwrite($fp_temp, $new_CONT_tag_data);
-                        fseek($fp_source, $AfterOffset, SEEK_SET);
-                        while ($buffer = fread($fp_source, $this->fread_buffer_size)) {
-                            fwrite($fp_temp, $buffer, strlen($buffer));
-                        }
-                        fclose($fp_temp);
-
-                        if (copy($tempfilename, $this->filename)) {
-                            unlink($tempfilename);
-                            fclose($fp_source);
-
-                            return true;
-                        }
-                        unlink($tempfilename);
-                        $this->errors[] = 'FAILED: copy('.$tempfilename.', '.$this->filename.')';
-                    } else {
-                        $this->errors[] = 'Could not fopen("'.$tempfilename.'", "wb")';
-                    }
-                }
-                fclose($fp_source);
-
-                return false;
             }
+            if (empty($oldChunkInfo['CONT'])) {
+                // no existing CONT chunk
+                    $BeforeOffset = $oldChunkInfo['DATA']['offset'];
+                $AfterOffset = $oldChunkInfo['DATA']['offset'];
+            } else {
+                // new data is longer than old data
+                    $BeforeOffset = $oldChunkInfo['CONT']['offset'];
+                $AfterOffset = $oldChunkInfo['CONT']['offset'] + $oldChunkInfo['CONT']['length'];
+            }
+            if ($tempfilename = tempnam(GetId3Core::getTempDir(), 'getID3')) {
+                if (is_writable($tempfilename) && is_file($tempfilename) && ($fp_temp = fopen($tempfilename, 'wb'))) {
+                    rewind($fp_source);
+                    fwrite($fp_temp, fread($fp_source, $BeforeOffset));
+                    fwrite($fp_temp, $new_CONT_tag_data);
+                    fseek($fp_source, $AfterOffset, SEEK_SET);
+                    while ($buffer = fread($fp_source, $this->fread_buffer_size)) {
+                        fwrite($fp_temp, $buffer, strlen($buffer));
+                    }
+                    fclose($fp_temp);
+
+                    if (copy($tempfilename, $this->filename)) {
+                        unlink($tempfilename);
+                        fclose($fp_source);
+
+                        return true;
+                    }
+                    unlink($tempfilename);
+                    $this->errors[] = 'FAILED: copy('.$tempfilename.', '.$this->filename.')';
+                } else {
+                    $this->errors[] = 'Could not fopen("'.$tempfilename.'", "wb")';
+                }
+            }
+            fclose($fp_source);
+
+            return false;
         }
         $this->errors[] = 'Could not fopen("'.$this->filename.'", "r+b")';
 
@@ -250,17 +256,17 @@ class Real
 
         $CONTchunk = "\x00\x00"; // object version
 
-        $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['title'])     ? strlen($this->tag_data['title'])     : 0), 2);
-        $CONTchunk .= (!empty($this->tag_data['title'])     ? strlen($this->tag_data['title'])     : '');
+        $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['title']) ? strlen($this->tag_data['title']) : 0), 2);
+        $CONTchunk .= (!empty($this->tag_data['title']) ? strlen($this->tag_data['title']) : '');
 
-        $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['artist'])    ? strlen($this->tag_data['artist'])    : 0), 2);
-        $CONTchunk .= (!empty($this->tag_data['artist'])    ? strlen($this->tag_data['artist'])    : '');
+        $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['artist']) ? strlen($this->tag_data['artist']) : 0), 2);
+        $CONTchunk .= (!empty($this->tag_data['artist']) ? strlen($this->tag_data['artist']) : '');
 
         $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['copyright']) ? strlen($this->tag_data['copyright']) : 0), 2);
         $CONTchunk .= (!empty($this->tag_data['copyright']) ? strlen($this->tag_data['copyright']) : '');
 
-        $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['comment'])   ? strlen($this->tag_data['comment'])   : 0), 2);
-        $CONTchunk .= (!empty($this->tag_data['comment'])   ? strlen($this->tag_data['comment'])   : '');
+        $CONTchunk .= Helper::BigEndian2String((!empty($this->tag_data['comment']) ? strlen($this->tag_data['comment']) : 0), 2);
+        $CONTchunk .= (!empty($this->tag_data['comment']) ? strlen($this->tag_data['comment']) : '');
 
         if ($this->paddedlength > (strlen($CONTchunk) + 8)) {
             $CONTchunk .= str_repeat("\x00", $this->paddedlength - strlen($CONTchunk) - 8);
@@ -278,7 +284,6 @@ class Real
     {
         // File MUST be writeable - CHMOD(646) at least
         if (is_writable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'r+b'))) {
-
             // Initialize GetId3 engine
             $getID3 = new GetId3Core();
             $OldThisFileInfo = $getID3->analyze($this->filename);

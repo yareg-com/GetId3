@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Tag;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Id3v1 extends BaseHandler
 {
@@ -58,7 +67,7 @@ class Id3v1 extends BaseHandler
 
             // If second-last byte of comment field is null and last byte of comment field is non-null
             // then this is ID3v1.1 and the comment field is 28 bytes long and the 30th byte is the track number
-            if (($id3v1tag{125} === "\x00") && ($id3v1tag{126} !== "\x00")) {
+            if (($id3v1tag[125] === "\x00") && ($id3v1tag[126] !== "\x00")) {
                 $ParsedID3v1['track'] = ord(substr($ParsedID3v1['comment'], 29, 1));
                 $ParsedID3v1['comment'] = substr($ParsedID3v1['comment'], 0, 28);
             }
@@ -318,7 +327,7 @@ class Id3v1 extends BaseHandler
             //$GenreLookupSCMPX[255] = 'Japanese Anime';
         }
 
-        return ($allowSCMPXextended ? $GenreLookupSCMPX : $GenreLookup);
+        return $allowSCMPXextended ? $GenreLookupSCMPX : $GenreLookup;
     }
 
     /**
@@ -337,12 +346,12 @@ class Id3v1 extends BaseHandler
                 if (!is_numeric($genreid)) {
                     return false;
                 }
-                $genreid = intval($genreid); // to handle 3 or '3' or '03'
+                $genreid = (int) $genreid; // to handle 3 or '3' or '03'
                 break;
         }
         $GenreLookup = self::ArrayOfGenres($allowSCMPXextended);
 
-        return (isset($GenreLookup[$genreid]) ? $GenreLookup[$genreid] : false);
+        return isset($GenreLookup[$genreid]) ? $GenreLookup[$genreid] : false;
     }
 
     /**
@@ -412,7 +421,7 @@ class Id3v1 extends BaseHandler
         switch (gettype($genreid)) {
             case 'string':
             case 'integer':
-                $ID3v1Tag .= chr(intval($genreid));
+                $ID3v1Tag .= chr((int) $genreid);
                 break;
             default:
                 $ID3v1Tag .= chr(255); // 'unknown' genre

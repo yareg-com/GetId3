@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Tests\Modules;
 
 use GetId3\GetId3Core;
@@ -58,19 +67,19 @@ class AudioVideoTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayNotHasKey('error', $properties);
         $this->assertArrayHasKey('mime_type', $properties);
-        $this->assertEquals('video/quicktime', $properties['mime_type']);
+        $this->assertSame('video/quicktime', $properties['mime_type']);
         $this->assertArrayHasKey('encoding', $properties);
-        $this->assertEquals('UTF-8', $properties['encoding']);
+        $this->assertSame('UTF-8', $properties['encoding']);
         $this->assertArrayHasKey('filesize', $properties);
         $this->assertSame(3284257, $properties['filesize']);
         $this->assertArrayHasKey('fileformat', $properties);
-        $this->assertEquals('quicktime', $properties['fileformat']);
+        $this->assertSame('quicktime', $properties['fileformat']);
         $this->assertArrayHasKey('audio', $properties);
         $this->assertArrayHasKey('dataformat', $properties['audio']);
-        $this->assertEquals('mp4', $properties['audio']['dataformat']);
+        $this->assertSame('mp4', $properties['audio']['dataformat']);
         $this->assertArrayHasKey('video', $properties);
         $this->assertArrayHasKey('dataformat', $properties['video']);
-        $this->assertEquals('mpeg4', $properties['video']['dataformat']);
+        $this->assertSame('mpeg4', $properties['video']['dataformat']);
     }
 
     public function testFlvFile()
@@ -96,19 +105,19 @@ class AudioVideoTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $properties);
         $this->assertArrayNotHasKey('warning', $properties);
         $this->assertArrayHasKey('mime_type', $properties);
-        $this->assertEquals('video/x-flv', $properties['mime_type']);
+        $this->assertSame('video/x-flv', $properties['mime_type']);
         $this->assertArrayHasKey('encoding', $properties);
-        $this->assertEquals('UTF-8', $properties['encoding']);
+        $this->assertSame('UTF-8', $properties['encoding']);
         $this->assertArrayHasKey('filesize', $properties);
         $this->assertSame(88722, $properties['filesize']);
         $this->assertArrayHasKey('fileformat', $properties);
-        $this->assertEquals('flv', $properties['fileformat']);
+        $this->assertSame('flv', $properties['fileformat']);
         $this->assertArrayHasKey('audio', $properties);
         $this->assertArrayHasKey('dataformat', $properties['audio']);
-        $this->assertEquals('flv', $properties['audio']['dataformat']);
+        $this->assertSame('flv', $properties['audio']['dataformat']);
         $this->assertArrayHasKey('video', $properties);
         $this->assertArrayHasKey('dataformat', $properties['video']);
-        $this->assertEquals('flv', $properties['video']['dataformat']);
+        $this->assertSame('flv', $properties['video']['dataformat']);
         $this->assertArrayHasKey('flv', $properties);
         $this->assertArrayHasKey('framecount', $properties['flv']);
         $this->assertArrayHasKey('total', $properties['flv']['framecount']);
@@ -140,19 +149,19 @@ class AudioVideoTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $properties);
         $this->assertArrayNotHasKey('warning', $properties);
         $this->assertArrayHasKey('mime_type', $properties);
-        $this->assertEquals('audio/x-realaudio', $properties['mime_type']);
+        $this->assertSame('audio/x-realaudio', $properties['mime_type']);
         $this->assertArrayHasKey('encoding', $properties);
-        $this->assertEquals('UTF-8', $properties['encoding']);
+        $this->assertSame('UTF-8', $properties['encoding']);
         $this->assertArrayHasKey('filesize', $properties);
         $this->assertSame(236939, $properties['filesize']);
         $this->assertArrayHasKey('fileformat', $properties);
-        $this->assertEquals('real', $properties['fileformat']);
+        $this->assertSame('real', $properties['fileformat']);
         $this->assertArrayHasKey('video', $properties);
         $this->assertArrayHasKey('dataformat', $properties['video']);
-        $this->assertEquals('real', $properties['video']['dataformat']);
+        $this->assertSame('real', $properties['video']['dataformat']);
         $this->assertArrayHasKey('real', $properties);
         $this->assertArrayHasKey('frame_rate', $properties['video']);
-        $this->assertEquals(15, $properties['video']['frame_rate']);
+        $this->assertSame(15.0, $properties['video']['frame_rate']);
         $this->assertArrayHasKey('bitrate', $properties);
         $this->assertArrayHasKey('playtime_seconds', $properties);
         $this->assertArrayHasKey('resolution_x', $properties['video']);
@@ -184,30 +193,30 @@ class AudioVideoTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $properties);
         $this->assertArrayNotHasKey('warning', $properties);
         $this->assertArrayHasKey('mime_type', $properties);
-        $this->assertEquals('video/x-ms-asf', $properties['mime_type']);
+        $this->assertSame('video/x-ms-asf', $properties['mime_type']);
         $this->assertArrayHasKey('encoding', $properties);
-        $this->assertEquals('UTF-8', $properties['encoding']);
+        $this->assertSame('UTF-8', $properties['encoding']);
         $this->assertArrayHasKey('filesize', $properties);
         $this->assertSame(269671, $properties['filesize']);
         $this->assertArrayHasKey('fileformat', $properties);
-        $this->assertEquals('asf', $properties['fileformat']);
+        $this->assertSame('asf', $properties['fileformat']);
         $this->assertArrayHasKey('audio', $properties);
         $this->assertArrayHasKey('dataformat', $properties['audio']);
-        $this->assertEquals('wma', $properties['audio']['dataformat']);
+        $this->assertSame('wma', $properties['audio']['dataformat']);
         $this->assertArrayHasKey('encoder', $properties['audio']);
-        $this->assertEquals('Windows Media Audio V2', $properties['audio']['encoder']);
+        $this->assertSame('Windows Media Audio V2', $properties['audio']['encoder']);
         $this->assertArrayHasKey('video', $properties);
         $this->assertArrayHasKey('dataformat', $properties['video']);
-        $this->assertEquals('asf', $properties['video']['dataformat']);
+        $this->assertSame('asf', $properties['video']['dataformat']);
         $this->assertArrayHasKey('encoder', $properties['video']);
-        $this->assertEquals('Microsoft MPEG-4 Video Codec V3', $properties['video']['encoder']);
+        $this->assertSame('Microsoft MPEG-4 Video Codec V3', $properties['video']['encoder']);
         $this->assertArrayHasKey('encoder_options', $properties['audio']);
-        $this->assertEquals('32 kbps, 22 kHz, stereo', $properties['audio']['encoder_options']);
+        $this->assertSame('32 kbps, 22 kHz, stereo', $properties['audio']['encoder_options']);
         $this->assertArrayHasKey('compression_ratio', $properties['audio']);
-        $this->assertEquals(0.045408163265306, $properties['audio']['compression_ratio']);
+        $this->assertSame(0.045408163265306, $properties['audio']['compression_ratio']);
         $this->assertArrayHasKey('asf', $properties);
         $this->assertArrayHasKey('bitrate', $properties['video']);
-        $this->assertEquals(237907, $properties['video']['bitrate']);
+        $this->assertSame(237907.0, $properties['video']['bitrate']);
         $this->assertArrayHasKey('bitrate', $properties);
         $this->assertArrayHasKey('playtime_seconds', $properties);
         $this->assertArrayHasKey('resolution_x', $properties['video']);

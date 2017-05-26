@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Graphic;
 
 use GetId3\Handler\BaseHandler;
@@ -23,8 +32,8 @@ use GetId3\Handler\BaseHandler;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Svg extends BaseHandler
 {
@@ -81,10 +90,10 @@ class Svg extends BaseHandler
             $info['video']['pixel_aspect_ratio'] = (float) 1;
 
             if (!empty($info['svg']['svg']['sections']['width'])) {
-                $info['svg']['width'] = intval($info['svg']['svg']['sections']['width']);
+                $info['svg']['width'] = (int) ($info['svg']['svg']['sections']['width']);
             }
             if (!empty($info['svg']['svg']['sections']['height'])) {
-                $info['svg']['height'] = intval($info['svg']['svg']['sections']['height']);
+                $info['svg']['height'] = (int) ($info['svg']['svg']['sections']['height']);
             }
             if (!empty($info['svg']['svg']['sections']['version'])) {
                 $info['svg']['version'] = $info['svg']['svg']['sections']['version'];

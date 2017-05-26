@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Write;
 
 use GetId3\GetId3Core;
@@ -23,10 +32,10 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses helperapps/metaflac.exe
+ * @uses \helperapps/metaflac.exe
  */
 class Metaflac
 {
@@ -103,7 +112,6 @@ class Metaflac
                 $metaflacError = 'metaflac.exe not found in '.GetId3Core::getHelperAppsDir();
             }
         } else {
-
             // It's simpler on *nix
             $commandline = 'metaflac --no-utf8-convert --remove-all-tags --import-tags-from='.escapeshellarg($tempcommentsfilename).' '.escapeshellarg($this->filename).' 2>&1';
             $metaflacError = `$commandline`;
@@ -153,7 +161,6 @@ class Metaflac
                 $metaflacError = 'metaflac.exe not found in '.GetId3Core::getHelperAppsDir();
             }
         } else {
-
             // It's simpler on *nix
             $commandline = 'metaflac --remove-all-tags "'.$this->filename.'" 2>&1';
             $metaflacError = `$commandline`;

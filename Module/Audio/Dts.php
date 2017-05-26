@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Dts extends BaseHandler
 {
@@ -95,7 +104,7 @@ class Dts extends BaseHandler
         $info['dts']['bits_per_sample'] = self::bitPerSampleLookup($info['dts']['raw']['bits_per_sample']);
         $info['dts']['sample_rate'] = self::sampleRateLookup($info['dts']['raw']['sample_frequency']);
         $info['dts']['dialog_normalization'] = self::dialogNormalization($info['dts']['raw']['dialog_normalization'], $info['dts']['raw']['encoder_soft_version']);
-        $info['dts']['flags']['lossless'] = (($info['dts']['raw']['bitrate'] == 31) ? true  : false);
+        $info['dts']['flags']['lossless'] = (($info['dts']['raw']['bitrate'] == 31) ? true : false);
         $info['dts']['bitrate_mode'] = (($info['dts']['raw']['bitrate'] == 30) ? 'vbr' : 'cbr');
         $info['dts']['channels'] = self::numChannelsLookup($info['dts']['raw']['channel_arrangement']);
         $info['dts']['channel_arrangement'] = self::channelArrangementLookup($info['dts']['raw']['channel_arrangement']);
@@ -171,7 +180,7 @@ class Dts extends BaseHandler
             31 => 'lossless',
         );
 
-        return (isset($DTSbitrateLookup[$index]) ? $DTSbitrateLookup[$index] : false);
+        return isset($DTSbitrateLookup[$index]) ? $DTSbitrateLookup[$index] : false;
     }
 
     /**
@@ -200,7 +209,7 @@ class Dts extends BaseHandler
             15 => 'invalid',
         );
 
-        return (isset($DTSsampleRateLookup[$index]) ? $DTSsampleRateLookup[$index] : false);
+        return isset($DTSsampleRateLookup[$index]) ? $DTSsampleRateLookup[$index] : false;
     }
 
     /**
@@ -217,7 +226,7 @@ class Dts extends BaseHandler
             3 => 24,
         );
 
-        return (isset($DTSbitPerSampleLookup[$index]) ? $DTSbitPerSampleLookup[$index] : false);
+        return isset($DTSbitPerSampleLookup[$index]) ? $DTSbitPerSampleLookup[$index] : false;
     }
 
     /**
@@ -291,7 +300,7 @@ class Dts extends BaseHandler
             15 => 'CL + C+ CR + L + R + SL + S + SR',
         );
 
-        return (isset($DTSchannelArrangementLookup[$index]) ? $DTSchannelArrangementLookup[$index] : 'user-defined');
+        return isset($DTSchannelArrangementLookup[$index]) ? $DTSchannelArrangementLookup[$index] : 'user-defined';
     }
 
     /**

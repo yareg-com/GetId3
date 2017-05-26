@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Tag;
 
 /////////////////////////////////////////////////////////////////
@@ -56,14 +65,14 @@ namespace GetId3\Module\Tag;
  * @author James Heinrich <info@getid3.org>
  * @author Nigel Barnes <ngbarnesØhotmail*com>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Xmp
 {
     /**
      * @var string
-     * The name of the image file that contains the XMP fields to extract and modify.
+     * The name of the image file that contains the XMP fields to extract and modify
      *
      * @see Image_XMP()
      */
@@ -71,7 +80,7 @@ class Xmp
 
     /**
      * @var array
-     * The XMP fields that were extracted from the image or updated by this class.
+     * The XMP fields that were extracted from the image or updated by this class
      *
      * @see getAllTags()
      */
@@ -79,7 +88,7 @@ class Xmp
 
     /**
      * @var bool
-     * True if an APP1 segment was found to contain XMP metadata.
+     * True if an APP1 segment was found to contain XMP metadata
      *
      * @see isValid()
      */
@@ -439,7 +448,7 @@ class Xmp
      * You'll normally want to call this method before trying to get XMP fields.
      *
      * @return bool
-     * Returns true if an APP1 segment was found to contain XMP metadata.
+     * Returns true if an APP1 segment was found to contain XMP metadata
      */
     public function isValid()
     {
@@ -494,7 +503,7 @@ class Xmp
         $data = fread($filehnd, 2);
 
         // Check that the third character is 0xFF (Start of first segment header)
-        if ($data{0} != "\xFF") {
+        if ($data[0] != "\xFF") {
             // NO FF found - close file and return - JPEG is probably corrupted
             fclose($filehnd);
 
@@ -508,10 +517,10 @@ class Xmp
         //                                       2) we have hit the compressed image data (no more headers are allowed after data)
         //                                       3) or end of file is hit
 
-        while (($data{1} != "\xD9") && (!$hit_compressed_image_data) && (!feof($filehnd))) {
+        while (($data[1] != "\xD9") && (!$hit_compressed_image_data) && (!feof($filehnd))) {
             // Found a segment to look at.
             // Check that the segment marker is not a Restart marker - restart markers don't have size or data after them
-            if ((ord($data{1}) < 0xD0) || (ord($data{1}) > 0xD7)) {
+            if ((ord($data[1]) < 0xD0) || (ord($data[1]) > 0xD7)) {
                 // Segment isn't a Restart marker
                 // Read the next two bytes (size)
                 $sizestr = fread($filehnd, 2);
@@ -527,15 +536,15 @@ class Xmp
 
                 // Store the segment information in the output array
                 $headerdata[] = array(
-                    'SegType' => ord($data{1}),
-                    'SegName' => self::$JPEG_Segment_Names[ord($data{1})],
+                    'SegType' => ord($data[1]),
+                    'SegName' => self::$JPEG_Segment_Names[ord($data[1])],
                     'SegDataStart' => $segdatastart,
                     'SegData' => $segdata,
                 );
             }
 
             // If this is a SOS (Start Of Scan) segment, then there is no more header data - the compressed image data follows
-            if ($data{1} == "\xDA") {
+            if ($data[1] == "\xDA") {
                 // Flag that we have hit the compressed image data - exit loop as no more headers available.
                 $hit_compressed_image_data = true;
             } else {
@@ -543,7 +552,7 @@ class Xmp
                 $data = fread($filehnd, 2);
 
                 // Check that the first byte of the two is 0xFF as it should be for a marker
-                if ($data{0} != "\xFF") {
+                if ($data[0] != "\xFF") {
                     // NO FF found - close file and return - JPEG is probably corrupted
                     fclose($filehnd);
 
@@ -597,8 +606,9 @@ class Xmp
      * which contains all the XMP (XML) information.
      *
      * @param string $xml_text - a string containing the XMP data (XML) to be parsed
+     * @param mixed $xmltext
      *
-     * @return array $xmp_array - an array containing all xmp details retrieved.
+     * @return array $xmp_array - an array containing all xmp details retrieved
      * @return bool FALSE - couldn't parse the XMP data
      */
     public function read_XMP_array_from_text($xmltext)
@@ -658,11 +668,9 @@ class Xmp
                 case 'x:xmpmeta':
                     // only defined attribute is x:xmptk written by Adobe XMP Toolkit; value is the version of the toolkit
                     break;
-
                 case 'rdf:RDF':
                     // required element immediately within x:xmpmeta; no data here
                     break;
-
                 case 'rdf:Description':
                     switch ($xml_elem['type']) {
                         case 'open':
@@ -686,7 +694,6 @@ class Xmp
                 case 'rdf:nodeID':
                     // Attributes are ignored
                     break;
-
                 case 'rdf:li':
                     // Property member
                     if ($xml_elem['type'] == 'complete') {
@@ -703,7 +710,6 @@ class Xmp
                     //else unidentified attribute!!
                     }
                     break;
-
                 case 'rdf:Seq':
                 case 'rdf:Bag':
                 case 'rdf:Alt':
@@ -719,7 +725,6 @@ class Xmp
                             break;
                     }
                     break;
-
                 default:
                     // Check whether we want the details from this attribute
                     if (in_array($xml_elem['tag'], self::$XMP_tag_captions)) {
@@ -728,17 +733,14 @@ class Xmp
                                 // open current element
                                 $current_property = $xml_elem['tag'];
                                 break;
-
                             case 'close':
                                 // close current element
                                 $current_property = '';
                                 break;
-
                             case 'complete':
                                 // store attribute value
                                 $xmp_array[$xml_elem['tag']] = (isset($xml_elem['value']) ? $xml_elem['value'] : '');
                                 break;
-
                             case 'cdata':
                                 // ignore
                                 break;
@@ -754,7 +756,8 @@ class Xmp
     /**
      * Constructor
      *
-     * @param string - Name of the image file to access and extract XMP information from.
+     * @param string - Name of the image file to access and extract XMP information from
+     * @param mixed $sFilename
      */
     public function Image_XMP($sFilename)
     {

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Archive;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Szip extends BaseHandler
 {
@@ -62,7 +71,6 @@ class Szip extends BaseHandler
                     // might be present between directory/data blocks.
                     fseek($this->getid3->fp, 4, SEEK_CUR);
                     break;
-
                 case 'BH':
                     $BHheaderbytes = Helper::BigEndian2Int(fread($this->getid3->fp,
                                                                             3));
@@ -124,7 +132,6 @@ class Szip extends BaseHandler
                         $info['szip']['BH'][] = $BHdataArray;
                     }
                     break;
-
                 default:
                     break 2;
             }

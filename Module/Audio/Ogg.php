@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -25,8 +34,8 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Ogg extends BaseHandler
 {
@@ -80,7 +89,6 @@ class Ogg extends BaseHandler
         } elseif (substr($filedata, 1, 6) == 'vorbis') {
             $this->ParseVorbisPageHeader($filedata, $filedataoffset, $oggpageinfo);
         } elseif (substr($filedata, 0, 8) == 'Speex   ') {
-
             // http://www.speex.org/manual/node10.html
 
             $info['audio']['dataformat'] = 'speex';
@@ -131,7 +139,6 @@ class Ogg extends BaseHandler
                 $info['audio']['bitrate_mode'] = 'vbr';
             }
         } elseif (substr($filedata, 0, 8) == "fishead\x00") {
-
             // Ogg Skeleton version 3.0 Format Specification
             // http://xiph.org/ogg/doc/skeleton.html
             $filedataoffset += 8;
@@ -152,7 +159,7 @@ class Ogg extends BaseHandler
 
             $info['ogg']['skeleton']['fishead']['version'] = $info['ogg']['skeleton']['fishead']['raw']['version_major'].'.'.$info['ogg']['skeleton']['fishead']['raw']['version_minor'];
             $info['ogg']['skeleton']['fishead']['presentationtime'] = $info['ogg']['skeleton']['fishead']['raw']['presentationtime_numerator'] / $info['ogg']['skeleton']['fishead']['raw']['presentationtime_denominator'];
-            $info['ogg']['skeleton']['fishead']['basetime'] = $info['ogg']['skeleton']['fishead']['raw']['basetime_numerator']         / $info['ogg']['skeleton']['fishead']['raw']['basetime_denominator'];
+            $info['ogg']['skeleton']['fishead']['basetime'] = $info['ogg']['skeleton']['fishead']['raw']['basetime_numerator'] / $info['ogg']['skeleton']['fishead']['raw']['basetime_denominator'];
             $info['ogg']['skeleton']['fishead']['utc'] = $info['ogg']['skeleton']['fishead']['raw']['utc'];
 
             $counter = 0;
@@ -219,7 +226,6 @@ class Ogg extends BaseHandler
 
                 $this->ParseVorbisComments();
                 break;
-
             case 'flac':
                 $getid3_flac = new Flac($this->getid3);
                 if (!$getid3_flac->parseMETAdata()) {
@@ -229,12 +235,10 @@ class Ogg extends BaseHandler
                 }
                 unset($getid3_flac);
                 break;
-
             case 'speex':
                 $this->fseek($info['ogg']['pageheader'][$oggpageinfo['page_seqno']]['page_length'], SEEK_CUR);
                 $this->ParseVorbisComments();
                 break;
-
         }
 
         // Last Page - Number of Samples
@@ -281,11 +285,9 @@ class Ogg extends BaseHandler
 
             // Vorbis only
             if ($info['audio']['dataformat'] == 'vorbis') {
-
                 // Vorbis 1.0 starts with Xiph.Org
                 if (preg_match('/^Xiph.Org/', $info['audio']['encoder'])) {
                     if ($info['audio']['bitrate_mode'] == 'abr') {
-
                         // Set -b 128 on abr files
                         $info['audio']['encoder_options'] = '-b '.round($info['ogg']['bitrate_nominal'] / 1000);
                     } elseif (($info['audio']['bitrate_mode'] == 'vbr') && ($info['audio']['channels'] == 2) && ($info['audio']['sample_rate'] >= 44100) && ($info['audio']['sample_rate'] <= 48000)) {
@@ -295,7 +297,7 @@ class Ogg extends BaseHandler
                 }
 
                 if (empty($info['audio']['encoder_options']) && !empty($info['ogg']['bitrate_nominal'])) {
-                    $info['audio']['encoder_options'] = 'Nominal bitrate: '.intval(round($info['ogg']['bitrate_nominal'] / 1000)).'kbps';
+                    $info['audio']['encoder_options'] = 'Nominal bitrate: '.(int) (round($info['ogg']['bitrate_nominal'] / 1000)).'kbps';
                 }
             }
         }
@@ -357,7 +359,7 @@ class Ogg extends BaseHandler
     /**
      * @return bool
      *
-     * @link http://xiph.org/ogg/vorbis/doc/framing.html
+     * @see http://xiph.org/ogg/vorbis/doc/framing.html
      */
     public function ParseOggPageHeader()
     {
@@ -433,13 +435,11 @@ class Ogg extends BaseHandler
                     $commentdataoffset += (strlen('vorbis') + 1);
                 }
                 break;
-
             case 'flac':
                 $CommentStartOffset = $info['flac']['VORBIS_COMMENT']['raw']['offset'] + 4;
                 $this->fseek($CommentStartOffset);
                 $commentdata = $this->fread($info['flac']['VORBIS_COMMENT']['raw']['block_length']);
                 break;
-
             default:
                 return false;
         }
@@ -531,7 +531,6 @@ class Ogg extends BaseHandler
             $commentdataoffset += $ThisFileInfo_ogg_comments_raw[$i]['size'];
 
             if (!$commentstring) {
-
                 // no comment?
                 $info['warning'][] = 'Blank Ogg comment ['.$i.']';
             } elseif (strstr($commentstring, '=')) {
@@ -636,32 +635,27 @@ class Ogg extends BaseHandler
                 switch ($index) {
                     case 'rg_audiophile':
                     case 'replaygain_album_gain':
-                        $info['replay_gain']['album']['adjustment'] = (double) $commentvalue[0];
+                        $info['replay_gain']['album']['adjustment'] = (float) $commentvalue[0];
                         unset($info['ogg']['comments'][$index]);
                         break;
-
                     case 'rg_radio':
                     case 'replaygain_track_gain':
-                        $info['replay_gain']['track']['adjustment'] = (double) $commentvalue[0];
+                        $info['replay_gain']['track']['adjustment'] = (float) $commentvalue[0];
                         unset($info['ogg']['comments'][$index]);
                         break;
-
                     case 'replaygain_album_peak':
-                        $info['replay_gain']['album']['peak'] = (double) $commentvalue[0];
+                        $info['replay_gain']['album']['peak'] = (float) $commentvalue[0];
                         unset($info['ogg']['comments'][$index]);
                         break;
-
                     case 'rg_peak':
                     case 'replaygain_track_peak':
-                        $info['replay_gain']['track']['peak'] = (double) $commentvalue[0];
+                        $info['replay_gain']['track']['peak'] = (float) $commentvalue[0];
                         unset($info['ogg']['comments'][$index]);
                         break;
-
                     case 'replaygain_reference_loudness':
-                        $info['replay_gain']['reference_volume'] = (double) $commentvalue[0];
+                        $info['replay_gain']['reference_volume'] = (float) $commentvalue[0];
                         unset($info['ogg']['comments'][$index]);
                         break;
-
                     default:
                         // do nothing
                         break;
@@ -690,7 +684,7 @@ class Ogg extends BaseHandler
             $SpeexBandModeLookup[2] = 'ultra-wide';
         }
 
-        return (isset($SpeexBandModeLookup[$mode]) ? $SpeexBandModeLookup[$mode] : null);
+        return isset($SpeexBandModeLookup[$mode]) ? $SpeexBandModeLookup[$mode] : null;
     }
 
     /**

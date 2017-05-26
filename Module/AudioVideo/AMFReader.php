@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 /////////////////////////////////////////////////////////////////
@@ -22,8 +31,8 @@ namespace GetId3\Module\AudioVideo;
  * @author James Heinrich <info@getid3.org>
  * @author Seth Kaufman <seth@whirl-i-gig.com>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class AMFReader
 {
@@ -46,62 +55,50 @@ class AMFReader
 
         $type = $this->stream->readByte();
         switch ($type) {
-
             // Double
             case 0:
                 $value = $this->readDouble();
                 break;
-
             // Boolean
             case 1:
                 $value = $this->readBoolean();
                 break;
-
             // String
             case 2:
                 $value = $this->readString();
                 break;
-
             // Object
             case 3:
                 $value = $this->readObject();
                 break;
-
             // null
             case 6:
                 return;
                 break;
-
             // Mixed array
             case 8:
                 $value = $this->readMixedArray();
                 break;
-
             // Array
             case 10:
                 $value = $this->readArray();
                 break;
-
             // Date
             case 11:
                 $value = $this->readDate();
                 break;
-
             // Long string
             case 13:
                 $value = $this->readLongString();
                 break;
-
             // XML (handled as string)
             case 15:
                 $value = $this->readXML();
                 break;
-
             // Typed object (handled as object)
             case 16:
                 $value = $this->readTypedObject();
                 break;
-
             // Long string
             default:
                 $value = '(unknown or unsupported data type)';

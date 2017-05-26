@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Ac3 extends BaseHandler
 {
@@ -258,19 +267,6 @@ class Ac3 extends BaseHandler
     }
 
     /**
-     * @param  type $length
-     *
-     * @return type
-     */
-    private function readHeaderBSI($length)
-    {
-        $data = substr($this->AC3header['bsi'], $this->BSIoffset, $length);
-        $this->BSIoffset += $length;
-
-        return bindec($data);
-    }
-
-    /**
      * @staticvar array $AC3sampleRateCodeLookup
      *
      * @param  type $fscod
@@ -286,7 +282,7 @@ class Ac3 extends BaseHandler
             3 => 'reserved', // If the reserved code is indicated, the decoder should not attempt to decode audio and should mute.
         );
 
-        return (isset($AC3sampleRateCodeLookup[$fscod]) ? $AC3sampleRateCodeLookup[$fscod] : false);
+        return isset($AC3sampleRateCodeLookup[$fscod]) ? $AC3sampleRateCodeLookup[$fscod] : false;
     }
 
     /**
@@ -317,7 +313,7 @@ class Ac3 extends BaseHandler
             }
         }
 
-        return (isset($AC3serviceTypeLookup[$bsmod][$acmod]) ? $AC3serviceTypeLookup[$bsmod][$acmod] : false);
+        return isset($AC3serviceTypeLookup[$bsmod][$acmod]) ? $AC3serviceTypeLookup[$bsmod][$acmod] : false;
     }
 
     /**
@@ -344,7 +340,7 @@ class Ac3 extends BaseHandler
             );
         }
 
-        return (isset($AC3audioCodingModeLookup[$acmod]) ? $AC3audioCodingModeLookup[$acmod] : false);
+        return isset($AC3audioCodingModeLookup[$acmod]) ? $AC3audioCodingModeLookup[$acmod] : false;
     }
 
     /**
@@ -366,7 +362,7 @@ class Ac3 extends BaseHandler
             );
         }
 
-        return (isset($AC3centerMixLevelLookup[$cmixlev]) ? $AC3centerMixLevelLookup[$cmixlev] : false);
+        return isset($AC3centerMixLevelLookup[$cmixlev]) ? $AC3centerMixLevelLookup[$cmixlev] : false;
     }
 
     /**
@@ -388,7 +384,7 @@ class Ac3 extends BaseHandler
             );
         }
 
-        return (isset($AC3surroundMixLevelLookup[$surmixlev]) ? $AC3surroundMixLevelLookup[$surmixlev] : false);
+        return isset($AC3surroundMixLevelLookup[$surmixlev]) ? $AC3surroundMixLevelLookup[$surmixlev] : false;
     }
 
     /**
@@ -407,7 +403,7 @@ class Ac3 extends BaseHandler
             3 => 'reserved',
         );
 
-        return (isset($AC3dolbySurroundModeLookup[$dsurmod]) ? $AC3dolbySurroundModeLookup[$dsurmod] : false);
+        return isset($AC3dolbySurroundModeLookup[$dsurmod]) ? $AC3dolbySurroundModeLookup[$dsurmod] : false;
     }
 
     /**
@@ -478,7 +474,7 @@ class Ac3 extends BaseHandler
         // -8    –42.14 dB
 
         $fourbit = str_pad(decbin(($compre & 0xF0) >> 4), 4, '0', STR_PAD_LEFT);
-        if ($fourbit{0} == '1') {
+        if ($fourbit[0] == '1') {
             $log_gain = -8 + bindec(substr($fourbit, 1));
         } else {
             $log_gain = bindec(substr($fourbit, 1));
@@ -514,7 +510,7 @@ class Ac3 extends BaseHandler
             3 => 'reserved',
         );
 
-        return (isset($AC3roomTypeLookup[$roomtyp]) ? $AC3roomTypeLookup[$roomtyp] : false);
+        return isset($AC3roomTypeLookup[$roomtyp]) ? $AC3roomTypeLookup[$roomtyp] : false;
     }
 
     /**
@@ -559,7 +555,7 @@ class Ac3 extends BaseHandler
             $AC3frameSizeLookup[$frmsizecod] += 2;
         }
 
-        return (isset($AC3frameSizeLookup[$framesizeid][$fscod]) ? $AC3frameSizeLookup[$framesizeid][$fscod] : false);
+        return isset($AC3frameSizeLookup[$framesizeid][$fscod]) ? $AC3frameSizeLookup[$framesizeid][$fscod] : false;
     }
 
     /**
@@ -595,6 +591,19 @@ class Ac3 extends BaseHandler
             18 => 640000,
         );
 
-        return (isset($AC3bitrateLookup[$framesizeid]) ? $AC3bitrateLookup[$framesizeid] : false);
+        return isset($AC3bitrateLookup[$framesizeid]) ? $AC3bitrateLookup[$framesizeid] : false;
+    }
+
+    /**
+     * @param  type $length
+     *
+     * @return type
+     */
+    private function readHeaderBSI($length)
+    {
+        $data = substr($this->AC3header['bsi'], $this->BSIoffset, $length);
+        $this->BSIoffset += $length;
+
+        return bindec($data);
     }
 }

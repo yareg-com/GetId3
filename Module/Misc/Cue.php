@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Misc;
 
 use GetId3\Handler\BaseHandler;
@@ -41,8 +50,8 @@ use GetId3\Handler\BaseHandler;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Cue extends BaseHandler
 {
@@ -78,7 +87,7 @@ class Cue extends BaseHandler
     }
 
     /**
-     * @param  type $filedata - The filename for the cue sheet to open.
+     * @param  type $filedata - The filename for the cue sheet to open
      *
      * @return type
      */
@@ -96,7 +105,7 @@ class Cue extends BaseHandler
     }
 
     /**
-     * @param type $file - The cuesheet as an array of each line.
+     * @param type $file - The cuesheet as an array of each line
      */
     public function parseCueSheet($file)
     {
@@ -146,8 +155,8 @@ class Cue extends BaseHandler
     /**
      * Parses the REM command.
      *
-     * @param string $line - The line in the cue file that contains the TRACK command.
-     * @param int $track_on - The track currently processing.
+     * @param string $line - The line in the cue file that contains the TRACK command
+     * @param int $track_on - The track currently processing
      */
     public function parseComment($line, $track_on)
     {
@@ -169,7 +178,7 @@ class Cue extends BaseHandler
     /**
      * Parses the FILE command.
      *
-     * @param  string $line - The line in the cue file that contains the FILE command.
+     * @param  string $line - The line in the cue file that contains the FILE command
      *
      * @return array  - Array of FILENAME and TYPE of file..
      */
@@ -190,8 +199,8 @@ class Cue extends BaseHandler
     /**
      * Parses the FLAG command.
      *
-     * @param string $line - The line in the cue file that contains the TRACK command.
-     * @param int $track_on - The track currently processing.
+     * @param string $line - The line in the cue file that contains the TRACK command
+     * @param int $track_on - The track currently processing
      */
     public function parseFlags($line, $track_on)
     {
@@ -225,8 +234,8 @@ class Cue extends BaseHandler
     /**
      * Collect any unidentified data.
      *
-     * @param string $line - The line in the cue file that contains the TRACK command.
-     * @param int $track_on - The track currently processing.
+     * @param string $line - The line in the cue file that contains the TRACK command
+     * @param int $track_on - The track currently processing
      */
     public function parseGarbage($line, $track_on)
     {
@@ -242,8 +251,8 @@ class Cue extends BaseHandler
     /**
      * Parses the INDEX command of a TRACK.
      *
-     * @param string $line - The line in the cue file that contains the TRACK command.
-     * @param int $track_on - The track currently processing.
+     * @param string $line - The line in the cue file that contains the TRACK command
+     * @param int $track_on - The track currently processing
      */
     public function parseIndex($line, $track_on)
     {
@@ -252,7 +261,7 @@ class Cue extends BaseHandler
 
         if ($type == 'index') {
             //read the index number
-            $number = intval(substr($line, 0, strpos($line, ' ')));
+            $number = (int) (substr($line, 0, strpos($line, ' ')));
             $line = substr($line, strpos($line, ' ') + 1);
         }
 
@@ -264,11 +273,11 @@ class Cue extends BaseHandler
 
         switch ($type) {
             case 'index':
-                $this->cuesheet['tracks'][$track_on][$type][$number] = array('minutes' => intval($minutes), 'seconds' => intval($seconds), 'frames' => intval($frames));
+                $this->cuesheet['tracks'][$track_on][$type][$number] = array('minutes' => (int) $minutes, 'seconds' => (int) $seconds, 'frames' => (int) $frames);
                 break;
             case 'pregap':
             case 'postgap':
-                $this->cuesheet['tracks'][$track_on][$type] = array('minutes' => intval($minutes), 'seconds' => intval($seconds), 'frames' => intval($frames));
+                $this->cuesheet['tracks'][$track_on][$type] = array('minutes' => (int) $minutes, 'seconds' => (int) $seconds, 'frames' => (int) $frames);
                 break;
         }
     }
@@ -306,8 +315,8 @@ class Cue extends BaseHandler
     /**
      * Parses the TRACK command.
      *
-     * @param string $line - The line in the cue file that contains the TRACK command.
-     * @param int $track_on - The track currently processing.
+     * @param string $line - The line in the cue file that contains the TRACK command
+     * @param int $track_on - The track currently processing
      */
     public function parseTrack($line, $track_on)
     {

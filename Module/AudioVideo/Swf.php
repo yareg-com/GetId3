@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Swf extends BaseHandler
 {
@@ -55,11 +64,9 @@ class Swf extends BaseHandler
             case 'FWS':
                 $info['swf']['header']['compressed'] = false;
                 break;
-
             case 'CWS':
                 $info['swf']['header']['compressed'] = true;
                 break;
-
             default:
                 $info['error'][] = 'Expecting "FWS" or "CWS" at offset '.$info['avdataoffset'].', found "'.Helper::PrintHexBytes($info['swf']['header']['signature']).'"';
                 unset($info['swf']);
@@ -104,8 +111,8 @@ class Swf extends BaseHandler
         $info['swf']['header']['frame_count'] = Helper::LittleEndian2Int(substr($SWFfileData, 10 + $FrameSizeDataLength, 2));
 
         $info['video']['frame_rate'] = $info['swf']['header']['frame_rate'];
-        $info['video']['resolution_x'] = intval(round($info['swf']['header']['frame_width']  / 20));
-        $info['video']['resolution_y'] = intval(round($info['swf']['header']['frame_height'] / 20));
+        $info['video']['resolution_x'] = (int) (round($info['swf']['header']['frame_width'] / 20));
+        $info['video']['resolution_y'] = (int) (round($info['swf']['header']['frame_height'] / 20));
         $info['video']['pixel_aspect_ratio'] = (float) 1;
 
         if (($info['swf']['header']['frame_count'] > 0) && ($info['swf']['header']['frame_rate'] > 0)) {
@@ -138,12 +145,10 @@ class Swf extends BaseHandler
             switch ($TagID) {
                 case 0: // end of movie
                     break 2;
-
                 case 9: // Set background color
                     //$info['swf']['tags'][] = $TagData;
                     $info['swf']['bgcolor'] = strtoupper(str_pad(dechex(Helper::BigEndian2Int($TagData['data'])), 6, '0', STR_PAD_LEFT));
                     break;
-
                 default:
                     if ($this->ReturnAllTagData) {
                         $info['swf']['tags'][] = $TagData;

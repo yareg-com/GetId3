@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Extension\Cache;
 
-use GetId3\GetId3Core;
 use GetId3\Exception\DefaultException;
+use GetId3\GetId3Core;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -77,8 +86,8 @@ use GetId3\Exception\DefaultException;
  * @author James Heinrich <info@getid3.org>
  * @author Allan Hansen <ahØartemis*dk>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Dbm extends GetId3
 {
@@ -129,7 +138,6 @@ class Dbm extends GetId3
         // Try to open dbm file for writing
         $this->dba = dba_open($dbm_filename, 'w', $cache_type);
         if (!$this->dba) {
-
             // Failed - create new dbm file
             $this->dba = dba_open($dbm_filename, 'n', $cache_type);
 
@@ -156,9 +164,6 @@ class Dbm extends GetId3
         parent::__construct();
     }
 
-    /**
-     *
-     */
     public function __destruct()
     {
         // Close dbm file
@@ -205,7 +210,6 @@ class Dbm extends GetId3
     public function analyze($filename)
     {
         if (file_exists($filename)) {
-
             // Calc key     filename::mod_time::size    - should be unique
             $key = $filename.'::'.filemtime($filename).'::'.filesize($filename);
 

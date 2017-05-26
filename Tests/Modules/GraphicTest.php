@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Tests\Modules;
 
 use GetId3\GetId3Core;
@@ -60,12 +69,12 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayNotHasKey('error', $image);
         $this->assertArrayHasKey('mime_type', $image);
-        $this->assertEquals('image/jpeg', $image['mime_type']);
+        $this->assertSame('image/jpeg', $image['mime_type']);
         $this->assertArrayHasKey('fileformat', $image);
-        $this->assertEquals('jpg', $image['fileformat']);
+        $this->assertSame('jpg', $image['fileformat']);
         $this->assertArrayHasKey('video', $image);
         $this->assertArrayHasKey('dataformat', $image['video']);
-        $this->assertEquals('jpg', $image['video']['dataformat']);
+        $this->assertSame('jpg', $image['video']['dataformat']);
         $this->assertArrayHasKey('lossless', $image['video']);
         $this->assertArrayHasKey('bits_per_sample', $image['video']);
         $this->assertArrayHasKey('pixel_aspect_ratio', $image['video']);
@@ -99,12 +108,12 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayNotHasKey('error', $image);
         $this->assertArrayHasKey('mime_type', $image);
-        $this->assertEquals('image/png', $image['mime_type']);
+        $this->assertSame('image/png', $image['mime_type']);
         $this->assertArrayHasKey('fileformat', $image);
-        $this->assertEquals('png', $image['fileformat']);
+        $this->assertSame('png', $image['fileformat']);
         $this->assertArrayHasKey('video', $image);
         $this->assertArrayHasKey('dataformat', $image['video']);
-        $this->assertEquals('png', $image['video']['dataformat']);
+        $this->assertSame('png', $image['video']['dataformat']);
         $this->assertArrayHasKey('lossless', $image['video']);
         $this->assertArrayHasKey('bits_per_sample', $image['video']);
         $this->assertArrayHasKey('resolution_x', $image['video']);
@@ -120,7 +129,7 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('height', $image['png']['IHDR']);
         $this->assertSame(225, $image['png']['IHDR']['height']);
         $this->assertArrayHasKey('compression_method_text', $image['png']['IHDR']);
-        $this->assertEquals('deflate/inflate', $image['png']['IHDR']['compression_method_text']);
+        $this->assertSame('deflate/inflate', $image['png']['IHDR']['compression_method_text']);
         $this->assertArrayHasKey('bKGD', $image['png']);
         $this->assertArrayHasKey('background_red', $image['png']['bKGD']);
         $this->assertSame(1095233372415, $image['png']['bKGD']['background_red']);
@@ -148,12 +157,12 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayNotHasKey('error', $image);
         $this->assertArrayHasKey('mime_type', $image);
-        $this->assertEquals('image/bmp', $image['mime_type']);
+        $this->assertSame('image/bmp', $image['mime_type']);
         $this->assertArrayHasKey('fileformat', $image);
-        $this->assertEquals('bmp', $image['fileformat']);
+        $this->assertSame('bmp', $image['fileformat']);
         $this->assertArrayHasKey('video', $image);
         $this->assertArrayHasKey('dataformat', $image['video']);
-        $this->assertEquals('bmp', $image['video']['dataformat']);
+        $this->assertSame('bmp', $image['video']['dataformat']);
         $this->assertArrayHasKey('lossless', $image['video']);
         $this->assertArrayHasKey('bits_per_sample', $image['video']);
         $this->assertArrayHasKey('resolution_x', $image['video']);
@@ -165,7 +174,7 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('bmp', $image);
         $this->assertArrayHasKey('header', $image['bmp']);
         $this->assertArrayHasKey('compression', $image['bmp']['header']);
-        $this->assertEquals('BI_RGB', $image['bmp']['header']['compression']);
+        $this->assertSame('BI_RGB', $image['bmp']['header']['compression']);
     }
 
     public function testSvgFile()
@@ -191,12 +200,12 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $image);
         $this->assertArrayNotHasKey('warning', $image);
         $this->assertArrayHasKey('mime_type', $image);
-        $this->assertEquals('image/svg+xml', $image['mime_type']);
+        $this->assertSame('image/svg+xml', $image['mime_type']);
         $this->assertArrayHasKey('fileformat', $image);
-        $this->assertEquals('svg', $image['fileformat']);
+        $this->assertSame('svg', $image['fileformat']);
         $this->assertArrayHasKey('video', $image);
         $this->assertArrayHasKey('dataformat', $image['video']);
-        $this->assertEquals('svg', $image['video']['dataformat']);
+        $this->assertSame('svg', $image['video']['dataformat']);
         $this->assertArrayHasKey('lossless', $image['video']);
         $this->assertArrayHasKey('pixel_aspect_ratio', $image['video']);
         $this->assertArrayHasKey('resolution_x', $image['video']);
@@ -207,7 +216,7 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('xml', $image['svg']);
         $this->assertArrayHasKey('svg', $image['svg']);
         $this->assertArrayHasKey('version', $image['svg']);
-        $this->assertEquals('1.0', $image['svg']['version']);
+        $this->assertSame('1.0', $image['svg']['version']);
     }
 
     public function testTiffFile()
@@ -233,12 +242,12 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $image);
         $this->assertArrayNotHasKey('warning', $image);
         $this->assertArrayHasKey('mime_type', $image);
-        $this->assertEquals('image/tiff', $image['mime_type']);
+        $this->assertSame('image/tiff', $image['mime_type']);
         $this->assertArrayHasKey('fileformat', $image);
-        $this->assertEquals('tiff', $image['fileformat']);
+        $this->assertSame('tiff', $image['fileformat']);
         $this->assertArrayHasKey('video', $image);
         $this->assertArrayHasKey('dataformat', $image['video']);
-        $this->assertEquals('tiff', $image['video']['dataformat']);
+        $this->assertSame('tiff', $image['video']['dataformat']);
         $this->assertArrayHasKey('lossless', $image['video']);
         $this->assertArrayHasKey('resolution_x', $image['video']);
         $this->assertSame(1728, $image['video']['resolution_x']);
@@ -246,7 +255,7 @@ class GraphicTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(2376, $image['video']['resolution_y']);
         $this->assertArrayHasKey('tiff', $image);
         $this->assertArrayHasKey('byte_order', $image['tiff']);
-        $this->assertEquals('Intel', $image['tiff']['byte_order']);
+        $this->assertSame('Intel', $image['tiff']['byte_order']);
         $this->assertArrayHasKey('encoding', $image['tiff']);
         $this->assertArrayHasKey('comments', $image['tiff']);
     }

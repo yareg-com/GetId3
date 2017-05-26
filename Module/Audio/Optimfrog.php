@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\AudioVideo\Riff;
 
 /////////////////////////////////////////////////////////////////
@@ -24,12 +33,12 @@ use GetId3\Module\AudioVideo\Riff;
 /**
  * module for analyzing OptimFROG audio files
  *
- * @uses module.audio.riff.php
+ * @uses \module.audio.riff.php
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Optimfrog extends BaseHandler
 {
@@ -75,7 +84,7 @@ class Optimfrog extends BaseHandler
         $OptimFROGencoderVersion_major = floor($OptimFROGencoderVersion_raw / 10);
         $OptimFROGencoderVersion_minor = $OptimFROGencoderVersion_raw - ($OptimFROGencoderVersion_major * 10);
         $RIFFdata = substr($OptimFROGheaderData, 1, 44);
-        $OrignalRIFFheaderSize = Helper::LittleEndian2Int(substr($RIFFdata, 4, 4)) +  8;
+        $OrignalRIFFheaderSize = Helper::LittleEndian2Int(substr($RIFFdata, 4, 4)) + 8;
         $OrignalRIFFdataSize = Helper::LittleEndian2Int(substr($RIFFdata, 40, 4)) + 44;
 
         if ($OrignalRIFFheaderSize > $OrignalRIFFdataSize) {
@@ -147,7 +156,6 @@ class Optimfrog extends BaseHandler
                         case 15:
                             // good
                             break;
-
                         default:
                             $info['warning'][] = '"'.$BlockName.'" contains more data than expected (expected 12 or 15 bytes, found '.$BlockSize.' bytes)';
                             break;
@@ -166,7 +174,6 @@ class Optimfrog extends BaseHandler
                     $offset += 4;
 
                     if ($BlockSize > 12) {
-
                         // OFR 4.504b or higher
                         $thisfile_ofr_thisblock['channels'] = $this->OptimFROGchannelConfigNumChannelsLookup($thisfile_ofr_thisblock['channel_config']);
                         $thisfile_ofr_thisblock['raw']['encoder_id'] = Helper::LittleEndian2Int(substr($BlockData, $offset, 2));
@@ -194,7 +201,6 @@ class Optimfrog extends BaseHandler
                     $info['audio']['sample_rate'] = $thisfile_ofr_thisblock['sample_rate'];
                     $info['audio']['bits_per_sample'] = $this->OptimFROGbitsPerSampleTypeLookup($thisfile_ofr_thisblock['raw']['sample_type']);
                     break;
-
                 case 'COMP':
                     // unlike other block types, there CAN be multiple COMP blocks
 
@@ -224,7 +230,6 @@ class Optimfrog extends BaseHandler
                     $offset += 2;
 
                     if ($info['ofr']['OFR ']['size'] > 12) {
-
                         // OFR 4.504b or higher
                         $COMPdata['raw']['encoder_id'] = Helper::LittleEndian2Int(substr($BlockData, $offset, 2));
                         $COMPdata['encoder'] = $this->OptimFROGencoderNameLookup($COMPdata['raw']['encoder_id']);
@@ -238,14 +243,12 @@ class Optimfrog extends BaseHandler
 
                     $thisfile_ofr_thisblock[] = $COMPdata;
                     break;
-
                 case 'HEAD':
                     $thisfile_ofr_thisblock['offset'] = $BlockOffset;
                     $thisfile_ofr_thisblock['size'] = $BlockSize;
 
                     $RIFFdata .= fread($this->getid3->fp, $BlockSize);
                     break;
-
                 case 'TAIL':
                     $thisfile_ofr_thisblock['offset'] = $BlockOffset;
                     $thisfile_ofr_thisblock['size'] = $BlockSize;
@@ -254,7 +257,6 @@ class Optimfrog extends BaseHandler
                         $RIFFdata .= fread($this->getid3->fp, $BlockSize);
                     }
                     break;
-
                 case 'RECV':
                     // block contains no useful meta data - simply note and skip
 
@@ -263,7 +265,6 @@ class Optimfrog extends BaseHandler
 
                     fseek($this->getid3->fp, $BlockSize, SEEK_CUR);
                     break;
-
                 case 'APET':
                     // APEtag v2
 
@@ -273,7 +274,6 @@ class Optimfrog extends BaseHandler
 
                     fseek($this->getid3->fp, $BlockSize, SEEK_CUR);
                     break;
-
                 case 'MD5 ':
                     // APEtag v2
 
@@ -289,7 +289,6 @@ class Optimfrog extends BaseHandler
                         fseek($this->getid3->fp, $BlockSize, SEEK_CUR);
                     }
                     break;
-
                 default:
                     $thisfile_ofr_thisblock['offset'] = $BlockOffset;
                     $thisfile_ofr_thisblock['size'] = $BlockSize;
@@ -347,7 +346,7 @@ class Optimfrog extends BaseHandler
             10 => 'float 24.0 (32-bit)',
         );
 
-        return (isset($OptimFROGsampleTypeLookup[$SampleType]) ? $OptimFROGsampleTypeLookup[$SampleType] : false);
+        return isset($OptimFROGsampleTypeLookup[$SampleType]) ? $OptimFROGsampleTypeLookup[$SampleType] : false;
     }
 
     /**
@@ -373,7 +372,7 @@ class Optimfrog extends BaseHandler
             10 => 32,
         );
 
-        return (isset($OptimFROGbitsPerSampleTypeLookup[$SampleType]) ? $OptimFROGbitsPerSampleTypeLookup[$SampleType] : false);
+        return isset($OptimFROGbitsPerSampleTypeLookup[$SampleType]) ? $OptimFROGbitsPerSampleTypeLookup[$SampleType] : false;
     }
 
     /**
@@ -390,7 +389,7 @@ class Optimfrog extends BaseHandler
             1 => 'stereo',
         );
 
-        return (isset($OptimFROGchannelConfigurationLookup[$ChannelConfiguration]) ? $OptimFROGchannelConfigurationLookup[$ChannelConfiguration] : false);
+        return isset($OptimFROGchannelConfigurationLookup[$ChannelConfiguration]) ? $OptimFROGchannelConfigurationLookup[$ChannelConfiguration] : false;
     }
 
     /**
@@ -407,7 +406,7 @@ class Optimfrog extends BaseHandler
             1 => 2,
         );
 
-        return (isset($OptimFROGchannelConfigNumChannelsLookup[$ChannelConfiguration]) ? $OptimFROGchannelConfigNumChannelsLookup[$ChannelConfiguration] : false);
+        return isset($OptimFROGchannelConfigNumChannelsLookup[$ChannelConfiguration]) ? $OptimFROGchannelConfigNumChannelsLookup[$ChannelConfiguration] : false;
     }
 
     // static function OptimFROGalgorithmNameLookup($AlgorithID) {
@@ -467,7 +466,7 @@ class Optimfrog extends BaseHandler
             0x09 => 'bestnew',
         );
 
-        return (isset($OptimFROGencoderModeLookup[$CompressionModeID]) ? $OptimFROGencoderModeLookup[$CompressionModeID] : 'undefined mode (0x'.str_pad(dechex($CompressionModeID), 2, '0', STR_PAD_LEFT).')');
+        return isset($OptimFROGencoderModeLookup[$CompressionModeID]) ? $OptimFROGencoderModeLookup[$CompressionModeID] : 'undefined mode (0x'.str_pad(dechex($CompressionModeID), 2, '0', STR_PAD_LEFT).')';
     }
 
     /**
@@ -491,6 +490,6 @@ class Optimfrog extends BaseHandler
             0x02 => '4x',
         );
 
-        return (isset($OptimFROGencoderSpeedupLookup[$CompressionSpeedupID]) ? $OptimFROGencoderSpeedupLookup[$CompressionSpeedupID] : 'undefined mode (0x'.dechex($CompressionSpeedupID));
+        return isset($OptimFROGencoderSpeedupLookup[$CompressionSpeedupID]) ? $OptimFROGencoderSpeedupLookup[$CompressionSpeedupID] : 'undefined mode (0x'.dechex($CompressionSpeedupID);
     }
 }

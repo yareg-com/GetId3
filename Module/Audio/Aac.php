@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Aac extends BaseHandler
 {
@@ -60,7 +69,6 @@ class Aac extends BaseHandler
         $offset = 0;
 
         if (substr($AACheader, 0, 4) == 'ADIF') {
-
             // http://faac.sourceforge.net/wiki/index.php?page=ADIF
 
             // http://libmpeg.org/mpeg4/doc/w2203tfs.pdf
@@ -262,13 +270,12 @@ class Aac extends BaseHandler
             $info['audio']['encoder_options'] = $info['aac']['header_type'].' '.$info['aac']['header']['profile'];
 
             return true;
-        } else {
-            unset($info['fileformat']);
-            unset($info['aac']);
-            $info['error'][] = 'AAC-ADIF synch not found at offset '.$info['avdataoffset'].' (expected "ADIF", found "'.substr($AACheader, 0, 4).'" instead)';
-
-            return false;
         }
+        unset($info['fileformat']);
+        unset($info['aac']);
+        $info['error'][] = 'AAC-ADIF synch not found at offset '.$info['avdataoffset'].' (expected "ADIF", found "'.substr($AACheader, 0, 4).'" instead)';
+
+        return false;
     }
 
     /**
@@ -379,9 +386,9 @@ class Aac extends BaseHandler
                 $info['aac']['header']['raw']['home'] = ($header2 & 0x00100000) >> 20;
                 $info['aac']['header']['raw']['copyright_stream'] = ($header2 & 0x00080000) >> 19;
                 $info['aac']['header']['raw']['copyright_start'] = ($header2 & 0x00040000) >> 18;
-                $info['aac']['header']['raw']['frame_length'] = ($header2 & 0x0003FFE0) >>  5;
+                $info['aac']['header']['raw']['frame_length'] = ($header2 & 0x0003FFE0) >> 5;
 
-                $info['aac']['header']['mpeg_version'] = ($info['aac']['header']['raw']['mpeg_version']      ? 2    : 4);
+                $info['aac']['header']['mpeg_version'] = ($info['aac']['header']['raw']['mpeg_version'] ? 2 : 4);
                 $info['aac']['header']['crc_present'] = ($info['aac']['header']['raw']['protection_absent'] ? false : true);
                 $info['aac']['header']['profile'] = self::AACprofileLookup($info['aac']['header']['raw']['profile_code'], $info['aac']['header']['mpeg_version']);
                 $info['aac']['header']['sample_frequency'] = self::AACsampleRateLookup($info['aac']['header']['raw']['sample_rate_code']);
@@ -407,7 +414,7 @@ class Aac extends BaseHandler
                 $info['audio']['channels'] = $info['aac']['header']['channels'];
             }
 
-            $FrameLength = ($header2 & 0x0003FFE0) >>  5;
+            $FrameLength = ($header2 & 0x0003FFE0) >> 5;
 
             if (!isset($BitrateCache[$FrameLength])) {
                 $BitrateCache[$FrameLength] = ($info['aac']['header']['sample_frequency'] / 1024) * $FrameLength * 8;
@@ -444,7 +451,6 @@ class Aac extends BaseHandler
 
             $byteoffset += $FrameLength;
             if ((++$framenumber < $MaxFramesToScan) && (($byteoffset + 10) < $info['avdataend'])) {
-
                 // keep scanning
             } else {
                 $info['aac']['frames'] = $framenumber;
@@ -494,7 +500,7 @@ class Aac extends BaseHandler
             $AACsampleRateLookup[15] = 0;
         }
 
-        return (isset($AACsampleRateLookup[$samplerateid]) ? $AACsampleRateLookup[$samplerateid] : 'invalid');
+        return isset($AACsampleRateLookup[$samplerateid]) ? $AACsampleRateLookup[$samplerateid] : 'invalid';
     }
 
     /**
@@ -519,7 +525,7 @@ class Aac extends BaseHandler
             $AACprofileLookup[4][3] = 'AAC_LTP';
         }
 
-        return (isset($AACprofileLookup[$mpegversion][$profileid]) ? $AACprofileLookup[$mpegversion][$profileid] : 'invalid');
+        return isset($AACprofileLookup[$mpegversion][$profileid]) ? $AACprofileLookup[$mpegversion][$profileid] : 'invalid';
     }
 
     /**

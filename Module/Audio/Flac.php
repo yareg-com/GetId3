@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -25,8 +34,8 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Flac extends BaseHandler
 {
@@ -94,41 +103,34 @@ class Flac extends BaseHandler
                         return false;
                     }
                     break;
-
                 case 'PADDING':        // 0x01
                     // ignore
                     break;
-
                 case 'APPLICATION':    // 0x02
                     if (!$this->parseAPPLICATION($BlockTypeText_raw['block_data'])) {
                         return false;
                     }
                     break;
-
                 case 'SEEKTABLE':      // 0x03
                     if (!$this->parseSEEKTABLE($BlockTypeText_raw['block_data'])) {
                         return false;
                     }
                     break;
-
                 case 'VORBIS_COMMENT': // 0x04
                     if (!$this->parseVORBIS_COMMENT($BlockTypeText_raw['block_data'])) {
                         return false;
                     }
                     break;
-
                 case 'CUESHEET':       // 0x05
                     if (!$this->parseCUESHEET($BlockTypeText_raw['block_data'])) {
                         return false;
                     }
                     break;
-
                 case 'PICTURE':        // 0x06
                     if (!$this->parsePICTURE($BlockTypeText_raw)) {
                         return false;
                     }
                     break;
-
                 default:
                     $this->warning('Unhandled METADATA_BLOCK_HEADER.BLOCK_TYPE ('.$BlockType.') at offset '.$BlockOffset);
             }
@@ -195,6 +197,120 @@ class Flac extends BaseHandler
         }
 
         return true;
+    }
+
+    /**
+     * @param  type    $Block
+     *
+     * @return bool
+     */
+    public function parsePICTURE($Block = '')
+    {
+        $info = &$this->getid3->info;
+
+        $picture['typeid'] = Helper::BigEndian2Int($this->fread(4));
+        $picture['type'] = self::pictureTypeLookup($picture['typeid']);
+        $picture['image_mime'] = $this->fread(Helper::BigEndian2Int($this->fread(4)));
+        $descr_length = Helper::BigEndian2Int($this->fread(4));
+        if ($descr_length) {
+            $picture['description'] = $this->fread($descr_length);
+        }
+        $picture['width'] = Helper::BigEndian2Int($this->fread(4));
+        $picture['height'] = Helper::BigEndian2Int($this->fread(4));
+        $picture['color_depth'] = Helper::BigEndian2Int($this->fread(4));
+        $picture['colors_indexed'] = Helper::BigEndian2Int($this->fread(4));
+        $data_length = Helper::BigEndian2Int($this->fread(4));
+
+        if ($picture['image_mime'] == '-->') {
+            $picture['data'] = $this->fread($data_length);
+        } else {
+            $this->saveAttachment(
+                $picture['data'],
+                $picture['type'].'_'.$this->ftell().'.'.substr($picture['image_mime'], 6),
+                $this->ftell(), $data_length);
+        }
+
+        $info['flac']['PICTURE'][] = $picture;
+
+        return true;
+    }
+
+    /**
+     * @staticvar array $metaBlockTypeLookup
+     *
+     * @param  type $blocktype
+     *
+     * @return type
+     */
+    public static function metaBlockTypeLookup($blocktype)
+    {
+        static $metaBlockTypeLookup = array();
+        if (empty($metaBlockTypeLookup)) {
+            $metaBlockTypeLookup[0] = 'STREAMINFO';
+            $metaBlockTypeLookup[1] = 'PADDING';
+            $metaBlockTypeLookup[2] = 'APPLICATION';
+            $metaBlockTypeLookup[3] = 'SEEKTABLE';
+            $metaBlockTypeLookup[4] = 'VORBIS_COMMENT';
+            $metaBlockTypeLookup[5] = 'CUESHEET';
+            $metaBlockTypeLookup[6] = 'PICTURE';
+        }
+
+        return isset($metaBlockTypeLookup[$blocktype]) ? $metaBlockTypeLookup[$blocktype] : 'reserved';
+    }
+
+    /**
+     * @staticvar array $applicationIDLookup
+     *
+     * @param  type $applicationid
+     *
+     * @return type
+     */
+    public static function applicationIDLookup($applicationid)
+    {
+        static $applicationIDLookup = array();
+        if (empty($applicationIDLookup)) {
+            // http://flac.sourceforge.net/id.html
+            $applicationIDLookup[0x46746F6C] = 'flac-tools';      // 'Ftol'
+            $applicationIDLookup[0x46746F6C] = 'Sound Font FLAC'; // 'SFFL'
+        }
+
+        return isset($applicationIDLookup[$applicationid]) ? $applicationIDLookup[$applicationid] : 'reserved';
+    }
+
+    /**
+     * @staticvar array $lookup
+     *
+     * @param  type $type_id
+     *
+     * @return type
+     */
+    public static function pictureTypeLookup($type_id)
+    {
+        static $lookup = array(
+             0 => 'Other',
+             1 => '32x32 pixels \'file icon\' (PNG only)',
+             2 => 'Other file icon',
+             3 => 'Cover (front)',
+             4 => 'Cover (back)',
+             5 => 'Leaflet page',
+             6 => 'Media (e.g. label side of CD)',
+             7 => 'Lead artist/lead performer/soloist',
+             8 => 'Artist/performer',
+             9 => 'Conductor',
+            10 => 'Band/Orchestra',
+            11 => 'Composer',
+            12 => 'Lyricist/text writer',
+            13 => 'Recording Location',
+            14 => 'During recording',
+            15 => 'During performance',
+            16 => 'Movie/video screen capture',
+            17 => 'A bright coloured fish',
+            18 => 'Illustration',
+            19 => 'Band/artist logotype',
+            20 => 'Publisher/Studio logotype',
+        );
+
+        return isset($lookup[$type_id]) ? $lookup[$type_id] : 'reserved';
     }
 
     /**
@@ -274,7 +390,6 @@ class Flac extends BaseHandler
             $SampleNumberString = substr($BlockData, $offset, 8);
             $offset += 8;
             if ($SampleNumberString == $placeholderpattern) {
-
                 // placeholder point
                 Helper::safe_inc($info['flac']['SEEKTABLE']['placeholders'], 1);
                 $offset += 10;
@@ -371,119 +486,5 @@ class Flac extends BaseHandler
         }
 
         return true;
-    }
-
-    /**
-     * @param  type    $Block
-     *
-     * @return bool
-     */
-    public function parsePICTURE($Block = '')
-    {
-        $info = &$this->getid3->info;
-
-        $picture['typeid'] = Helper::BigEndian2Int($this->fread(4));
-        $picture['type'] = self::pictureTypeLookup($picture['typeid']);
-        $picture['image_mime'] = $this->fread(Helper::BigEndian2Int($this->fread(4)));
-        $descr_length = Helper::BigEndian2Int($this->fread(4));
-        if ($descr_length) {
-            $picture['description'] = $this->fread($descr_length);
-        }
-        $picture['width'] = Helper::BigEndian2Int($this->fread(4));
-        $picture['height'] = Helper::BigEndian2Int($this->fread(4));
-        $picture['color_depth'] = Helper::BigEndian2Int($this->fread(4));
-        $picture['colors_indexed'] = Helper::BigEndian2Int($this->fread(4));
-        $data_length = Helper::BigEndian2Int($this->fread(4));
-
-        if ($picture['image_mime'] == '-->') {
-            $picture['data'] = $this->fread($data_length);
-        } else {
-            $this->saveAttachment(
-                $picture['data'],
-                $picture['type'].'_'.$this->ftell().'.'.substr($picture['image_mime'], 6),
-                $this->ftell(), $data_length);
-        }
-
-        $info['flac']['PICTURE'][] = $picture;
-
-        return true;
-    }
-
-    /**
-     * @staticvar array $metaBlockTypeLookup
-     *
-     * @param  type $blocktype
-     *
-     * @return type
-     */
-    public static function metaBlockTypeLookup($blocktype)
-    {
-        static $metaBlockTypeLookup = array();
-        if (empty($metaBlockTypeLookup)) {
-            $metaBlockTypeLookup[0] = 'STREAMINFO';
-            $metaBlockTypeLookup[1] = 'PADDING';
-            $metaBlockTypeLookup[2] = 'APPLICATION';
-            $metaBlockTypeLookup[3] = 'SEEKTABLE';
-            $metaBlockTypeLookup[4] = 'VORBIS_COMMENT';
-            $metaBlockTypeLookup[5] = 'CUESHEET';
-            $metaBlockTypeLookup[6] = 'PICTURE';
-        }
-
-        return (isset($metaBlockTypeLookup[$blocktype]) ? $metaBlockTypeLookup[$blocktype] : 'reserved');
-    }
-
-    /**
-     * @staticvar array $applicationIDLookup
-     *
-     * @param  type $applicationid
-     *
-     * @return type
-     */
-    public static function applicationIDLookup($applicationid)
-    {
-        static $applicationIDLookup = array();
-        if (empty($applicationIDLookup)) {
-            // http://flac.sourceforge.net/id.html
-            $applicationIDLookup[0x46746F6C] = 'flac-tools';      // 'Ftol'
-            $applicationIDLookup[0x46746F6C] = 'Sound Font FLAC'; // 'SFFL'
-        }
-
-        return (isset($applicationIDLookup[$applicationid]) ? $applicationIDLookup[$applicationid] : 'reserved');
-    }
-
-    /**
-     * @staticvar array $lookup
-     *
-     * @param  type $type_id
-     *
-     * @return type
-     */
-    public static function pictureTypeLookup($type_id)
-    {
-        static $lookup = array(
-             0 => 'Other',
-             1 => '32x32 pixels \'file icon\' (PNG only)',
-             2 => 'Other file icon',
-             3 => 'Cover (front)',
-             4 => 'Cover (back)',
-             5 => 'Leaflet page',
-             6 => 'Media (e.g. label side of CD)',
-             7 => 'Lead artist/lead performer/soloist',
-             8 => 'Artist/performer',
-             9 => 'Conductor',
-            10 => 'Band/Orchestra',
-            11 => 'Composer',
-            12 => 'Lyricist/text writer',
-            13 => 'Recording Location',
-            14 => 'During recording',
-            15 => 'During performance',
-            16 => 'Movie/video screen capture',
-            17 => 'A bright coloured fish',
-            18 => 'Illustration',
-            19 => 'Band/artist logotype',
-            20 => 'Publisher/Studio logotype',
-        );
-
-        return (isset($lookup[$type_id]) ? $lookup[$type_id] : 'reserved');
     }
 }

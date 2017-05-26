@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Graphic;
 
 use GetId3\Handler\BaseHandler;
@@ -23,8 +32,8 @@ use GetId3\Handler\BaseHandler;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Pcd extends BaseHandler
 {
@@ -33,9 +42,6 @@ class Pcd extends BaseHandler
      */
     public $ExtractData = 0;
 
-    /**
-     *
-     */
     public function analyze()
     {
         $info = &$this->getid3->info;
@@ -80,16 +86,16 @@ class Pcd extends BaseHandler
 
                 $PCD_data_Y1 = fread($this->getid3->fp, $PCD_width);
                 $PCD_data_Y2 = fread($this->getid3->fp, $PCD_width);
-                $PCD_data_Cb = fread($this->getid3->fp, intval(round($PCD_width / 2)));
-                $PCD_data_Cr = fread($this->getid3->fp, intval(round($PCD_width / 2)));
+                $PCD_data_Cb = fread($this->getid3->fp, (int) (round($PCD_width / 2)));
+                $PCD_data_Cr = fread($this->getid3->fp, (int) (round($PCD_width / 2)));
 
                 for ($x = 0; $x < $PCD_width; ++$x) {
                     if ($PCDisVertical) {
-                        $info['pcd']['data'][$PCD_width - $x][$y] = $this->YCbCr2RGB(ord($PCD_data_Y1{$x}), ord($PCD_data_Cb{floor($x / 2)}), ord($PCD_data_Cr{floor($x / 2)}));
-                        $info['pcd']['data'][$PCD_width - $x][$y + 1] = $this->YCbCr2RGB(ord($PCD_data_Y2{$x}), ord($PCD_data_Cb{floor($x / 2)}), ord($PCD_data_Cr{floor($x / 2)}));
+                        $info['pcd']['data'][$PCD_width - $x][$y] = $this->YCbCr2RGB(ord($PCD_data_Y1[$x]), ord($PCD_data_Cb[floor($x / 2)]), ord($PCD_data_Cr[floor($x / 2)]));
+                        $info['pcd']['data'][$PCD_width - $x][$y + 1] = $this->YCbCr2RGB(ord($PCD_data_Y2[$x]), ord($PCD_data_Cb[floor($x / 2)]), ord($PCD_data_Cr[floor($x / 2)]));
                     } else {
-                        $info['pcd']['data'][$y][$x] = $this->YCbCr2RGB(ord($PCD_data_Y1{$x}), ord($PCD_data_Cb{floor($x / 2)}), ord($PCD_data_Cr{floor($x / 2)}));
-                        $info['pcd']['data'][$y + 1][$x] = $this->YCbCr2RGB(ord($PCD_data_Y2{$x}), ord($PCD_data_Cb{floor($x / 2)}), ord($PCD_data_Cr{floor($x / 2)}));
+                        $info['pcd']['data'][$y][$x] = $this->YCbCr2RGB(ord($PCD_data_Y1[$x]), ord($PCD_data_Cb[floor($x / 2)]), ord($PCD_data_Cr[floor($x / 2)]));
+                        $info['pcd']['data'][$y + 1][$x] = $this->YCbCr2RGB(ord($PCD_data_Y2[$x]), ord($PCD_data_Cb[floor($x / 2)]), ord($PCD_data_Cr[floor($x / 2)]));
                     }
                 }
             }
@@ -137,7 +143,7 @@ class Pcd extends BaseHandler
         foreach ($RGBcolor as $rgbname => $dummy) {
             $RGBcolor[$rgbname] = max(0,
                                         min(255,
-                                            intval(
+                                            (int) (
                                                 round(
                                                     ($YCbCr_constants[$rgbname]['Y'] * $Y) +
                                                     ($YCbCr_constants[$rgbname]['Cb'] * ($Cb - 156)) +
@@ -148,6 +154,6 @@ class Pcd extends BaseHandler
                                     );
         }
 
-        return (($RGBcolor['red'] * 65536) + ($RGBcolor['green'] * 256) + $RGBcolor['blue']);
+        return ($RGBcolor['red'] * 65536) + ($RGBcolor['green'] * 256) + $RGBcolor['blue'];
     }
 }

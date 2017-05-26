@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Nsv extends BaseHandler
 {
@@ -49,7 +58,6 @@ class Nsv extends BaseHandler
                     $info['video']['lossless'] = false;
                 }
                 break;
-
             case 'NSVf':
                 if ($this->getNSVfHeaderFilepointer(0)) {
                     $info['fileformat'] = 'nsv';
@@ -60,7 +68,6 @@ class Nsv extends BaseHandler
                     $this->getNSVsHeaderFilepointer($info['nsv']['NSVf']['header_length']);
                 }
                 break;
-
             default:
                 $info['error'][] = 'Expecting "NSVs" or "NSVf" at offset '.$info['avdataoffset'].', found "'.Helper::PrintHexBytes($NSVheader).'"';
 
@@ -136,7 +143,6 @@ class Nsv extends BaseHandler
 
                 $info['audio']['sample_rate'] = $info['nsv']['NSVs']['sample_rate'];
                 break;
-
             case 'MP3 ':
             case 'NONE':
             default:
@@ -258,6 +264,6 @@ class Nsv extends BaseHandler
             $NSVframerateLookup[199] = (float) 47.952;
         }
 
-        return (isset($NSVframerateLookup[$framerateindex]) ? $NSVframerateLookup[$framerateindex] : false);
+        return isset($NSVframerateLookup[$framerateindex]) ? $NSVframerateLookup[$framerateindex] : false;
     }
 }

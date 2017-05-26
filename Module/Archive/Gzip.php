@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Archive;
 
-use GetId3\Lib\Helper;
 use GetId3\GetId3Core;
+use GetId3\Lib\Helper;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -30,8 +39,8 @@ use GetId3\GetId3Core;
  * @author James Heinrich <info@getid3.org>
  * @author Mike Mozolin <teddybearØmail*ru>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Gzip
 {
@@ -69,7 +78,7 @@ class Gzip
         $arr_members = explode("\x1F\x8B\x08", $buffer);
         while (true) {
             $is_wrong_members = false;
-            $num_members = intval(count($arr_members));
+            $num_members = (int) (count($arr_members));
             for ($i = 0; $i < $num_members; ++$i) {
                 if (strlen($arr_members[$i]) == 0) {
                     continue;
@@ -268,7 +277,6 @@ class Gzip
                                 }
                             }
                             break;
-
                         case '':
                         default:
                             // unknown or unhandled format
@@ -310,7 +318,7 @@ class Gzip
             '255' => 'unknown',
         );
 
-        return (isset($os_type[$key]) ? $os_type[$key] : '');
+        return isset($os_type[$key]) ? $os_type[$key] : '';
     }
 
     /**
@@ -330,6 +338,6 @@ class Gzip
             '4' => 'fastest algorithm',
         );
 
-        return (isset($xflag_type[$key]) ? $xflag_type[$key] : '');
+        return isset($xflag_type[$key]) ? $xflag_type[$key] : '';
     }
 }

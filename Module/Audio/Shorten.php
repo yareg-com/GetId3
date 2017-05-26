@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
 use GetId3\Module\AudioVideo\Riff;
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +35,8 @@ use GetId3\Module\AudioVideo\Riff;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Shorten extends BaseHandler
 {
@@ -69,7 +78,7 @@ class Shorten extends BaseHandler
                 $info['error'][] = 'Expecting "'.Helper::PrintHexBytes($magic).'" at offset '.$info['shn']['seektable']['offset'].', found "'.Helper::PrintHexBytes($SeekTableMagic).'"';
 
                 return false;
-            } else {
+            }
 
                 // typedef struct tag_TSeekEntry
                 // {
@@ -88,7 +97,7 @@ class Shorten extends BaseHandler
                 // }TSeekEntry;
 
                 $SeekTableData = fread($this->getid3->fp, $info['shn']['seektable']['length'] - 16);
-                $info['shn']['seektable']['entry_count'] = floor(strlen($SeekTableData) / 80);
+            $info['shn']['seektable']['entry_count'] = floor(strlen($SeekTableData) / 80);
                 //$info['shn']['seektable']['entries'] = array();
                 //$SeekTableOffset = 0;
                 //for ($i = 0; $i < $info['shn']['seektable']['entry_count']; $i++) {
@@ -127,7 +136,6 @@ class Shorten extends BaseHandler
                 //
                 //	$info['shn']['seektable']['entries'][] = $SeekTableEntry;
                 //}
-            }
         }
 
         if (preg_match('#(1|ON)#i', ini_get('safe_mode'))) {

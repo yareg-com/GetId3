@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Extension\Cache;
 
 use GetId3\GetId3Core;
@@ -98,8 +107,8 @@ use GetId3\GetId3Core;
  * @author Carlo Capocasa <calroØcarlocapocasa*com>
  * @author Karl G. Holz <newaeonØmac*com>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Sqlite3 extends GetId3
 {
@@ -121,15 +130,16 @@ class Sqlite3 extends GetId3
      * __construct()
      *
      * @param  string $table holds name of sqlite table
+     * @param mixed $hide
      *
      * @return type
      */
     public function __construct($table = 'getid3_cache', $hide = false)
     {
         $this->table = $table; // Set table
-        $file = dirname(__FILE__).'/'.basename(__FILE__, 'php').'sqlite';
+        $file = __DIR__.'/'.basename(__FILE__, 'php').'sqlite';
         if ($hide) {
-            $file = dirname(__FILE__).'/.ht.'.basename(__FILE__, 'php').'sqlite';
+            $file = __DIR__.'/.ht.'.basename(__FILE__, 'php').'sqlite';
         }
         $this->db = new self($file);
         $db = $this->db;
@@ -157,22 +167,37 @@ class Sqlite3 extends GetId3
     }
 
     /**
-     * clear the cache
+     * use the magical __get() for sql queries
      *
-     * @return type
+     * access as easy as $this->{case name}, returns NULL if query is not found
+     *
+     * @param mixed $name
      */
-    private function clear_cache()
+    public function __get($name)
     {
-        $db = $this->db;
-        $sql = $this->delete_cache;
-        $db->exec($sql);
-        $sql = $this->set_version;
-        $stmt = $db->prepare($sql);
-        $stmt->bindValue(':filename', GetId3Core::VERSION, SQLITE3_TEXT);
-        $stmt->bindValue(':dirname', GetId3Core::VERSION, SQLITE3_TEXT);
-        $stmt->bindValue(':val', GetId3Core::VERSION, SQLITE3_TEXT);
-
-        return $stmt->execute();
+        switch ($name) {
+            case 'version_check':
+                return "SELECT val FROM $this->table WHERE filename = :filename AND filesize = '-1' AND filetime = '-1' AND analyzetime = '-1'";
+                break;
+            case 'delete_cache':
+                return "DELETE FROM $this->table";
+                break;
+            case 'set_version':
+                return "INSERT INTO $this->table (filename, dirname, filesize, filetime, analyzetime, val) VALUES (:filename, :dirname, -1, -1, -1, :val)";
+                break;
+            case 'get_id3_data':
+                return "SELECT val FROM $this->table WHERE filename = :filename AND filesize = :filesize AND filetime = :filetime";
+                break;
+            case 'cache_file':
+                return "INSERT INTO $this->table (filename, dirname, filesize, filetime, analyzetime, val) VALUES (:filename, :dirname, :filesize, :filetime, :atime, :val)";
+                break;
+            case 'make_table':
+                return "CREATE TABLE IF NOT EXISTS $this->table (filename VARCHAR(255) NOT NULL DEFAULT '', dirname VARCHAR(255) NOT NULL DEFAULT '', filesize INT(11) NOT NULL DEFAULT '0', filetime INT(11) NOT NULL DEFAULT '0', analyzetime INT(11) NOT NULL DEFAULT '0', val text not null, PRIMARY KEY (filename, filesize, filetime))";
+                break;
+            case 'get_cached_dir':
+                return "SELECT val FROM $this->table WHERE dirname = :dirname";
+                break;
+        }
     }
 
     /**
@@ -223,20 +248,6 @@ class Sqlite3 extends GetId3
     }
 
     /**
-     * create data base table
-     * this is almost the same as MySQL, with the exception of the dirname being added
-     *
-     * @return type
-     */
-    private function create_table()
-    {
-        $db = $this->db;
-        $sql = $this->make_table;
-
-        return $db->exec($sql);
-    }
-
-    /**
      * get cached directory
      *
      * This function is not in the MySQL extention, it's ment to speed up requesting multiple files
@@ -262,34 +273,35 @@ class Sqlite3 extends GetId3
     }
 
     /**
-     * use the magical __get() for sql queries
+     * clear the cache
      *
-     * access as easy as $this->{case name}, returns NULL if query is not found
+     * @return type
      */
-    public function __get($name)
+    private function clear_cache()
     {
-        switch ($name) {
-            case 'version_check':
-                return "SELECT val FROM $this->table WHERE filename = :filename AND filesize = '-1' AND filetime = '-1' AND analyzetime = '-1'";
-                break;
-            case 'delete_cache':
-                return "DELETE FROM $this->table";
-                break;
-            case 'set_version':
-                return "INSERT INTO $this->table (filename, dirname, filesize, filetime, analyzetime, val) VALUES (:filename, :dirname, -1, -1, -1, :val)";
-                break;
-            case 'get_id3_data':
-                return "SELECT val FROM $this->table WHERE filename = :filename AND filesize = :filesize AND filetime = :filetime";
-                break;
-            case 'cache_file':
-                return "INSERT INTO $this->table (filename, dirname, filesize, filetime, analyzetime, val) VALUES (:filename, :dirname, :filesize, :filetime, :atime, :val)";
-                break;
-            case 'make_table':
-                return "CREATE TABLE IF NOT EXISTS $this->table (filename VARCHAR(255) NOT NULL DEFAULT '', dirname VARCHAR(255) NOT NULL DEFAULT '', filesize INT(11) NOT NULL DEFAULT '0', filetime INT(11) NOT NULL DEFAULT '0', analyzetime INT(11) NOT NULL DEFAULT '0', val text not null, PRIMARY KEY (filename, filesize, filetime))";
-                break;
-            case 'get_cached_dir':
-                return "SELECT val FROM $this->table WHERE dirname = :dirname";
-                break;
-        }
+        $db = $this->db;
+        $sql = $this->delete_cache;
+        $db->exec($sql);
+        $sql = $this->set_version;
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':filename', GetId3Core::VERSION, SQLITE3_TEXT);
+        $stmt->bindValue(':dirname', GetId3Core::VERSION, SQLITE3_TEXT);
+        $stmt->bindValue(':val', GetId3Core::VERSION, SQLITE3_TEXT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * create data base table
+     * this is almost the same as MySQL, with the exception of the dirname being added
+     *
+     * @return type
+     */
+    private function create_table()
+    {
+        $db = $this->db;
+        $sql = $this->make_table;
+
+        return $db->exec($sql);
     }
 }

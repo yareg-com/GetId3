@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Dss extends BaseHandler
 {
@@ -60,7 +69,7 @@ class Dss extends BaseHandler
         $thisfile_dss['date_create'] = self::DSSdateStringToUnixDate(substr($DSSheader, 38, 12));
         $thisfile_dss['date_complete'] = self::DSSdateStringToUnixDate(substr($DSSheader, 50, 12));
         //$thisfile_dss['length']         =                         intval(substr($DSSheader,  62,   6)); // I thought time was in seconds, it's actually HHMMSS
-        $thisfile_dss['length'] = intval((substr($DSSheader, 62, 2) * 3600) + (substr($DSSheader, 64, 2) * 60) + substr($DSSheader, 66, 2));
+        $thisfile_dss['length'] = (int) ((substr($DSSheader, 62, 2) * 3600) + (substr($DSSheader, 64, 2) * 60) + substr($DSSheader, 66, 2));
         $thisfile_dss['priority'] = ord(substr($DSSheader, 793, 1));
         $thisfile_dss['comments'] = trim(substr($DSSheader, 798, 100));
 

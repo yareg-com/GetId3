@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Misc;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Iso extends BaseHandler
 {
@@ -42,17 +51,15 @@ class Iso extends BaseHandler
             fseek($this->getid3->fp, 2048 * $i, SEEK_SET);
             $ISOheader = fread($this->getid3->fp, 2048);
             if (substr($ISOheader, 1, 5) == 'CD001') {
-                switch (ord($ISOheader{0})) {
+                switch (ord($ISOheader[0])) {
                     case 1:
                         $info['iso']['primary_volume_descriptor']['offset'] = 2048 * $i;
                         $this->ParsePrimaryVolumeDescriptor($ISOheader);
                         break;
-
                     case 2:
                         $info['iso']['supplementary_volume_descriptor']['offset'] = 2048 * $i;
                         $this->ParseSupplementaryVolumeDescriptor($ISOheader);
                         break;
-
                     default:
                         // skip
                         break;
@@ -314,8 +321,8 @@ class Iso extends BaseHandler
         fseek($this->getid3->fp, $directorydata['location_bytes'], SEEK_SET);
         $DirectoryRecordData = fread($this->getid3->fp, 1);
 
-        while (ord($DirectoryRecordData{0}) > 33) {
-            $DirectoryRecordData .= fread($this->getid3->fp, ord($DirectoryRecordData{0}) - 1);
+        while (ord($DirectoryRecordData[0]) > 33) {
+            $DirectoryRecordData .= fread($this->getid3->fp, ord($DirectoryRecordData[0]) - 1);
 
             $ThisDirectoryRecord['raw']['length'] = Helper::LittleEndian2Int(substr($DirectoryRecordData, 0, 1));
             $ThisDirectoryRecord['raw']['extended_attribute_length'] = Helper::LittleEndian2Int(substr($DirectoryRecordData, 1, 1));
@@ -365,9 +372,9 @@ class Iso extends BaseHandler
         // convert 'filename.ext;1' to 'filename.ext'
         if (!strstr($ISOfilename, ';')) {
             return $ISOfilename;
-        } else {
-            return substr($ISOfilename, 0, strpos($ISOfilename, ';'));
         }
+
+        return substr($ISOfilename, 0, strpos($ISOfilename, ';'));
     }
 
     /**
@@ -407,13 +414,13 @@ class Iso extends BaseHandler
         // 6: second of the minute from 0 to 59
         // 7: Offset from Greenwich Mean Time in number of 15 minute intervals from -48 (West) to +52 (East)
 
-        $UNIXyear = ord($ISOtime{0}) + 1900;
-        $UNIXmonth = ord($ISOtime{1});
-        $UNIXday = ord($ISOtime{2});
-        $UNIXhour = ord($ISOtime{3});
-        $UNIXminute = ord($ISOtime{4});
-        $UNIXsecond = ord($ISOtime{5});
-        $GMToffset = $this->TwosCompliment2Decimal(ord($ISOtime{5}));
+        $UNIXyear = ord($ISOtime[0]) + 1900;
+        $UNIXmonth = ord($ISOtime[1]);
+        $UNIXday = ord($ISOtime[2]);
+        $UNIXhour = ord($ISOtime[3]);
+        $UNIXminute = ord($ISOtime[4]);
+        $UNIXsecond = ord($ISOtime[5]);
+        $GMToffset = $this->TwosCompliment2Decimal(ord($ISOtime[5]));
 
         return gmmktime($UNIXhour, $UNIXminute, $UNIXsecond, $UNIXmonth, $UNIXday, $UNIXyear);
     }
@@ -433,12 +440,10 @@ class Iso extends BaseHandler
         // The negative of this number is the value of the original binary.
 
         if ($BinaryValue & 0x80) {
-
             // negative number
-            return (0 - ((~$BinaryValue & 0xFF) + 1));
-        } else {
+            return 0 - ((~$BinaryValue & 0xFF) + 1);
+        }
             // positive number
             return $BinaryValue;
-        }
     }
 }

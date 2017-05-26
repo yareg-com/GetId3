@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Graphic;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Bmp extends BaseHandler
 {
@@ -121,7 +130,6 @@ class Bmp extends BaseHandler
         $info['video']['pixel_aspect_ratio'] = (float) 1;
 
         if ($thisfile_bmp['type_os'] == 'OS/2') {
-
             // OS/2-format BMP
             // http://netghost.narod.ru/gff/graphics/summary/os2bmp.htm
 
@@ -195,7 +203,6 @@ class Bmp extends BaseHandler
                 $info['video']['codec'] = $thisfile_bmp_header['compression'].' '.$thisfile_bmp_header_raw['bits_per_pixel'].'-bit';
             }
         } elseif ($thisfile_bmp['type_os'] == 'Windows') {
-
             // Windows-format BMP
 
             // BITMAPINFOHEADER - [40 bytes] http://msdn.microsoft.com/library/en-us/gdi/bitmaps_1rw2.asp
@@ -344,13 +351,12 @@ class Bmp extends BaseHandler
             $pixeldataoffset = 0;
             $thisfile_bmp_header_raw['compression'] = (isset($thisfile_bmp_header_raw['compression']) ? $thisfile_bmp_header_raw['compression'] : '');
             switch ($thisfile_bmp_header_raw['compression']) {
-
                 case 0: // BI_RGB
                     switch ($thisfile_bmp_header_raw['bits_per_pixel']) {
                         case 1:
                             for ($row = ($thisfile_bmp_header_raw['height'] - 1); $row >= 0; --$row) {
                                 for ($col = 0; $col < $thisfile_bmp_header_raw['width']; $col = $col) {
-                                    $paletteindexbyte = ord($BMPpixelData{$pixeldataoffset++});
+                                    $paletteindexbyte = ord($BMPpixelData[$pixeldataoffset++]);
                                     for ($i = 7; $i >= 0; --$i) {
                                         $paletteindex = ($paletteindexbyte & (0x01 << $i)) >> $i;
                                         $thisfile_bmp['data'][$row][$col] = $thisfile_bmp['palette'][$paletteindex];
@@ -363,11 +369,10 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         case 4:
                             for ($row = ($thisfile_bmp_header_raw['height'] - 1); $row >= 0; --$row) {
                                 for ($col = 0; $col < $thisfile_bmp_header_raw['width']; $col = $col) {
-                                    $paletteindexbyte = ord($BMPpixelData{$pixeldataoffset++});
+                                    $paletteindexbyte = ord($BMPpixelData[$pixeldataoffset++]);
                                     for ($i = 1; $i >= 0; --$i) {
                                         $paletteindex = ($paletteindexbyte & (0x0F << (4 * $i))) >> (4 * $i);
                                         $thisfile_bmp['data'][$row][$col] = $thisfile_bmp['palette'][$paletteindex];
@@ -380,11 +385,10 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         case 8:
                             for ($row = ($thisfile_bmp_header_raw['height'] - 1); $row >= 0; --$row) {
                                 for ($col = 0; $col < $thisfile_bmp_header_raw['width']; ++$col) {
-                                    $paletteindex = ord($BMPpixelData{$pixeldataoffset++});
+                                    $paletteindex = ord($BMPpixelData[$pixeldataoffset++]);
                                     $thisfile_bmp['data'][$row][$col] = $thisfile_bmp['palette'][$paletteindex];
                                 }
                                 while (($pixeldataoffset % 4) != 0) {
@@ -393,11 +397,10 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         case 24:
                             for ($row = ($thisfile_bmp_header_raw['height'] - 1); $row >= 0; --$row) {
                                 for ($col = 0; $col < $thisfile_bmp_header_raw['width']; ++$col) {
-                                    $thisfile_bmp['data'][$row][$col] = (ord($BMPpixelData{$pixeldataoffset + 2}) << 16) | (ord($BMPpixelData{$pixeldataoffset + 1}) << 8) | ord($BMPpixelData{$pixeldataoffset});
+                                    $thisfile_bmp['data'][$row][$col] = (ord($BMPpixelData[$pixeldataoffset + 2]) << 16) | (ord($BMPpixelData[$pixeldataoffset + 1]) << 8) | ord($BMPpixelData[$pixeldataoffset]);
                                     $pixeldataoffset += 3;
                                 }
                                 while (($pixeldataoffset % 4) != 0) {
@@ -406,11 +409,10 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         case 32:
                             for ($row = ($thisfile_bmp_header_raw['height'] - 1); $row >= 0; --$row) {
                                 for ($col = 0; $col < $thisfile_bmp_header_raw['width']; ++$col) {
-                                    $thisfile_bmp['data'][$row][$col] = (ord($BMPpixelData{$pixeldataoffset + 3}) << 24) | (ord($BMPpixelData{$pixeldataoffset + 2}) << 16) | (ord($BMPpixelData{$pixeldataoffset + 1}) << 8) | ord($BMPpixelData{$pixeldataoffset});
+                                    $thisfile_bmp['data'][$row][$col] = (ord($BMPpixelData[$pixeldataoffset + 3]) << 24) | (ord($BMPpixelData[$pixeldataoffset + 2]) << 16) | (ord($BMPpixelData[$pixeldataoffset + 1]) << 8) | ord($BMPpixelData[$pixeldataoffset]);
                                     $pixeldataoffset += 4;
                                 }
                                 while (($pixeldataoffset % 4) != 0) {
@@ -419,17 +421,14 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         case 16:
                             // ?
                             break;
-
                         default:
                             $info['error'][] = 'Unknown bits-per-pixel value ('.$thisfile_bmp_header_raw['bits_per_pixel'].') - cannot read pixel data';
                             break;
                     }
                     break;
-
                 case 1: // BI_RLE8 - http://msdn.microsoft.com/library/en-us/gdi/bitmaps_6x0u.asp
                     switch ($thisfile_bmp_header_raw['bits_per_pixel']) {
                         case 8:
@@ -438,7 +437,6 @@ class Bmp extends BaseHandler
                                 $firstbyte = Helper::LittleEndian2Int(substr($BMPpixelData, $pixeldataoffset++, 1));
                                 $secondbyte = Helper::LittleEndian2Int(substr($BMPpixelData, $pixeldataoffset++, 1));
                                 if ($firstbyte == 0) {
-
                                     // escaped/absolute mode - the first byte of the pair can be set to zero to
                                     // indicate an escape character that denotes the end of a line, the end of
                                     // a bitmap, or a delta, depending on the value of the second byte.
@@ -447,12 +445,10 @@ class Bmp extends BaseHandler
                                             // end of line
                                             // no need for special processing, just ignore
                                             break;
-
                                         case 1:
                                             // end of bitmap
                                             $pixeldataoffset = strlen($BMPpixelData); // force to exit loop just in case
                                             break;
-
                                         case 2:
                                             // delta - The 2 bytes following the escape contain unsigned values
                                             // indicating the horizontal and vertical offsets of the next pixel
@@ -463,7 +459,6 @@ class Bmp extends BaseHandler
                                             $row = ($thisfile_bmp_header_raw['height'] - 1 - (($pixelcounter - $col) / $thisfile_bmp_header_raw['width'])) - $rowincrement;
                                             $pixelcounter = ($row * $thisfile_bmp_header_raw['width']) + $col;
                                             break;
-
                                         default:
                                             // In absolute mode, the first byte is zero and the second byte is a
                                             // value in the range 03H through FFH. The second byte represents the
@@ -483,7 +478,6 @@ class Bmp extends BaseHandler
                                             break;
                                     }
                                 } else {
-
                                     // encoded mode - the first byte specifies the number of consecutive pixels
                                     // to be drawn using the color index contained in the second byte.
                                     for ($i = 0; $i < $firstbyte; ++$i) {
@@ -495,13 +489,11 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         default:
                             $info['error'][] = 'Unknown bits-per-pixel value ('.$thisfile_bmp_header_raw['bits_per_pixel'].') - cannot read pixel data';
                             break;
                     }
                     break;
-
                 case 2: // BI_RLE4 - http://msdn.microsoft.com/library/en-us/gdi/bitmaps_6x0u.asp
                     switch ($thisfile_bmp_header_raw['bits_per_pixel']) {
                         case 4:
@@ -510,7 +502,6 @@ class Bmp extends BaseHandler
                                 $firstbyte = Helper::LittleEndian2Int(substr($BMPpixelData, $pixeldataoffset++, 1));
                                 $secondbyte = Helper::LittleEndian2Int(substr($BMPpixelData, $pixeldataoffset++, 1));
                                 if ($firstbyte == 0) {
-
                                     // escaped/absolute mode - the first byte of the pair can be set to zero to
                                     // indicate an escape character that denotes the end of a line, the end of
                                     // a bitmap, or a delta, depending on the value of the second byte.
@@ -519,12 +510,10 @@ class Bmp extends BaseHandler
                                             // end of line
                                             // no need for special processing, just ignore
                                             break;
-
                                         case 1:
                                             // end of bitmap
                                             $pixeldataoffset = strlen($BMPpixelData); // force to exit loop just in case
                                             break;
-
                                         case 2:
                                             // delta - The 2 bytes following the escape contain unsigned values
                                             // indicating the horizontal and vertical offsets of the next pixel
@@ -535,7 +524,6 @@ class Bmp extends BaseHandler
                                             $row = ($thisfile_bmp_header_raw['height'] - 1 - (($pixelcounter - $col) / $thisfile_bmp_header_raw['width'])) - $rowincrement;
                                             $pixelcounter = ($row * $thisfile_bmp_header_raw['width']) + $col;
                                             break;
-
                                         default:
                                             // In absolute mode, the first byte is zero. The second byte contains the number
                                             // of color indexes that follow. Subsequent bytes contain color indexes in their
@@ -561,7 +549,6 @@ class Bmp extends BaseHandler
                                             break;
                                     }
                                 } else {
-
                                     // encoded mode - the first byte of the pair contains the number of pixels to be
                                     // drawn using the color indexes in the second byte. The second byte contains two
                                     // color indexes, one in its high-order 4 bits and one in its low-order 4 bits.
@@ -580,13 +567,11 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         default:
                             $info['error'][] = 'Unknown bits-per-pixel value ('.$thisfile_bmp_header_raw['bits_per_pixel'].') - cannot read pixel data';
                             break;
                     }
                     break;
-
                 case 3: // BI_BITFIELDS
                     switch ($thisfile_bmp_header_raw['bits_per_pixel']) {
                         case 16:
@@ -608,9 +593,9 @@ class Bmp extends BaseHandler
                                     $pixelvalue = Helper::LittleEndian2Int(substr($BMPpixelData, $pixeldataoffset, $thisfile_bmp_header_raw['bits_per_pixel'] / 8));
                                     $pixeldataoffset += $thisfile_bmp_header_raw['bits_per_pixel'] / 8;
 
-                                    $red = intval(round(((($pixelvalue & $thisfile_bmp_header_raw['red_mask'])   >> $redshift)   / ($thisfile_bmp_header_raw['red_mask']   >> $redshift))   * 255));
-                                    $green = intval(round(((($pixelvalue & $thisfile_bmp_header_raw['green_mask']) >> $greenshift) / ($thisfile_bmp_header_raw['green_mask'] >> $greenshift)) * 255));
-                                    $blue = intval(round(((($pixelvalue & $thisfile_bmp_header_raw['blue_mask'])  >> $blueshift)  / ($thisfile_bmp_header_raw['blue_mask']  >> $blueshift))  * 255));
+                                    $red = (int) (round(((($pixelvalue & $thisfile_bmp_header_raw['red_mask']) >> $redshift) / ($thisfile_bmp_header_raw['red_mask'] >> $redshift)) * 255));
+                                    $green = (int) (round(((($pixelvalue & $thisfile_bmp_header_raw['green_mask']) >> $greenshift) / ($thisfile_bmp_header_raw['green_mask'] >> $greenshift)) * 255));
+                                    $blue = (int) (round(((($pixelvalue & $thisfile_bmp_header_raw['blue_mask']) >> $blueshift) / ($thisfile_bmp_header_raw['blue_mask'] >> $blueshift)) * 255));
                                     $thisfile_bmp['data'][$row][$col] = (($red << 16) | ($green << 8) | ($blue));
                                 }
                                 while (($pixeldataoffset % 4) != 0) {
@@ -619,13 +604,11 @@ class Bmp extends BaseHandler
                                 }
                             }
                             break;
-
                         default:
                             $info['error'][] = 'Unknown bits-per-pixel value ('.$thisfile_bmp_header_raw['bits_per_pixel'].') - cannot read pixel data';
                             break;
                     }
                     break;
-
                 default: // unhandled compression type
                     $info['error'][] = 'Unknown/unhandled compression type value ('.$thisfile_bmp_header_raw['compression'].') - cannot decompress pixel data';
                     break;
@@ -648,33 +631,31 @@ class Bmp extends BaseHandler
 
             return false;
         }
-        set_time_limit(intval(round($BMPinfo['resolution_x'] * $BMPinfo['resolution_y'] / 10000)));
-        if ($im = ImageCreateTrueColor($BMPinfo['resolution_x'], $BMPinfo['resolution_y'])) {
+        set_time_limit((int) (round($BMPinfo['resolution_x'] * $BMPinfo['resolution_y'] / 10000)));
+        if ($im = imagecreatetruecolor($BMPinfo['resolution_x'], $BMPinfo['resolution_y'])) {
             for ($row = 0; $row < $BMPinfo['resolution_y']; ++$row) {
                 for ($col = 0; $col < $BMPinfo['resolution_x']; ++$col) {
                     if (isset($BMPinfo['bmp']['data'][$row][$col])) {
                         $red = ($BMPinfo['bmp']['data'][$row][$col] & 0x00FF0000) >> 16;
                         $green = ($BMPinfo['bmp']['data'][$row][$col] & 0x0000FF00) >> 8;
                         $blue = ($BMPinfo['bmp']['data'][$row][$col] & 0x000000FF);
-                        $pixelcolor = ImageColorAllocate($im, $red, $green, $blue);
-                        ImageSetPixel($im, $col, $row, $pixelcolor);
-                    } else {
+                        $pixelcolor = imagecolorallocate($im, $red, $green, $blue);
+                        imagesetpixel($im, $col, $row, $pixelcolor);
+                    }
                         //echo 'ERROR: no data for pixel '.$row.' x '.$col.'<BR>';
                         //return false;
-                    }
                 }
             }
             if (headers_sent()) {
                 echo 'plotted '.($BMPinfo['resolution_x'] * $BMPinfo['resolution_y']).' pixels in '.(time() - $starttime).' seconds<BR>';
-                ImageDestroy($im);
+                imagedestroy($im);
                 exit;
-            } else {
-                header('Content-type: image/png');
-                ImagePNG($im);
-                ImageDestroy($im);
-
-                return true;
             }
+            header('Content-type: image/png');
+            imagepng($im);
+            imagedestroy($im);
+
+            return true;
         }
 
         return false;
@@ -698,7 +679,7 @@ class Bmp extends BaseHandler
             5 => 'BI_PNG',
         );
 
-        return (isset($BMPcompressionWindowsLookup[$compressionid]) ? $BMPcompressionWindowsLookup[$compressionid] : 'invalid');
+        return isset($BMPcompressionWindowsLookup[$compressionid]) ? $BMPcompressionWindowsLookup[$compressionid] : 'invalid';
     }
 
     /**
@@ -718,6 +699,6 @@ class Bmp extends BaseHandler
             4 => 'BI_RLE24',
         );
 
-        return (isset($BMPcompressionOS2Lookup[$compressionid]) ? $BMPcompressionOS2Lookup[$compressionid] : 'invalid');
+        return isset($BMPcompressionOS2Lookup[$compressionid]) ? $BMPcompressionOS2Lookup[$compressionid] : 'invalid';
     }
 }

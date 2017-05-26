@@ -1,11 +1,12 @@
 <?php
 
-/**
- * GetId3() by James Heinrich <info@getid3.org>
- * available at http://getid3.sourceforge.net
- * or http://www.getid3.org
+/*
+ * This file is part of GetID3.
  *
- * Please see readme.txt for more information
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace GetId3\Module\Audio;
@@ -18,8 +19,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Mp3 extends BaseHandler
 {
@@ -151,7 +152,6 @@ class Mp3 extends BaseHandler
                 case 'mp3':
                     $info['fileformat'] = $info['audio']['dataformat'];
                     break;
-
                 default:
                     $info['warning'][] = 'Expecting [audio][dataformat] to be mp1/mp2/mp3 when fileformat == mp3, [audio][dataformat] actually "'.$info['audio']['dataformat'].'"';
                     break;
@@ -210,7 +210,6 @@ class Mp3 extends BaseHandler
         } elseif (!empty($thisfile_mpeg_audio_lame['vbr_quality'])) {
             static $KnownEncoderValues = array();
             if (empty($KnownEncoderValues)) {
-
                 //$KnownEncoderValues[abrbitrate_minbitrate][vbr_quality][raw_vbr_method][raw_noise_shaping][raw_stereo_mode][ath_type][lowpass_frequency] = 'preset name';
                 $KnownEncoderValues[0xFF][58][1][1][3][2][20500] = '--alt-preset insane';        // 3.90,   3.90.1, 3.92
                 $KnownEncoderValues[0xFF][58][1][1][3][2][20600] = '--alt-preset insane';        // 3.90.2, 3.90.3, 3.91
@@ -270,7 +269,6 @@ class Mp3 extends BaseHandler
             } elseif (isset($KnownEncoderValues['**'][$thisfile_mpeg_audio_lame['vbr_quality']][$thisfile_mpeg_audio_lame['raw']['vbr_method']][$thisfile_mpeg_audio_lame['raw']['noise_shaping']][$thisfile_mpeg_audio_lame['raw']['stereo_mode']][$thisfile_mpeg_audio_lame['ath_type']][$thisfile_mpeg_audio_lame['lowpass_frequency']])) {
                 $encoder_options = $KnownEncoderValues['**'][$thisfile_mpeg_audio_lame['vbr_quality']][$thisfile_mpeg_audio_lame['raw']['vbr_method']][$thisfile_mpeg_audio_lame['raw']['noise_shaping']][$thisfile_mpeg_audio_lame['raw']['stereo_mode']][$thisfile_mpeg_audio_lame['ath_type']][$thisfile_mpeg_audio_lame['lowpass_frequency']];
             } elseif ($info['audio']['bitrate_mode'] == 'vbr') {
-
                 // http://gabriel.mp3-tech.org/mp3infotag.html
                 // int    Quality = (100 - 10 * gfp->VBR_q - gfp->quality)h
 
@@ -342,7 +340,6 @@ class Mp3 extends BaseHandler
                                 $encoder_options .= ' --lowpass '.$thisfile_mpeg_audio_lame['lowpass_frequency'];
                             }
                             break;
-
                         default:
                             break;
                     }
@@ -376,7 +373,6 @@ class Mp3 extends BaseHandler
                                     case 'insane':
                                         $encoder_options .= ' --resample '.$thisfile_mpeg_audio['sample_rate'];
                                         break;
-
                                     default:
                                         static $ExpectedResampledRate = array(
                                             'phon+/lw/mw-eu/sw|16000' => 16000,
@@ -395,7 +391,6 @@ class Mp3 extends BaseHandler
                                         break;
                                 }
                                 break;
-
                             case '--r3mix':
                             default:
                                 $encoder_options .= ' --resample '.$thisfile_mpeg_audio['sample_rate'];
@@ -541,7 +536,6 @@ class Mp3 extends BaseHandler
         if (!$FastMPEGheaderScan && ($thisfile_mpeg_audio['layer'] == '2')) {
             $info['audio']['dataformat'] = 'mp2';
             switch ($thisfile_mpeg_audio['channelmode']) {
-
                 case 'mono':
                     if (($thisfile_mpeg_audio['bitrate'] == 'free') || ($thisfile_mpeg_audio['bitrate'] <= 192000)) {
                         // these are ok
@@ -551,14 +545,13 @@ class Mp3 extends BaseHandler
                         return false;
                     }
                     break;
-
                 case 'stereo':
                 case 'joint stereo':
                 case 'dual channel':
                     if (($thisfile_mpeg_audio['bitrate'] == 'free') || ($thisfile_mpeg_audio['bitrate'] == 64000) || ($thisfile_mpeg_audio['bitrate'] >= 96000)) {
                         // these are ok
                     } else {
-                        $info['error'][] = intval(round($thisfile_mpeg_audio['bitrate'] / 1000)).'kbps not allowed in Layer 2, '.$thisfile_mpeg_audio['channelmode'].'.';
+                        $info['error'][] = (int) (round($thisfile_mpeg_audio['bitrate'] / 1000)).'kbps not allowed in Layer 2, '.$thisfile_mpeg_audio['channelmode'].'.';
 
                         return false;
                     }
@@ -645,7 +638,6 @@ class Mp3 extends BaseHandler
                 $previousbyteoffset += $Fraunhofer_OffsetN;
             }
         } else {
-
             // Xing VBR header is hardcoded 'Xing' at a offset 0x0D (13), 0x15 (21) or 0x24 (36)
             // depending on MPEG layer and number of channels
 
@@ -726,7 +718,7 @@ class Mp3 extends BaseHandler
                 if ($thisfile_mpeg_audio['xing_flags']['toc']) {
                     $LAMEtocData = substr($headerstring, $VBRidOffset + 16, 100);
                     for ($i = 0; $i < 100; ++$i) {
-                        $thisfile_mpeg_audio['toc'][$i] = ord($LAMEtocData{$i});
+                        $thisfile_mpeg_audio['toc'][$i] = ord($LAMEtocData[$i]);
                     }
                 }
                 if ($thisfile_mpeg_audio['xing_flags']['vbr_scale']) {
@@ -737,7 +729,6 @@ class Mp3 extends BaseHandler
 
                 // http://gabriel.mp3-tech.org/mp3infotag.html
                 if (substr($headerstring, $VBRidOffset + 120, 4) == 'LAME') {
-
                     // shortcut
                     $thisfile_mpeg_audio['LAME'] = array();
                     $thisfile_mpeg_audio_lame = &$thisfile_mpeg_audio['LAME'];
@@ -749,7 +740,6 @@ class Mp3 extends BaseHandler
                                                                         0, 9);
 
                     if ($thisfile_mpeg_audio_lame['short_version'] >= 'LAME3.90') {
-
                         // extra 11 chars are not part of version string when LAMEtag present
                         unset($thisfile_mpeg_audio_lame['long_version']);
 
@@ -962,7 +952,6 @@ class Mp3 extends BaseHandler
                     }
                 }
             } else {
-
                 // not Fraunhofer or Xing VBR methods, most likely CBR (but could be VBR with no header)
                 $thisfile_mpeg_audio['bitrate_mode'] = 'cbr';
                 if ($recursivesearch) {
@@ -1013,10 +1002,10 @@ class Mp3 extends BaseHandler
                     $thisfile_mpeg_audio['framelength'] = $framebytelength;
                     if ($thisfile_mpeg_audio['layer'] == '1') {
                         // BitRate = (((FrameLengthInBytes / 4) - Padding) * SampleRate) / 12
-                        $info['audio']['bitrate'] = ((($framebytelength / 4) - intval($thisfile_mpeg_audio['padding'])) * $thisfile_mpeg_audio['sample_rate']) / 12;
+                        $info['audio']['bitrate'] = ((($framebytelength / 4) - (int) ($thisfile_mpeg_audio['padding'])) * $thisfile_mpeg_audio['sample_rate']) / 12;
                     } else {
                         // Bitrate = ((FrameLengthInBytes - Padding) * SampleRate) / 144
-                        $info['audio']['bitrate'] = (($framebytelength - intval($thisfile_mpeg_audio['padding'])) * $thisfile_mpeg_audio['sample_rate']) / 144;
+                        $info['audio']['bitrate'] = (($framebytelength - (int) ($thisfile_mpeg_audio['padding'])) * $thisfile_mpeg_audio['sample_rate']) / 144;
                     }
                 } else {
                     $info['error'][] = 'Error calculating frame length of free-format MP3 without Xing/LAME header';
@@ -1197,11 +1186,9 @@ class Mp3 extends BaseHandler
                     return false;
                 }
             } elseif (!empty($firstframetestarray['mpeg']['audio']['framelength']) && (($nextframetestoffset + $firstframetestarray['mpeg']['audio']['framelength']) > $info['avdataend'])) {
-
                 // it's not the end of the file, but there's not enough data left for another frame, so assume it's garbage/padding and return OK
                 return true;
             } else {
-
                 // next frame is not valid, note the error and fail, so scanning can contiue for a valid frame sequence
                 $info['warning'][] = 'Frame at offset ('.$offset.') is valid, but the next one at ('.$nextframetestoffset.') is not.';
 
@@ -1227,13 +1214,13 @@ class Mp3 extends BaseHandler
 
         $SyncPattern1 = substr($MPEGaudioData, 0, 4);
         // may be different pattern due to padding
-        $SyncPattern2 = $SyncPattern1{0}
-        .$SyncPattern1{1}
-        .chr(ord($SyncPattern1{2}) | 0x02).$SyncPattern1{3};
+        $SyncPattern2 = $SyncPattern1[0]
+        .$SyncPattern1[1]
+        .chr(ord($SyncPattern1[2]) | 0x02).$SyncPattern1[3];
         if ($SyncPattern2 === $SyncPattern1) {
-            $SyncPattern2 = $SyncPattern1{0}
-            .$SyncPattern1{1}
-            .chr(ord($SyncPattern1{2}) & 0xFD).$SyncPattern1{3};
+            $SyncPattern2 = $SyncPattern1[0]
+            .$SyncPattern1[1]
+            .chr(ord($SyncPattern1[2]) & 0xFD).$SyncPattern1[3];
         }
 
         $framelength = false;
@@ -1246,7 +1233,6 @@ class Mp3 extends BaseHandler
             $framelength = $framelength2;
         }
         if (!$framelength) {
-
             // LAME 3.88 has a different value for modeextension on the first frame vs the rest
             $framelength1 = strpos($MPEGaudioData, substr($SyncPattern1, 0, 3),
                                                           4);
@@ -1263,13 +1249,12 @@ class Mp3 extends BaseHandler
                 $info['error'][] = 'Cannot find next free-format synch pattern ('.Helper::PrintHexBytes($SyncPattern1).' or '.Helper::PrintHexBytes($SyncPattern2).') after offset '.$offset;
 
                 return false;
-            } else {
-                $info['warning'][] = 'ModeExtension varies between first frame and other frames (known free-format issue in LAME 3.88)';
-                $info['audio']['codec'] = 'LAME';
-                $info['audio']['encoder'] = 'LAME3.88';
-                $SyncPattern1 = substr($SyncPattern1, 0, 3);
-                $SyncPattern2 = substr($SyncPattern2, 0, 3);
             }
+            $info['warning'][] = 'ModeExtension varies between first frame and other frames (known free-format issue in LAME 3.88)';
+            $info['audio']['codec'] = 'LAME';
+            $info['audio']['encoder'] = 'LAME3.88';
+            $SyncPattern1 = substr($SyncPattern1, 0, 3);
+            $SyncPattern2 = substr($SyncPattern2, 0, 3);
         }
 
         if ($deepscan) {
@@ -1303,7 +1288,7 @@ class Mp3 extends BaseHandler
                 $nextoffset += $framelength;
             }
             if (count($ActualFrameLengthValues) > 0) {
-                $framelength = intval(round(array_sum($ActualFrameLengthValues) / count($ActualFrameLengthValues)));
+                $framelength = (int) (round(array_sum($ActualFrameLengthValues) / count($ActualFrameLengthValues)));
             }
         }
 
@@ -1349,9 +1334,9 @@ class Mp3 extends BaseHandler
             if (strlen($head4) < 4) {
                 break;
             }
-            if ($head4{0} != "\xFF") {
+            if ($head4[0] != "\xFF") {
                 for ($i = 1; $i < 4; ++$i) {
-                    if ($head4{$i} == "\xFF") {
+                    if ($head4[$i] == "\xFF") {
                         fseek($this->getGetId3()->fp, $i - 4, SEEK_CUR);
                         continue 2;
                     }
@@ -1385,7 +1370,7 @@ class Mp3 extends BaseHandler
                     fseek($this->getGetId3()->fp,
                           $MPEGaudioHeaderLengthCache[$head4] - 4, SEEK_CUR);
                     $next4 = fread($this->getGetId3()->fp, 4);
-                    if ($next4{0} == "\xFF") {
+                    if ($next4[0] == "\xFF") {
                         if (!isset($MPEGaudioHeaderDecodeCache[$next4])) {
                             $MPEGaudioHeaderDecodeCache[$next4] = self::MPEGaudioHeaderDecode($next4);
                         }
@@ -1400,7 +1385,7 @@ class Mp3 extends BaseHandler
                             Helper::safe_inc($Distribution['bitrate'][$LongMPEGbitrateLookup[$head4]]);
                             Helper::safe_inc($Distribution['layer'][$LongMPEGlayerLookup[$head4]]);
                             Helper::safe_inc($Distribution['version'][$LongMPEGversionLookup[$head4]]);
-                            Helper::safe_inc($Distribution['padding'][intval($LongMPEGpaddingLookup[$head4])]);
+                            Helper::safe_inc($Distribution['padding'][(int) ($LongMPEGpaddingLookup[$head4])]);
                             Helper::safe_inc($Distribution['frequency'][$LongMPEGfrequencyLookup[$head4]]);
                             if ($max_frames_scan && (++$frames_scanned >= $max_frames_scan)) {
                                 $pct_data_scanned = (ftell($this->getGetId3()->fp) - $info['avdataoffset']) / ($info['avdataend'] - $info['avdataoffset']);
@@ -1541,7 +1526,7 @@ class Mp3 extends BaseHandler
                 return false;
             }
 
-            if (($header{$SynchSeekOffset} == "\xFF") && ($header{($SynchSeekOffset + 1)} > "\xE0")) { // synch detected
+            if (($header[$SynchSeekOffset] == "\xFF") && ($header[($SynchSeekOffset + 1)] > "\xE0")) { // synch detected
                 if (!isset($FirstFrameThisfileInfo) && !isset($info['mpeg']['audio'])) {
                     $FirstFrameThisfileInfo = $info;
                     $FirstFrameAVDataOffset = $avdataoffset + $SynchSeekOffset;
@@ -1643,7 +1628,7 @@ class Mp3 extends BaseHandler
                                       SEEK_SET);
                                 $buffer_4k = fread($this->getGetId3()->fp, 4096);
                                 for ($j = 0; $j < (strlen($buffer_4k) - 4); ++$j) {
-                                    if (($buffer_4k{$j} == "\xFF") && ($buffer_4k{($j + 1)} > "\xE0")) { // synch detected
+                                    if (($buffer_4k[$j] == "\xFF") && ($buffer_4k[($j + 1)] > "\xE0")) { // synch detected
                                         if ($this->decodeMPEGaudioHeader($scan_start_offset[$current_segment] + $j,
                                                                          $dummy,
                                                                          false,
@@ -1942,19 +1927,19 @@ class Mp3 extends BaseHandler
         if (isset($MPEGaudioVersionLookup[$rawarray['version']])) {
             $decodedVersion = $MPEGaudioVersionLookup[$rawarray['version']];
         } else {
-            echo($echoerrors ? "\n".'invalid Version ('.$rawarray['version'].')' : '');
+            echo $echoerrors ? "\n".'invalid Version ('.$rawarray['version'].')' : '';
 
             return false;
         }
         if (isset($MPEGaudioLayerLookup[$rawarray['layer']])) {
             $decodedLayer = $MPEGaudioLayerLookup[$rawarray['layer']];
         } else {
-            echo($echoerrors ? "\n".'invalid Layer ('.$rawarray['layer'].')' : '');
+            echo $echoerrors ? "\n".'invalid Layer ('.$rawarray['layer'].')' : '';
 
             return false;
         }
         if (!isset($MPEGaudioBitrateLookup[$decodedVersion][$decodedLayer][$rawarray['bitrate']])) {
-            echo($echoerrors ? "\n".'invalid Bitrate ('.$rawarray['bitrate'].')' : '');
+            echo $echoerrors ? "\n".'invalid Bitrate ('.$rawarray['bitrate'].')' : '';
             if ($rawarray['bitrate'] == 15) {
                 // known issue in LAME 3.90 - 3.93.1 where free-format has bitrate ID of 15 instead of 0
                 // let it go through here otherwise file will not be identified
@@ -1966,22 +1951,22 @@ class Mp3 extends BaseHandler
             }
         }
         if (!isset($MPEGaudioFrequencyLookup[$decodedVersion][$rawarray['sample_rate']])) {
-            echo($echoerrors ? "\n".'invalid Frequency ('.$rawarray['sample_rate'].')' : '');
+            echo $echoerrors ? "\n".'invalid Frequency ('.$rawarray['sample_rate'].')' : '';
 
             return false;
         }
         if (!isset($MPEGaudioChannelModeLookup[$rawarray['channelmode']])) {
-            echo($echoerrors ? "\n".'invalid ChannelMode ('.$rawarray['channelmode'].')' : '');
+            echo $echoerrors ? "\n".'invalid ChannelMode ('.$rawarray['channelmode'].')' : '';
 
             return false;
         }
         if (!isset($MPEGaudioModeExtensionLookup[$decodedLayer][$rawarray['modeextension']])) {
-            echo($echoerrors ? "\n".'invalid Mode Extension ('.$rawarray['modeextension'].')' : '');
+            echo $echoerrors ? "\n".'invalid Mode Extension ('.$rawarray['modeextension'].')' : '';
 
             return false;
         }
         if (!isset($MPEGaudioEmphasisLookup[$rawarray['emphasis']])) {
-            echo($echoerrors ? "\n".'invalid Emphasis ('.$rawarray['emphasis'].')' : '');
+            echo $echoerrors ? "\n".'invalid Emphasis ('.$rawarray['emphasis'].')' : '';
 
             return false;
         }
@@ -2022,18 +2007,18 @@ class Mp3 extends BaseHandler
 
         $MPEGrawHeader['synch'] = (Helper::BigEndian2Int(substr($Header4Bytes,
                                                                    0, 2)) & 0xFFE0) >> 4;
-        $MPEGrawHeader['version'] = (ord($Header4Bytes{1}) & 0x18) >> 3; //    BB
-        $MPEGrawHeader['layer'] = (ord($Header4Bytes{1}) & 0x06) >> 1; //      CC
-        $MPEGrawHeader['protection'] = (ord($Header4Bytes{1}) & 0x01);      //        D
-        $MPEGrawHeader['bitrate'] = (ord($Header4Bytes{2}) & 0xF0) >> 4; // EEEE
-        $MPEGrawHeader['sample_rate'] = (ord($Header4Bytes{2}) & 0x0C) >> 2; //     FF
-        $MPEGrawHeader['padding'] = (ord($Header4Bytes{2}) & 0x02) >> 1; //       G
-        $MPEGrawHeader['private'] = (ord($Header4Bytes{2}) & 0x01);      //        H
-        $MPEGrawHeader['channelmode'] = (ord($Header4Bytes{3}) & 0xC0) >> 6; // II
-        $MPEGrawHeader['modeextension'] = (ord($Header4Bytes{3}) & 0x30) >> 4; //   JJ
-        $MPEGrawHeader['copyright'] = (ord($Header4Bytes{3}) & 0x08) >> 3; //     K
-        $MPEGrawHeader['original'] = (ord($Header4Bytes{3}) & 0x04) >> 2; //      L
-        $MPEGrawHeader['emphasis'] = (ord($Header4Bytes{3}) & 0x03);      //       MM
+        $MPEGrawHeader['version'] = (ord($Header4Bytes[1]) & 0x18) >> 3; //    BB
+        $MPEGrawHeader['layer'] = (ord($Header4Bytes[1]) & 0x06) >> 1; //      CC
+        $MPEGrawHeader['protection'] = (ord($Header4Bytes[1]) & 0x01);      //        D
+        $MPEGrawHeader['bitrate'] = (ord($Header4Bytes[2]) & 0xF0) >> 4; // EEEE
+        $MPEGrawHeader['sample_rate'] = (ord($Header4Bytes[2]) & 0x0C) >> 2; //     FF
+        $MPEGrawHeader['padding'] = (ord($Header4Bytes[2]) & 0x02) >> 1; //       G
+        $MPEGrawHeader['private'] = (ord($Header4Bytes[2]) & 0x01);      //        H
+        $MPEGrawHeader['channelmode'] = (ord($Header4Bytes[3]) & 0xC0) >> 6; // II
+        $MPEGrawHeader['modeextension'] = (ord($Header4Bytes[3]) & 0x30) >> 4; //   JJ
+        $MPEGrawHeader['copyright'] = (ord($Header4Bytes[3]) & 0x08) >> 3; //     K
+        $MPEGrawHeader['original'] = (ord($Header4Bytes[3]) & 0x04) >> 2; //      L
+        $MPEGrawHeader['emphasis'] = (ord($Header4Bytes[3]) & 0x03);      //       MM
 
         return $MPEGrawHeader;
     }
@@ -2059,7 +2044,6 @@ class Mp3 extends BaseHandler
             if ($bitrate != 'free') {
                 if ($version == '1') {
                     if ($layer == '1') {
-
                         // For Layer I slot is 32 bits long
                         $FrameLengthCoefficient = 48;
                         $SlotLength = 4;
@@ -2070,12 +2054,10 @@ class Mp3 extends BaseHandler
                     }
                 } else { // MPEG-2 / MPEG-2.5
                     if ($layer == '1') {
-
                         // For Layer I slot is 32 bits long
                         $FrameLengthCoefficient = 24;
                         $SlotLength = 4;
                     } elseif ($layer == '2') {
-
                         // for Layer 2 and Layer 3 slot is 8 bits long.
                         $FrameLengthCoefficient = 144;
                         $SlotLength = 1;
@@ -2113,7 +2095,7 @@ class Mp3 extends BaseHandler
     {
         static $standard_bit_rates = array(320000, 256000, 224000, 192000, 160000, 128000, 112000, 96000, 80000, 64000, 56000, 48000, 40000, 32000, 24000, 16000, 8000);
         static $bit_rate_table = array(0 => '-');
-        $round_bit_rate = intval(round($bit_rate, -3));
+        $round_bit_rate = (int) (round($bit_rate, -3));
         if (!isset($bit_rate_table[$round_bit_rate])) {
             if ($round_bit_rate > max($standard_bit_rates)) {
                 $bit_rate_table[$round_bit_rate] = round($bit_rate,
@@ -2188,7 +2170,7 @@ class Mp3 extends BaseHandler
             0x0F => 'reserved',
         );
 
-        return (isset($LAMEvbrMethodLookup[$VBRmethodID]) ? $LAMEvbrMethodLookup[$VBRmethodID] : '');
+        return isset($LAMEvbrMethodLookup[$VBRmethodID]) ? $LAMEvbrMethodLookup[$VBRmethodID] : '';
     }
 
     /**
@@ -2211,7 +2193,7 @@ class Mp3 extends BaseHandler
             7 => 'other',
         );
 
-        return (isset($LAMEmiscStereoModeLookup[$StereoModeID]) ? $LAMEmiscStereoModeLookup[$StereoModeID] : '');
+        return isset($LAMEmiscStereoModeLookup[$StereoModeID]) ? $LAMEmiscStereoModeLookup[$StereoModeID] : '';
     }
 
     /**
@@ -2230,7 +2212,7 @@ class Mp3 extends BaseHandler
             3 => '> 48kHz',
         );
 
-        return (isset($LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID]) ? $LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID] : '');
+        return isset($LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID]) ? $LAMEmiscSourceSampleFrequencyLookup[$SourceSampleFrequencyID] : '';
     }
 
     /**
@@ -2249,7 +2231,7 @@ class Mp3 extends BaseHandler
             3 => 'Ambisonic encoding',
         );
 
-        return (isset($LAMEsurroundInfoLookup[$SurroundInfoID]) ? $LAMEsurroundInfoLookup[$SurroundInfoID] : 'reserved');
+        return isset($LAMEsurroundInfoLookup[$SurroundInfoID]) ? $LAMEsurroundInfoLookup[$SurroundInfoID] : 'reserved';
     }
 
     /**
@@ -2306,7 +2288,7 @@ class Mp3 extends BaseHandler
         $LAMEpresetUsedLookup[490] = '-V1';
         $LAMEpresetUsedLookup[500] = '--preset '.(($LAMEtag['raw']['vbr_method'] == 4) ? 'fast ' : '').'extreme';   // 3.94a15 Nov 12 2003
 
-        return (isset($LAMEpresetUsedLookup[$LAMEtag['preset_used_id']]) ? $LAMEpresetUsedLookup[$LAMEtag['preset_used_id']] : 'new/unknown preset: '.$LAMEtag['preset_used_id'].' - report to info@getid3.org');
+        return isset($LAMEpresetUsedLookup[$LAMEtag['preset_used_id']]) ? $LAMEpresetUsedLookup[$LAMEtag['preset_used_id']] : 'new/unknown preset: '.$LAMEtag['preset_used_id'].' - report to info@getid3.org';
     }
 
     public function getAllowBruteForce()

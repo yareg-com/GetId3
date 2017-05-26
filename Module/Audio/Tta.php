@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Tta extends BaseHandler
 {
@@ -55,7 +64,7 @@ class Tta extends BaseHandler
             return false;
         }
 
-        switch ($ttaheader{3}) {
+        switch ($ttaheader[3]) {
             case "\x01": // TTA v1.x
             case "\x02": // TTA v1.x
             case "\x03": // TTA v1.x
@@ -63,7 +72,7 @@ class Tta extends BaseHandler
                 $info['tta']['major_version'] = 1;
                 $info['avdataoffset'] += 16;
 
-                $info['tta']['compression_level'] = ord($ttaheader{3});
+                $info['tta']['compression_level'] = ord($ttaheader[3]);
                 $info['tta']['channels'] = Helper::LittleEndian2Int(substr($ttaheader, 4, 2));
                 $info['tta']['bits_per_sample'] = Helper::LittleEndian2Int(substr($ttaheader, 6, 2));
                 $info['tta']['sample_rate'] = Helper::LittleEndian2Int(substr($ttaheader, 8, 4));
@@ -72,7 +81,6 @@ class Tta extends BaseHandler
                 $info['audio']['encoder_options'] = '-e'.$info['tta']['compression_level'];
                 $info['playtime_seconds'] = $info['tta']['samples_per_channel'] / $info['tta']['sample_rate'];
                 break;
-
             case '2': // TTA v2.x
                 // "I have hurried to release the TTA 2.0 encoder. Format documentation is removed from our site. This format still in development. Please wait the TTA2 format, encoder v4."
                 $info['tta']['major_version'] = 2;
@@ -88,7 +96,6 @@ class Tta extends BaseHandler
                 $info['audio']['encoder_options'] = '-e'.$info['tta']['compression_level'];
                 $info['playtime_seconds'] = $info['tta']['data_length'] / $info['tta']['sample_rate'];
                 break;
-
             case '1': // TTA v3.x
                 // "This is a first stable release of the TTA format. It will be supported by the encoders v3 or higher."
                 $info['tta']['major_version'] = 3;
@@ -104,9 +111,8 @@ class Tta extends BaseHandler
 
                 $info['playtime_seconds'] = $info['tta']['data_length'] / $info['tta']['sample_rate'];
                 break;
-
             default:
-                $info['error'][] = 'This version of GetId3Core() ['.$this->getid3->version().'] only knows how to handle TTA v1 and v2 - it may not work correctly with this file which appears to be TTA v'.$ttaheader{3};
+                $info['error'][] = 'This version of GetId3Core() ['.$this->getid3->version().'] only knows how to handle TTA v1 and v2 - it may not work correctly with this file which appears to be TTA v'.$ttaheader[3];
 
                 return false;
                 break;

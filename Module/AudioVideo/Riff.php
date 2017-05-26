@@ -1,13 +1,22 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
-use GetId3\GetId3Core;
-use GetId3\Module\Tag\Id3v2;
-use GetId3\Module\Audio\Mp3;
 use GetId3\Module\Audio\Ac3;
+use GetId3\Module\Audio\Mp3;
+use GetId3\Module\Tag\Id3v2;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -34,12 +43,12 @@ use GetId3\Module\Audio\Ac3;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Audio\Mp3
- * @uses GetId3\Module\Audio\Ac3 (optional)
- * @uses GetId3\Module\Audio\Dts (optional)
+ * @uses \GetId3\Module\Audio\Mp3
+ * @uses \GetId3\Module\Audio\Ac3 (optional)
+ * @uses \GetId3\Module\Audio\Dts (optional)
  */
 class Riff extends BaseHandler
 {
@@ -75,7 +84,6 @@ class Riff extends BaseHandler
                 $thisfile_riff['header_size'] = $this->EitherEndian2Int(substr($RIFFheader, 4, 4));
                 $thisfile_riff[$RIFFsubtype] = $this->ParseRIFF($info['avdataoffset'] + 12, $info['avdataoffset'] + $thisfile_riff['header_size']);
                 break;
-
             case 'RIFF':  // AVI, WAV, etc
             case 'SDSS':  // SDSS is identical to RIFF, just renamed. Used by SmartSound QuickTracks (www.smartsound.com)
             case 'RMP3':  // RMP3 is identical to RIFF, just renamed. Used by [unknown program] when creating RIFF-MP3s
@@ -99,23 +107,23 @@ class Riff extends BaseHandler
                         $info['error'][] = 'AVI extends beyond '.round(PHP_INT_MAX / 1073741824).'GB and PHP filesystem functions cannot read that far, playtime is probably wrong';
                         $info['warning'][] = '[avdataend] value may be incorrect, multiple AVIX chunks may be present';
                         break;
-                    } else {
-                        fseek($this->getid3->fp, $nextRIFFoffset, SEEK_SET);
-                        $nextRIFFheader = fread($this->getid3->fp, 12);
-                        if ($nextRIFFoffset == ($info['avdataend'] - 1)) {
-                            if (substr($nextRIFFheader, 0, 1) == "\x00") {
-                                // RIFF padded to WORD boundary, we're actually already at the end
+                    }
+                    fseek($this->getid3->fp, $nextRIFFoffset, SEEK_SET);
+                    $nextRIFFheader = fread($this->getid3->fp, 12);
+                    if ($nextRIFFoffset == ($info['avdataend'] - 1)) {
+                        if (substr($nextRIFFheader, 0, 1) == "\x00") {
+                            // RIFF padded to WORD boundary, we're actually already at the end
                                 break;
-                            }
                         }
-                        $nextRIFFheaderID = substr($nextRIFFheader, 0, 4);
-                        $nextRIFFsize = $this->EitherEndian2Int(substr($nextRIFFheader, 4, 4));
-                        $nextRIFFtype = substr($nextRIFFheader, 8, 4);
-                        $chunkdata = array();
-                        $chunkdata['offset'] = $nextRIFFoffset + 8;
-                        $chunkdata['size'] = $nextRIFFsize;
-                        $nextRIFFoffset = $chunkdata['offset'] + $chunkdata['size'];
-                        switch ($nextRIFFheaderID) {
+                    }
+                    $nextRIFFheaderID = substr($nextRIFFheader, 0, 4);
+                    $nextRIFFsize = $this->EitherEndian2Int(substr($nextRIFFheader, 4, 4));
+                    $nextRIFFtype = substr($nextRIFFheader, 8, 4);
+                    $chunkdata = array();
+                    $chunkdata['offset'] = $nextRIFFoffset + 8;
+                    $chunkdata['size'] = $nextRIFFsize;
+                    $nextRIFFoffset = $chunkdata['offset'] + $chunkdata['size'];
+                    switch ($nextRIFFheaderID) {
                             case 'RIFF':
                                 $info['avdataend'] = $nextRIFFoffset;
                                 if (!Helper::intValueSupported($info['avdataend'])) {
@@ -151,13 +159,11 @@ class Riff extends BaseHandler
                                 $info['warning'][] = 'expecting "RIFF" or "JUNK" at '.$nextRIFFoffset.', found '.Helper::PrintHexBytes(substr($nextRIFFheader, 0, 4)).' - skipping rest of file';
                                 break 2;
                         }
-                    }
                 }
                 if ($RIFFsubtype == 'WAVE') {
                     $thisfile_riff_WAVE = &$thisfile_riff['WAVE'];
                 }
                 break;
-
             default:
                 $info['error'][] = 'Cannot parse RIFF (this is maybe not a RIFF / WAV / AVI file?) - expecting "FORM|RIFF|SDSS|RMP3" found "'.$RIFFsubtype.'" instead';
                 unset($info['fileformat']);
@@ -203,19 +209,15 @@ class Riff extends BaseHandler
                     $thisfile_audio['lossless'] = false;
                     if (isset($thisfile_riff_WAVE['data'][0]['offset']) && isset($thisfile_riff_raw['fmt ']['wFormatTag'])) {
                         switch ($thisfile_riff_raw['fmt ']['wFormatTag']) {
-
                             case 0x0001:  // PCM
                                 $thisfile_audio['lossless'] = true;
                                 break;
-
                             case 0x2000:  // AC-3
                                 $thisfile_audio_dataformat = 'ac3';
                                 break;
-
                             default:
                                 // do nothing
                                 break;
-
                         }
                     }
                     $thisfile_audio['streams'][$streamindex]['wformattag'] = $thisfile_audio['wformattag'];
@@ -225,7 +227,6 @@ class Riff extends BaseHandler
                 }
 
                 if (isset($thisfile_riff_WAVE['rgad'][0]['data'])) {
-
                     // shortcuts
                     $rgadData = &$thisfile_riff_WAVE['rgad'][0]['data'];
                     $thisfile_riff_raw['rgad'] = array('track' => array(), 'album' => array());
@@ -420,10 +421,10 @@ class Riff extends BaseHandler
                             $thisfile_riff_WAVE['iXML'][0]['timecode_rate'] = $numerator / ($denominator ? $denominator : 1000);
                         }
                         if (isset($parsedXML['SPEED']['TIMESTAMP_SAMPLES_SINCE_MIDNIGHT_LO']) && !empty($parsedXML['SPEED']['TIMESTAMP_SAMPLE_RATE']) && !empty($thisfile_riff_WAVE['iXML'][0]['timecode_rate'])) {
-                            $samples_since_midnight = floatval(ltrim($parsedXML['SPEED']['TIMESTAMP_SAMPLES_SINCE_MIDNIGHT_HI'].$parsedXML['SPEED']['TIMESTAMP_SAMPLES_SINCE_MIDNIGHT_LO'], '0'));
+                            $samples_since_midnight = (float) (ltrim($parsedXML['SPEED']['TIMESTAMP_SAMPLES_SINCE_MIDNIGHT_HI'].$parsedXML['SPEED']['TIMESTAMP_SAMPLES_SINCE_MIDNIGHT_LO'], '0'));
                             $thisfile_riff_WAVE['iXML'][0]['timecode_seconds'] = $samples_since_midnight / $parsedXML['SPEED']['TIMESTAMP_SAMPLE_RATE'];
-                            $h = floor($thisfile_riff_WAVE['iXML'][0]['timecode_seconds']       / 3600);
-                            $m = floor(($thisfile_riff_WAVE['iXML'][0]['timecode_seconds'] - ($h * 3600))      / 60);
+                            $h = floor($thisfile_riff_WAVE['iXML'][0]['timecode_seconds'] / 3600);
+                            $m = floor(($thisfile_riff_WAVE['iXML'][0]['timecode_seconds'] - ($h * 3600)) / 60);
                             $s = floor($thisfile_riff_WAVE['iXML'][0]['timecode_seconds'] - ($h * 3600) - ($m * 60));
                             $f = ($thisfile_riff_WAVE['iXML'][0]['timecode_seconds'] - ($h * 3600) - ($m * 60) - $s) * $thisfile_riff_WAVE['iXML'][0]['timecode_rate'];
                             $thisfile_riff_WAVE['iXML'][0]['timecode_string'] = sprintf('%02d:%02d:%02d:%05.2f', $h, $m, $s, $f);
@@ -449,7 +450,7 @@ class Riff extends BaseHandler
 
                     fseek($this->getid3->fp, $info['avdataoffset'] - 44, SEEK_SET);
                     $RIFFdata = fread($this->getid3->fp, 44);
-                    $OrignalRIFFheaderSize = Helper::LittleEndian2Int(substr($RIFFdata, 4, 4)) +  8;
+                    $OrignalRIFFheaderSize = Helper::LittleEndian2Int(substr($RIFFdata, 4, 4)) + 8;
                     $OrignalRIFFdataSize = Helper::LittleEndian2Int(substr($RIFFdata, 40, 4)) + 44;
 
                     if ($OrignalRIFFheaderSize > $OrignalRIFFdataSize) {
@@ -525,7 +526,6 @@ class Riff extends BaseHandler
                             $thisfile_audio['lossless'] = (($thisfile_riff_litewave_raw['m_wQuality'] == 100) ? true : false);
                             $thisfile_audio['encoder_options'] = '-q'.$thisfile_riff_litewave['quality_factor'];
                             break;
-
                         default:
                             break;
                     }
@@ -538,7 +538,6 @@ class Riff extends BaseHandler
                         case 'ofs':     // OptimFROG DualStream
                             // lossless compressed audio formats that keep original RIFF headers - skip warning
                             break;
-
                         case 'litewave':
                             if (($info['avdataend'] - $info['filesize']) == 1) {
                                 // LiteWave appears to incorrectly *not* pad actual output file
@@ -550,7 +549,6 @@ class Riff extends BaseHandler
                                 $info['avdataend'] = $info['filesize'];
                             }
                             break;
-
                         default:
                             if ((($info['avdataend'] - $info['filesize']) == 1) && (($thisfile_riff[$RIFFsubtype]['data'][0]['size'] % 2) == 0) && ((($info['filesize'] - $info['avdataoffset']) % 2) == 1)) {
                                 // output file appears to be incorrectly *not* padded to nearest WORD boundary
@@ -578,7 +576,6 @@ class Riff extends BaseHandler
                     }
                 }
                 break;
-
             case 'AVI ':
                 $thisfile_video['bitrate_mode'] = 'vbr'; // maybe not, but probably
                 $thisfile_video['dataformat'] = 'avi';
@@ -724,33 +721,26 @@ class Riff extends BaseHandler
                                                     $thisfile_audio_dataformat = 'wav';
                                                     $thisfile_audio['lossless'] = true;
                                                     break;
-
                                                 case 0x0050: // MPEG Layer 2 or Layer 1
                                                     $thisfile_audio_dataformat = 'mp2'; // Assume Layer-2
                                                     break;
-
                                                 case 0x0055: // MPEG Layer 3
                                                     $thisfile_audio_dataformat = 'mp3';
                                                     break;
-
                                                 case 0x00FF: // AAC
                                                     $thisfile_audio_dataformat = 'aac';
                                                     break;
-
                                                 case 0x0161: // Windows Media v7 / v8 / v9
                                                 case 0x0162: // Windows Media Professional v9
                                                 case 0x0163: // Windows Media Lossess v9
                                                     $thisfile_audio_dataformat = 'wma';
                                                     break;
-
                                                 case 0x2000: // AC-3
                                                     $thisfile_audio_dataformat = 'ac3';
                                                     break;
-
                                                 case 0x2001: // DTS
                                                     $thisfile_audio_dataformat = 'dts';
                                                     break;
-
                                                 default:
                                                     $thisfile_audio_dataformat = 'wav';
                                                     break;
@@ -759,7 +749,6 @@ class Riff extends BaseHandler
                                             $thisfile_audio_streams_currentstream['lossless'] = $thisfile_audio['lossless'];
                                             $thisfile_audio_streams_currentstream['bitrate_mode'] = $thisfile_audio['bitrate_mode'];
                                             break;
-
                                         case 'iavs':
                                         case 'vids':
                                             // shortcut
@@ -795,7 +784,6 @@ class Riff extends BaseHandler
                                                 case 'YUY2': // Uncompressed YUV 4:2:2
                                                     $thisfile_video['lossless'] = true;
                                                     break;
-
                                                 default:
                                                     $thisfile_video['lossless'] = false;
                                                     break;
@@ -811,17 +799,14 @@ class Riff extends BaseHandler
                                                         $thisfile_riff_video_current['dv_type'] = 2;
                                                     }
                                                     break;
-
                                                 case 'iavs':
                                                     $thisfile_riff_video_current['dv_type'] = 1;
                                                     break;
                                             }
                                             break;
-
                                         default:
                                             $info['warning'][] = 'Unhandled fccType for stream ('.$i.'): "'.$strhfccType.'"';
                                             break;
-
                                     }
                                 }
                             }
@@ -840,7 +825,6 @@ class Riff extends BaseHandler
                                         $thisfile_video['lossless'] = true;
                                         //$thisfile_video['bits_per_sample'] = 24;
                                         break;
-
                                     default:
                                         $thisfile_video['lossless'] = false;
                                         //$thisfile_video['bits_per_sample'] = 24;
@@ -851,7 +835,6 @@ class Riff extends BaseHandler
                     }
                 }
                 break;
-
             case 'CDDA':
                 $thisfile_audio['bitrate_mode'] = 'cbr';
                 $thisfile_audio_dataformat = 'cda';
@@ -885,7 +868,6 @@ class Riff extends BaseHandler
                     $thisfile_audio['bitrate_mode'] = 'cbr';
                 }
                 break;
-
             case 'AIFF':
             case 'AIFC':
                 $thisfile_audio['bitrate_mode'] = 'cbr';
@@ -908,7 +890,6 @@ class Riff extends BaseHandler
                 }
 
                 if (isset($thisfile_riff[$RIFFsubtype]['COMM'][0]['data'])) {
-
                     // shortcut
                     $thisfile_riff_RIFFsubtype_COMM_0_data = &$thisfile_riff[$RIFFsubtype]['COMM'][0]['data'];
 
@@ -926,7 +907,6 @@ class Riff extends BaseHandler
                                 $thisfile_audio['codec'] = 'Pulse Code Modulation (PCM)';
                                 $thisfile_audio['lossless'] = true;
                                 break;
-
                             case '':
                                 switch ($thisfile_riff_audio['codec_fourcc']) {
                                     // http://developer.apple.com/qa/snd/snd07.html
@@ -934,17 +914,14 @@ class Riff extends BaseHandler
                                         $thisfile_riff_audio['codec_name'] = 'Two\'s Compliment Little-Endian PCM';
                                         $thisfile_audio['lossless'] = true;
                                         break;
-
                                     case 'twos':
                                         $thisfile_riff_audio['codec_name'] = 'Two\'s Compliment Big-Endian PCM';
                                         $thisfile_audio['lossless'] = true;
                                         break;
-
                                     default:
                                         break;
                                 }
                                 break;
-
                             default:
                                 $thisfile_audio['codec'] = $thisfile_riff_audio['codec_name'];
                                 $thisfile_audio['lossless'] = false;
@@ -992,7 +969,6 @@ class Riff extends BaseHandler
                 }
 
                 break;
-
             case '8SVX':
                 $thisfile_audio['bitrate_mode'] = 'cbr';
                 $thisfile_audio_dataformat = '8svx';
@@ -1028,13 +1004,11 @@ class Riff extends BaseHandler
                             $thisfile_audio['lossless'] = true;
                             $ActualBitsPerSample = 8;
                             break;
-
                         case 1:
                             $thisfile_audio['codec'] = 'Fibonacci-delta encoding';
                             $thisfile_audio['lossless'] = false;
                             $ActualBitsPerSample = 4;
                             break;
-
                         default:
                             $info['warning'][] = 'Unexpected sCompression value in 8SVX.VHDR chunk - expecting 0 or 1, found "'.sCompression.'"';
                             break;
@@ -1047,12 +1021,10 @@ class Riff extends BaseHandler
                         case 6: // Stereo
                             $thisfile_audio['channels'] = 2;
                             break;
-
                         case 2: // Left channel only
                         case 4: // Right channel only
                             $thisfile_audio['channels'] = 1;
                             break;
-
                         default:
                             $info['warning'][] = 'Unexpected value in 8SVX.CHAN chunk - expecting 2 or 4 or 6, found "'.$ChannelsIndex.'"';
                             break;
@@ -1071,7 +1043,6 @@ class Riff extends BaseHandler
                     $info['playtime_seconds'] = ($info['avdataend'] - $info['avdataoffset']) / ($thisfile_audio['bitrate'] / 8);
                 }
                 break;
-
             case 'CDXA':
                 $info['mime_type'] = 'video/mpeg';
                 if (!empty($thisfile_riff['CDXA']['data'][0]['size'])) {
@@ -1090,7 +1061,6 @@ class Riff extends BaseHandler
                     }
                 }
                 break;
-
             default:
                 $info['error'][] = 'Unknown RIFF type: expecting one of (WAVE|RMP3|AVI |CDDA|AIFF|AIFC|8SVX|CDXA), found "'.$RIFFsubtype.'" instead';
                 unset($info['fileformat']);
@@ -1219,7 +1189,6 @@ class Riff extends BaseHandler
                 case 'ac3':
                     // ignore bits_per_sample
                     break;
-
                 default:
                     $thisfile_audio['bits_per_sample'] = $thisfile_riff_raw['fmt ']['wBitsPerSample'];
                     break;
@@ -1360,7 +1329,6 @@ class Riff extends BaseHandler
                         $RIFFchunk[$listname]['size'] = $chunksize;
 
                         if ($FoundAllChunksWeNeed) {
-
                             // skip over
                         } else {
                             $WhereWeWere = ftell($this->getid3->fp);
@@ -1393,7 +1361,6 @@ class Riff extends BaseHandler
                                         unset($getid3_temp, $getid3_mp3);
                                     }
                                 } elseif (preg_match('/^\x0B\x77/s', $FirstFourBytes)) {
-
                                     // AC3
                                     if (class_exists('GetId3\\Module\\Audio\\Ac3')) {
                                         $getid3_temp = new GetId3Core();
@@ -1436,7 +1403,6 @@ class Riff extends BaseHandler
                         }
                     }
                     break;
-
                 default:
                     if (preg_match('#^[0-9]{2}(wb|pc|dc|db)$#', $chunkname)) {
                         $nextoffset = ftell($this->getid3->fp) + $chunksize;
@@ -1461,7 +1427,6 @@ class Riff extends BaseHandler
                             $RIFFdataChunkContentsTest = fread($this->getid3->fp, 36);
 
                             if ((strlen($RIFFdataChunkContentsTest) > 0) && preg_match('/^\xFF[\xE2-\xE7\xF2-\xF7\xFA-\xFF][\x00-\xEB]/s', substr($RIFFdataChunkContentsTest, 0, 4))) {
-
                                 // Probably is MP3 data
                                 if (Mp3::MPEGaudioHeaderBytesValid(substr($RIFFdataChunkContentsTest, 0, 4))) {
                                     $getid3_temp = new GetId3Core();
@@ -1477,7 +1442,6 @@ class Riff extends BaseHandler
                                     unset($getid3_temp, $getid3_mp3);
                                 }
                             } elseif ((strlen($RIFFdataChunkContentsTest) > 0) && (substr($RIFFdataChunkContentsTest, 0, 2) == "\x0B\x77")) {
-
                                 // This is probably AC-3 data
                                 if (class_exists('GetId3\\Module\\Audio\\Ac3')) {
                                     $getid3_temp = new GetId3Core();
@@ -1494,7 +1458,6 @@ class Riff extends BaseHandler
                                     unset($getid3_temp, $getid3_ac3);
                                 }
                             } elseif ((strlen($RIFFdataChunkContentsTest) > 0) && (substr($RIFFdataChunkContentsTest, 8, 2) == "\x77\x0B")) {
-
                                 // Dolby Digital WAV
                                 // AC-3 content, but not encoded in same format as normal AC-3 file
                                 // For one thing, byte order is swapped
@@ -1532,16 +1495,15 @@ class Riff extends BaseHandler
                                     }
                                 }
                             } elseif ((strlen($RIFFdataChunkContentsTest) > 0) && (substr($RIFFdataChunkContentsTest, 0, 4) == 'wvpk')) {
-
                                 // This is WavPack data
                                 $info['wavpack']['offset'] = $RIFFchunk[$chunkname][$thisindex]['offset'];
                                 $info['wavpack']['size'] = Helper::LittleEndian2Int(substr($RIFFdataChunkContentsTest, 4, 4));
                                 $this->RIFFparseWavPackHeader(substr($RIFFdataChunkContentsTest, 8, 28));
-                            } else {
+                            }
 
                                 // This is some other kind of data (quite possibly just PCM)
                                 // do nothing special, just skip it
-                            }
+
                             $nextoffset = $RIFFchunk[$chunkname][$thisindex]['offset'] + 8 + $chunksize;
                             if (($nextoffset < 0) || !Helper::intValueSupported($nextoffset)) {
                                 $info['warning'][] = 'Unable to parse chunk at offset '.$nextoffset.' because beyond '.round(PHP_INT_MAX / 1073741824).'GB limit of PHP filesystem functions';
@@ -1549,7 +1511,6 @@ class Riff extends BaseHandler
                             }
                             fseek($this->getid3->fp, $RIFFchunk[$chunkname][$thisindex]['offset'] + 8 + $chunksize, SEEK_SET);
                             break;
-
                         case 'iXML':
                         case 'bext':
                         case 'cart':
@@ -1586,7 +1547,6 @@ class Riff extends BaseHandler
                                 fseek($this->getid3->fp, $nextoffset, SEEK_SET);
                             }
                             break;
-
                         default:
                             if (!preg_match('#^[0-9]{2}(wb|pc|dc|db)$#', $chunkname) && !empty($LISTchunkParent) && (($RIFFchunk[$chunkname][$thisindex]['offset'] + $RIFFchunk[$chunkname][$thisindex]['size']) <= $LISTchunkMaxOffset)) {
                                 $RIFFchunk[$LISTchunkParent][$chunkname][$thisindex]['offset'] = $RIFFchunk[$chunkname][$thisindex]['offset'];
@@ -1615,7 +1575,6 @@ class Riff extends BaseHandler
                             break;
                     }
                     break;
-
             }
         }
 
@@ -1636,8 +1595,8 @@ class Riff extends BaseHandler
             $RIFFdataLength = strlen($RIFFdata);
             $NewLengthString = Helper::LittleEndian2String($RIFFdataLength, 4);
             for ($i = 0; $i < 4; ++$i) {
-                $RIFFdata{$i + 4}
-                = $NewLengthString{$i};
+                $RIFFdata[$i + 4]
+                = $NewLengthString[$i];
             }
             fwrite($fp_temp, $RIFFdata);
             fclose($fp_temp);
@@ -1845,14 +1804,14 @@ class Riff extends BaseHandler
 
         $parsed['title'] = trim(substr($DIVXTAG, 0, 32));
         $parsed['artist'] = trim(substr($DIVXTAG, 32, 28));
-        $parsed['year'] = intval(trim(substr($DIVXTAG, 60, 4)));
+        $parsed['year'] = (int) (trim(substr($DIVXTAG, 60, 4)));
         $parsed['comment'] = trim(substr($DIVXTAG, 64, 48));
-        $parsed['genre_id'] = intval(trim(substr($DIVXTAG, 112, 3)));
+        $parsed['genre_id'] = (int) (trim(substr($DIVXTAG, 112, 3)));
         $parsed['rating_id'] = ord(substr($DIVXTAG, 115, 1));
         //$parsed['padding'] =             substr($DIVXTAG, 116,  5);  // 5-byte null
         //$parsed['magic']   =             substr($DIVXTAG, 121,  7);  // "DIVXTAG"
 
-        $parsed['genre'] = (isset($DIVXTAGgenre[$parsed['genre_id']])   ? $DIVXTAGgenre[$parsed['genre_id']]   : $parsed['genre_id']);
+        $parsed['genre'] = (isset($DIVXTAGgenre[$parsed['genre_id']]) ? $DIVXTAGgenre[$parsed['genre_id']] : $parsed['genre_id']);
         $parsed['rating'] = (isset($DIVXTAGrating[$parsed['rating_id']]) ? $DIVXTAGrating[$parsed['rating_id']] : $parsed['rating_id']);
 
         return $parsed;

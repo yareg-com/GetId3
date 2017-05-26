@@ -1,11 +1,20 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\AudioVideo;
 
+use GetId3\GetId3Core;
 use GetId3\Handler\BaseHandler;
 use GetId3\Lib\Helper;
 use GetId3\Module\Audio\Mp3;
-use GetId3\GetId3Core;
 
 /////////////////////////////////////////////////////////////////
 /// GetId3() by James Heinrich <info@getid3.org>               //
@@ -26,10 +35,10 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Audio_Mp3
+ * @uses \GetId3\Module\Audio_Mp3
  */
 class Mpeg extends BaseHandler
 {
@@ -70,7 +79,6 @@ class Mpeg extends BaseHandler
             }
         }
         if ($foundVideo) {
-
             // Start code                       32 bits
             // horizontal frame size            12 bits
             // vertical frame size              12 bits
@@ -132,7 +140,6 @@ class Mpeg extends BaseHandler
                                                                                                          30,
                                                                                                          1));
             if ($info['mpeg']['video']['raw']['intra_quant_flag']) {
-
                 // read 512 bits
                 $info['mpeg']['video']['raw']['intra_quant'] = Helper::BigEndian2Bin(substr($MPEGstreamData,
                                                                                                        $VideoChunkOffset,
@@ -334,7 +341,7 @@ class Mpeg extends BaseHandler
     {
         $MPEGvideoFramerateLookup = array(0, 23.976, 24, 25, 29.97, 30, 50, 59.94, 60);
 
-        return (isset($MPEGvideoFramerateLookup[$rawframerate]) ? (float) $MPEGvideoFramerateLookup[$rawframerate] : (float) 0);
+        return isset($MPEGvideoFramerateLookup[$rawframerate]) ? (float) $MPEGvideoFramerateLookup[$rawframerate] : (float) 0;
     }
 
     /**
@@ -346,7 +353,7 @@ class Mpeg extends BaseHandler
     {
         $MPEGvideoAspectRatioLookup = array(0, 1, 0.6735, 0.7031, 0.7615, 0.8055, 0.8437, 0.8935, 0.9157, 0.9815, 1.0255, 1.0695, 1.0950, 1.1575, 1.2015, 0);
 
-        return (isset($MPEGvideoAspectRatioLookup[$rawaspectratio]) ? (float) $MPEGvideoAspectRatioLookup[$rawaspectratio] : (float) 0);
+        return isset($MPEGvideoAspectRatioLookup[$rawaspectratio]) ? (float) $MPEGvideoAspectRatioLookup[$rawaspectratio] : (float) 0;
     }
 
     /**
@@ -358,6 +365,6 @@ class Mpeg extends BaseHandler
     {
         $MPEGvideoAspectRatioTextLookup = array('forbidden', 'square pixels', '0.6735', '16:9, 625 line, PAL', '0.7615', '0.8055', '16:9, 525 line, NTSC', '0.8935', '4:3, 625 line, PAL, CCIR601', '0.9815', '1.0255', '1.0695', '4:3, 525 line, NTSC, CCIR601', '1.1575', '1.2015', 'reserved');
 
-        return (isset($MPEGvideoAspectRatioTextLookup[$rawaspectratio]) ? $MPEGvideoAspectRatioTextLookup[$rawaspectratio] : '');
+        return isset($MPEGvideoAspectRatioTextLookup[$rawaspectratio]) ? $MPEGvideoAspectRatioTextLookup[$rawaspectratio] : '';
     }
 }

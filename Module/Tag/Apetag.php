@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Tag;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Apetag extends BaseHandler
 {
@@ -61,13 +70,11 @@ class Apetag extends BaseHandler
 
             //if (preg_match('/APETAGEX.{24}TAG.{125}$/i', $APEfooterID3v1)) {
             if (substr($APEfooterID3v1, strlen($APEfooterID3v1) - $id3v1tagsize - $apetagheadersize, 8) == 'APETAGEX') {
-
                 // APE tag found before ID3v1
                 $info['ape']['tag_offset_end'] = $info['filesize'] - $id3v1tagsize;
 
             //} elseif (preg_match('/APETAGEX.{24}$/i', $APEfooterID3v1)) {
             } elseif (substr($APEfooterID3v1, strlen($APEfooterID3v1) - $apetagheadersize, 8) == 'APETAGEX') {
-
                 // APE tag found, no ID3v1
                 $info['ape']['tag_offset_end'] = $info['filesize'];
             }
@@ -78,7 +85,6 @@ class Apetag extends BaseHandler
             }
         }
         if (!isset($info['ape']['tag_offset_end'])) {
-
             // APE tag not found
             unset($info['ape']);
 
@@ -163,7 +169,6 @@ class Apetag extends BaseHandler
                 case 3: // Locator (URL, filename, etc), UTF-8 encoded
                     $thisfile_ape_items_current['data'] = explode("\x00", trim($thisfile_ape_items_current['data']));
                     break;
-
                 default: // binary data
                     break;
             }
@@ -173,7 +178,6 @@ class Apetag extends BaseHandler
                     $thisfile_replaygain['track']['adjustment'] = (float) str_replace(',', '.', $thisfile_ape_items_current['data'][0]); // float casting will see "0,95" as zero!
                     $thisfile_replaygain['track']['originator'] = 'unspecified';
                     break;
-
                 case 'replaygain_track_peak':
                     $thisfile_replaygain['track']['peak'] = (float) str_replace(',', '.', $thisfile_ape_items_current['data'][0]); // float casting will see "0,95" as zero!
                     $thisfile_replaygain['track']['originator'] = 'unspecified';
@@ -181,12 +185,10 @@ class Apetag extends BaseHandler
                         $info['warning'][] = 'ReplayGain Track peak from APEtag appears invalid: '.$thisfile_replaygain['track']['peak'].' (original value = "'.$thisfile_ape_items_current['data'][0].'")';
                     }
                     break;
-
                 case 'replaygain_album_gain':
                     $thisfile_replaygain['album']['adjustment'] = (float) str_replace(',', '.', $thisfile_ape_items_current['data'][0]); // float casting will see "0,95" as zero!
                     $thisfile_replaygain['album']['originator'] = 'unspecified';
                     break;
-
                 case 'replaygain_album_peak':
                     $thisfile_replaygain['album']['peak'] = (float) str_replace(',', '.', $thisfile_ape_items_current['data'][0]); // float casting will see "0,95" as zero!
                     $thisfile_replaygain['album']['originator'] = 'unspecified';
@@ -194,26 +196,22 @@ class Apetag extends BaseHandler
                         $info['warning'][] = 'ReplayGain Album peak from APEtag appears invalid: '.$thisfile_replaygain['album']['peak'].' (original value = "'.$thisfile_ape_items_current['data'][0].'")';
                     }
                     break;
-
                 case 'mp3gain_undo':
                     list($mp3gain_undo_left, $mp3gain_undo_right, $mp3gain_undo_wrap) = explode(',', $thisfile_ape_items_current['data'][0]);
-                    $thisfile_replaygain['mp3gain']['undo_left'] = intval($mp3gain_undo_left);
-                    $thisfile_replaygain['mp3gain']['undo_right'] = intval($mp3gain_undo_right);
+                    $thisfile_replaygain['mp3gain']['undo_left'] = (int) $mp3gain_undo_left;
+                    $thisfile_replaygain['mp3gain']['undo_right'] = (int) $mp3gain_undo_right;
                     $thisfile_replaygain['mp3gain']['undo_wrap'] = (($mp3gain_undo_wrap == 'Y') ? true : false);
                     break;
-
                 case 'mp3gain_minmax':
                     list($mp3gain_globalgain_min, $mp3gain_globalgain_max) = explode(',', $thisfile_ape_items_current['data'][0]);
-                    $thisfile_replaygain['mp3gain']['globalgain_track_min'] = intval($mp3gain_globalgain_min);
-                    $thisfile_replaygain['mp3gain']['globalgain_track_max'] = intval($mp3gain_globalgain_max);
+                    $thisfile_replaygain['mp3gain']['globalgain_track_min'] = (int) $mp3gain_globalgain_min;
+                    $thisfile_replaygain['mp3gain']['globalgain_track_max'] = (int) $mp3gain_globalgain_max;
                     break;
-
                 case 'mp3gain_album_minmax':
                     list($mp3gain_globalgain_album_min, $mp3gain_globalgain_album_max) = explode(',', $thisfile_ape_items_current['data'][0]);
-                    $thisfile_replaygain['mp3gain']['globalgain_album_min'] = intval($mp3gain_globalgain_album_min);
-                    $thisfile_replaygain['mp3gain']['globalgain_album_max'] = intval($mp3gain_globalgain_album_max);
+                    $thisfile_replaygain['mp3gain']['globalgain_album_min'] = (int) $mp3gain_globalgain_album_min;
+                    $thisfile_replaygain['mp3gain']['globalgain_album_max'] = (int) $mp3gain_globalgain_album_max;
                     break;
-
                 case 'tracknumber':
                     if (is_array($thisfile_ape_items_current['data'])) {
                         foreach ($thisfile_ape_items_current['data'] as $comment) {
@@ -221,7 +219,6 @@ class Apetag extends BaseHandler
                         }
                     }
                     break;
-
                 case 'cover art (artist)':
                 case 'cover art (back)':
                 case 'cover art (band logo)':
@@ -295,7 +292,6 @@ class Apetag extends BaseHandler
                         }
                     } while (false);
                     break;
-
                 default:
                     if (is_array($thisfile_ape_items_current['data'])) {
                         foreach ($thisfile_ape_items_current['data'] as $comment) {
@@ -317,7 +313,7 @@ class Apetag extends BaseHandler
      *
      * @return bool
      *
-     * @link http://www.uni-jena.de/~pfk/mpp/sv8/apeheader.html
+     * @see http://www.uni-jena.de/~pfk/mpp/sv8/apeheader.html
      */
     public function parseAPEheaderFooter($APEheaderFooterData)
     {
@@ -348,7 +344,7 @@ class Apetag extends BaseHandler
      *
      * @return type
      *
-     * @link http://www.uni-jena.de/~pfk/mpp/sv8/apetagflags.html
+     * @see http://www.uni-jena.de/~pfk/mpp/sv8/apetagflags.html
      */
     public function parseAPEtagFlags($rawflagint)
     {
@@ -381,7 +377,7 @@ class Apetag extends BaseHandler
             3 => 'reserved',
         );
 
-        return (isset($APEcontentTypeFlagLookup[$contenttypeid]) ? $APEcontentTypeFlagLookup[$contenttypeid] : 'invalid');
+        return isset($APEcontentTypeFlagLookup[$contenttypeid]) ? $APEcontentTypeFlagLookup[$contenttypeid] : 'invalid';
     }
 
     /**

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Tag;
 
 use GetId3\Handler\BaseHandler;
@@ -24,10 +33,10 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Tag\Id3v1
+ * @uses \GetId3\Module\Tag\Id3v1
  */
 class Id3v2 extends BaseHandler
 {
@@ -76,9 +85,9 @@ class Id3v2 extends BaseHandler
 
         fseek($this->getid3->fp, $this->StartingOffset, SEEK_SET);
         $header = fread($this->getid3->fp, 10);
-        if (substr($header, 0, 3) == 'ID3'  &&  strlen($header) == 10) {
-            $thisfile_id3v2['majorversion'] = ord($header{3});
-            $thisfile_id3v2['minorversion'] = ord($header{4});
+        if (substr($header, 0, 3) == 'ID3' && strlen($header) == 10) {
+            $thisfile_id3v2['majorversion'] = ord($header[3]);
+            $thisfile_id3v2['minorversion'] = ord($header[4]);
 
             // shortcut
             $id3v2_majorversion = &$thisfile_id3v2['majorversion'];
@@ -89,27 +98,24 @@ class Id3v2 extends BaseHandler
         }
 
         if ($id3v2_majorversion > 4) { // this script probably won't correctly parse ID3v2.5.x and above (if it ever exists)
-
             $info['error'][] = 'this script only parses up to ID3v2.4.x - this tag is ID3v2.'.$id3v2_majorversion.'.'.$thisfile_id3v2['minorversion'];
 
             return false;
         }
 
-        $id3_flags = ord($header{5});
+        $id3_flags = ord($header[5]);
         switch ($id3v2_majorversion) {
             case 2:
                 // %ab000000 in v2.2
                 $thisfile_id3v2_flags['unsynch'] = (bool) ($id3_flags & 0x80); // a - Unsynchronisation
                 $thisfile_id3v2_flags['compression'] = (bool) ($id3_flags & 0x40); // b - Compression
                 break;
-
             case 3:
                 // %abc00000 in v2.3
                 $thisfile_id3v2_flags['unsynch'] = (bool) ($id3_flags & 0x80); // a - Unsynchronisation
                 $thisfile_id3v2_flags['exthead'] = (bool) ($id3_flags & 0x40); // b - Extended header
                 $thisfile_id3v2_flags['experim'] = (bool) ($id3_flags & 0x20); // c - Experimental indicator
                 break;
-
             case 4:
                 // %abcd0000 in v2.4
                 $thisfile_id3v2_flags['unsynch'] = (bool) ($id3_flags & 0x80); // a - Unsynchronisation
@@ -167,7 +173,6 @@ class Id3v2 extends BaseHandler
                 $extended_header_offset = 0;
 
                 if ($id3v2_majorversion == 3) {
-
                     // v2.3 definition:
                     //Extended header size  $xx xx xx xx   // 32-bit integer
                     //Extended Flags        $xx xx
@@ -193,7 +198,6 @@ class Id3v2 extends BaseHandler
                     }
                     $extended_header_offset += $thisfile_id3v2['exthead']['padding_size'];
                 } elseif ($id3v2_majorversion == 4) {
-
                     // v2.4 definition:
                     //Extended header size   4 * %0xxxxxxx // 28-bit synchsafe integer
                     //Number of flag bytes       $01
@@ -253,7 +257,7 @@ class Id3v2 extends BaseHandler
                     }
 
                     if ($thisfile_id3v2['exthead']['length'] != $extended_header_offset) {
-                        $info['warning'][] = 'ID3v2.4 extended header length mismatch (expecting '.intval($thisfile_id3v2['exthead']['length']).', found '.intval($extended_header_offset).')';
+                        $info['warning'][] = 'ID3v2.4 extended header length mismatch (expecting '.(int) ($thisfile_id3v2['exthead']['length']).', found '.(int) $extended_header_offset.')';
                     }
                 }
 
@@ -268,7 +272,7 @@ class Id3v2 extends BaseHandler
                     $thisfile_id3v2['padding']['length'] = strlen($framedata);
                     $thisfile_id3v2['padding']['valid'] = true;
                     for ($i = 0; $i < $thisfile_id3v2['padding']['length']; ++$i) {
-                        if ($framedata{$i} != "\x00") {
+                        if ($framedata[$i] != "\x00") {
                             $thisfile_id3v2['padding']['valid'] = false;
                             $thisfile_id3v2['padding']['errorpos'] = $thisfile_id3v2['padding']['start'] + $i;
                             $info['warning'][] = 'Invalid ID3v2 padding found at offset '.$thisfile_id3v2['padding']['errorpos'].' (the remaining '.($thisfile_id3v2['padding']['length'] - $i).' bytes are considered invalid)';
@@ -288,7 +292,6 @@ class Id3v2 extends BaseHandler
                     $frame_size = Helper::BigEndian2Int(substr($frame_header, 3, 3), 0);
                     $frame_flags = 0; // not used for anything in ID3v2.2, just set to avoid E_NOTICEs
                 } elseif ($id3v2_majorversion > 2) {
-
                     // Frame ID  $xx xx xx xx (four characters)
                     // Size      $xx xx xx xx (32-bit integer in v2.3, 28-bit synchsafe in v2.4+)
                     // Flags     $xx xx
@@ -328,7 +331,7 @@ class Id3v2 extends BaseHandler
 
                     $len = strlen($framedata);
                     for ($i = 0; $i < $len; ++$i) {
-                        if ($framedata{$i} != "\x00") {
+                        if ($framedata[$i] != "\x00") {
                             $thisfile_id3v2['padding']['valid'] = false;
                             $thisfile_id3v2['padding']['errorpos'] = $thisfile_id3v2['padding']['start'] + $i;
                             $info['warning'][] = 'Invalid ID3v2 padding found at offset '.$thisfile_id3v2['padding']['errorpos'].' (the remaining '.($thisfile_id3v2['padding']['length'] - $i).' bytes are considered invalid)';
@@ -355,26 +358,21 @@ class Id3v2 extends BaseHandler
 
                     $framedata = substr($framedata, $frame_size);
                 } else { // invalid frame length or FrameID
-
                     if ($frame_size <= strlen($framedata)) {
                         if ($this->IsValidID3v2FrameName(substr($framedata, $frame_size, 4), $id3v2_majorversion)) {
-
                             // next frame is valid, just skip the current frame
                             $framedata = substr($framedata, $frame_size);
                             $info['warning'][] = 'Next ID3v2 frame is valid, skipping current frame.';
                         } else {
-
                             // next frame is invalid too, abort processing
                             //unset($framedata);
                             $framedata = null;
                             $info['error'][] = 'Next ID3v2 frame is also invalid, aborting processing.';
                         }
                     } elseif ($frame_size == strlen($framedata)) {
-
                         // this is the last frame, just skip
                         $info['warning'][] = 'This was the last ID3v2 frame.';
                     } else {
-
                         // next frame is invalid too, abort processing
                         //unset($framedata);
                         $framedata = null;
@@ -391,7 +389,6 @@ class Id3v2 extends BaseHandler
                             case 'MP3':
                                 $info['warning'][] = 'error parsing "'.$frame_name.'" ('.$framedataoffset.' bytes into the ID3v2.'.$id3v2_majorversion.' tag). (ERROR: !IsValidID3v2FrameName("'.str_replace("\x00", ' ', $frame_name).'", '.$id3v2_majorversion.'))). [Note: this particular error has been known to happen with tags edited by "MP3ext (www.mutschler.de/mp3ext/)"]';
                                 break;
-
                             default:
                                 $info['warning'][] = 'error parsing "'.$frame_name.'" ('.$framedataoffset.' bytes into the ID3v2.'.$id3v2_majorversion.' tag). (ERROR: !IsValidID3v2FrameName("'.str_replace("\x00", ' ', $frame_name).'", '.$id3v2_majorversion.'))).';
                                 break;
@@ -418,11 +415,11 @@ class Id3v2 extends BaseHandler
             $footer = fread($this->getid3->fp, 10);
             if (substr($footer, 0, 3) == '3DI') {
                 $thisfile_id3v2['footer'] = true;
-                $thisfile_id3v2['majorversion_footer'] = ord($footer{3});
-                $thisfile_id3v2['minorversion_footer'] = ord($footer{4});
+                $thisfile_id3v2['majorversion_footer'] = ord($footer[3]);
+                $thisfile_id3v2['minorversion_footer'] = ord($footer[4]);
             }
             if ($thisfile_id3v2['majorversion_footer'] <= 4) {
-                $id3_flags = ord(substr($footer{5}));
+                $id3_flags = ord(substr($footer[5]));
                 $thisfile_id3v2_flags['unsynch_footer'] = (bool) ($id3_flags & 0x80);
                 $thisfile_id3v2_flags['extfoot_footer'] = (bool) ($id3_flags & 0x40);
                 $thisfile_id3v2_flags['experim_footer'] = (bool) ($id3_flags & 0x20);
@@ -457,17 +454,17 @@ class Id3v2 extends BaseHandler
                 switch ($txxx_array['description']) {
                     case 'replaygain_track_gain':
                         if (empty($info['replay_gain']['track']['adjustment']) && !empty($txxx_array['data'])) {
-                            $info['replay_gain']['track']['adjustment'] = floatval(trim(str_replace('dB', '', $txxx_array['data'])));
+                            $info['replay_gain']['track']['adjustment'] = (float) (trim(str_replace('dB', '', $txxx_array['data'])));
                         }
                         break;
                     case 'replaygain_track_peak':
                         if (empty($info['replay_gain']['track']['peak']) && !empty($txxx_array['data'])) {
-                            $info['replay_gain']['track']['peak'] = floatval($txxx_array['data']);
+                            $info['replay_gain']['track']['peak'] = (float) ($txxx_array['data']);
                         }
                         break;
                     case 'replaygain_album_gain':
                         if (empty($info['replay_gain']['album']['adjustment']) && !empty($txxx_array['data'])) {
-                            $info['replay_gain']['album']['adjustment'] = floatval(trim(str_replace('dB', '', $txxx_array['data'])));
+                            $info['replay_gain']['album']['adjustment'] = (float) (trim(str_replace('dB', '', $txxx_array['data'])));
                         }
                         break;
                 }
@@ -594,7 +591,6 @@ class Id3v2 extends BaseHandler
                 case 'WCOM':
                     $warning .= ' (this is known to happen with files tagged by RioPort)';
                     break;
-
                 default:
                     break;
             }
@@ -641,7 +637,7 @@ class Id3v2 extends BaseHandler
                 $info['id3v2']['comments'][$parsedFrame['framenameshort']][] = trim(Helper::iconv_fallback($parsedFrame['encoding'], $info['id3v2']['encoding'], $parsedFrame['data']));
             }
             //unset($parsedFrame['data']); do not unset, may be needed elsewhere, e.g. for replaygain
-        } elseif ($parsedFrame['frame_name']{0} == 'T') { // 4.2. T??[?] Text information frame
+        } elseif ($parsedFrame['frame_name'][0] == 'T') { // 4.2. T??[?] Text information frame
             //   There may only be one text information frame of its kind in an tag.
             // <Header for 'Text information frame', ID: 'T000' - 'TZZZ',
             // excluding 'TXXX' described in 4.2.6.>
@@ -712,7 +708,7 @@ class Id3v2 extends BaseHandler
                 $info['id3v2']['comments'][$parsedFrame['framenameshort']][] = Helper::iconv_fallback($parsedFrame['encoding'], $info['id3v2']['encoding'], $parsedFrame['url']);
             }
             unset($parsedFrame['data']);
-        } elseif ($parsedFrame['frame_name']{0} == 'W') { // 4.3. W??? URL link frames
+        } elseif ($parsedFrame['frame_name'][0] == 'W') { // 4.3. W??? URL link frames
             //   There may only be one URL link frame of its kind in a tag,
             //   except when stated otherwise in the frame description
             // <Header for 'URL link frame', ID: 'W000' - 'WZZZ', excluding 'WXXX'
@@ -914,7 +910,7 @@ class Id3v2 extends BaseHandler
                     $parsedFrame['lyrics'][$timestampindex]['data'] = substr($frame_remainingdata, $frame_offset, $frame_terminatorpos - $frame_offset);
 
                     $frame_remainingdata = substr($frame_remainingdata, $frame_terminatorpos + strlen($this->TextEncodingTerminatorLookup($frame_textencoding)));
-                    if (($timestampindex == 0) && (ord($frame_remainingdata{0}) != 0)) {
+                    if (($timestampindex == 0) && (ord($frame_remainingdata[0]) != 0)) {
                         // timestamp probably omitted for first data item
                     } else {
                         $parsedFrame['lyrics'][$timestampindex]['timestamp'] = Helper::BigEndian2Int(substr($frame_remainingdata, 0, 4));
@@ -1650,7 +1646,6 @@ class Id3v2 extends BaseHandler
             $parsedFrame['methodsymbol'] = ord(substr($parsedFrame['data'], $frame_offset++, 1));
             $parsedFrame['data'] = (string) substr($parsedFrame['data'], $frame_offset);
         } elseif (($id3v2_majorversion >= 3) && ($parsedFrame['frame_name'] == 'GRID')) { // 4.26  GRID Group identification registration (ID3v2.3+ only)
-
             //   There may be several 'GRID' frames in a tag,
             //   but only one containing the same symbol
             //   and only one containing the same owner identifier
@@ -1800,7 +1795,7 @@ class Id3v2 extends BaseHandler
             0x03 => 'No more than 32 frames and 4 KB total tag size',
         );
 
-        return (isset($LookupExtendedHeaderRestrictionsTagSizeLimits[$index]) ? $LookupExtendedHeaderRestrictionsTagSizeLimits[$index] : '');
+        return isset($LookupExtendedHeaderRestrictionsTagSizeLimits[$index]) ? $LookupExtendedHeaderRestrictionsTagSizeLimits[$index] : '';
     }
 
     /**
@@ -1817,7 +1812,7 @@ class Id3v2 extends BaseHandler
             0x01 => 'Strings are only encoded with ISO-8859-1 or UTF-8',
         );
 
-        return (isset($LookupExtendedHeaderRestrictionsTextEncodings[$index]) ? $LookupExtendedHeaderRestrictionsTextEncodings[$index] : '');
+        return isset($LookupExtendedHeaderRestrictionsTextEncodings[$index]) ? $LookupExtendedHeaderRestrictionsTextEncodings[$index] : '';
     }
 
     /**
@@ -1836,7 +1831,7 @@ class Id3v2 extends BaseHandler
             0x03 => 'No string is longer than 30 characters',
         );
 
-        return (isset($LookupExtendedHeaderRestrictionsTextFieldSize[$index]) ? $LookupExtendedHeaderRestrictionsTextFieldSize[$index] : '');
+        return isset($LookupExtendedHeaderRestrictionsTextFieldSize[$index]) ? $LookupExtendedHeaderRestrictionsTextFieldSize[$index] : '';
     }
 
     /**
@@ -1853,7 +1848,7 @@ class Id3v2 extends BaseHandler
             0x01 => 'Images are encoded only with PNG or JPEG',
         );
 
-        return (isset($LookupExtendedHeaderRestrictionsImageEncoding[$index]) ? $LookupExtendedHeaderRestrictionsImageEncoding[$index] : '');
+        return isset($LookupExtendedHeaderRestrictionsImageEncoding[$index]) ? $LookupExtendedHeaderRestrictionsImageEncoding[$index] : '';
     }
 
     /**
@@ -1872,7 +1867,7 @@ class Id3v2 extends BaseHandler
             0x03 => 'All images are exactly 64x64 pixels, unless required otherwise',
         );
 
-        return (isset($LookupExtendedHeaderRestrictionsImageSizeSize[$index]) ? $LookupExtendedHeaderRestrictionsImageSizeSize[$index] : '');
+        return isset($LookupExtendedHeaderRestrictionsImageSizeSize[$index]) ? $LookupExtendedHeaderRestrictionsImageSizeSize[$index] : '';
     }
 
     /**
@@ -2783,7 +2778,7 @@ class Id3v2 extends BaseHandler
             0xFF => 'one more byte of events follows',
         );
 
-        return (isset($EventLookup[$index]) ? $EventLookup[$index] : '');
+        return isset($EventLookup[$index]) ? $EventLookup[$index] : '';
     }
 
     /**
@@ -2807,7 +2802,7 @@ class Id3v2 extends BaseHandler
             0x08 => 'URLs to images',
         );
 
-        return (isset($SYTLContentTypeLookup[$index]) ? $SYTLContentTypeLookup[$index] : '');
+        return isset($SYTLContentTypeLookup[$index]) ? $SYTLContentTypeLookup[$index] : '';
     }
 
     /**
@@ -2847,7 +2842,7 @@ class Id3v2 extends BaseHandler
             return $APICPictureTypeLookup;
         }
 
-        return (isset($APICPictureTypeLookup[$index]) ? $APICPictureTypeLookup[$index] : '');
+        return isset($APICPictureTypeLookup[$index]) ? $APICPictureTypeLookup[$index] : '';
     }
 
     /**
@@ -2871,7 +2866,7 @@ class Id3v2 extends BaseHandler
             0x08 => 'Non-musical merchandise',
         );
 
-        return (isset($COMRReceivedAsLookup[$index]) ? $COMRReceivedAsLookup[$index] : '');
+        return isset($COMRReceivedAsLookup[$index]) ? $COMRReceivedAsLookup[$index] : '';
     }
 
     /**
@@ -2895,7 +2890,7 @@ class Id3v2 extends BaseHandler
             0x08 => 'Subwoofer',
         );
 
-        return (isset($RVA2ChannelTypeLookup[$index]) ? $RVA2ChannelTypeLookup[$index] : '');
+        return isset($RVA2ChannelTypeLookup[$index]) ? $RVA2ChannelTypeLookup[$index] : '';
     }
 
     /**
@@ -3080,7 +3075,6 @@ class Id3v2 extends BaseHandler
         */
 
         return Helper::EmbeddedLookup($framename, $begin, __LINE__, __FILE__, 'id3v2-framename_long');
-
         // Last three:
         // from Helium2 [www.helium2.com]
         // from http://privatewww.essex.ac.uk/~djmrob/replaygain/file_format_id3v2.html
@@ -3289,7 +3283,7 @@ class Id3v2 extends BaseHandler
             255 => "\x00\x00",
         );
 
-        return (isset($TextEncodingTerminatorLookup[$encoding]) ? $TextEncodingTerminatorLookup[$encoding] : '');
+        return isset($TextEncodingTerminatorLookup[$encoding]) ? $TextEncodingTerminatorLookup[$encoding] : '';
     }
 
     /**
@@ -3311,7 +3305,7 @@ class Id3v2 extends BaseHandler
             255 => 'UTF-16BE',
         );
 
-        return (isset($TextEncodingNameLookup[$encoding]) ? $TextEncodingNameLookup[$encoding] : 'ISO-8859-1');
+        return isset($TextEncodingNameLookup[$encoding]) ? $TextEncodingNameLookup[$encoding] : 'ISO-8859-1';
     }
 
     /**
@@ -3326,7 +3320,6 @@ class Id3v2 extends BaseHandler
             case 2:
                 return preg_match('#[A-Z][A-Z0-9]{2}#', $framename);
                 break;
-
             case 3:
             case 4:
                 return preg_match('#[A-Z][A-Z0-9]{3}#', $framename);
@@ -3346,10 +3339,10 @@ class Id3v2 extends BaseHandler
     public static function IsANumber($numberstring, $allowdecimal = false, $allownegative = false)
     {
         for ($i = 0; $i < strlen($numberstring); ++$i) {
-            if ((chr($numberstring{$i}) < chr('0')) || (chr($numberstring{$i}) > chr('9'))) {
-                if (($numberstring{$i} == '.') && $allowdecimal) {
+            if ((chr($numberstring[$i]) < chr('0')) || (chr($numberstring[$i]) > chr('9'))) {
+                if (($numberstring[$i] == '.') && $allowdecimal) {
                     // allowed
-                } elseif (($numberstring{$i} == '-') && $allownegative && ($i == 0)) {
+                } elseif (($numberstring[$i] == '-') && $allownegative && ($i == 0)) {
                     // allowed
                 } else {
                     return false;
@@ -3402,6 +3395,6 @@ class Id3v2 extends BaseHandler
      */
     public static function ID3v2HeaderLength($majorversion)
     {
-        return (($majorversion == 2) ? 6 : 10);
+        return ($majorversion == 2) ? 6 : 10;
     }
 }

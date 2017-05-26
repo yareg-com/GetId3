@@ -2,7 +2,7 @@ GetId3
 ======
 [![Build Status](https://secure.travis-ci.org/phansys/GetId3.png?branch=master)](http://travis-ci.org/phansys/GetId3)
 
-This fork of GetId3 library **only works in PHP  +5.3**. It updates to
+This fork of GetId3 library **only works in PHP  +5.3.3**. It updates to
 [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md)
 / [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md)
 standards, adds namespaces and makes it installable by composer.
@@ -15,16 +15,16 @@ Useful links
 License
 -------
 
-For license info please read [Resources/doc/license.txt](https://github.com/phansys/GetId3/tree/master/Resources/doc/license.txt)
+For license info please read [LICENSE](Resources/doc/license.txt)
 
-For commercial license read [Resources/doc/license.commercial.txt](https://github.com/phansys/GetId3/tree/master/Resources/doc/license.commercial.txt)
+For commercial license read [Resources/doc/license.commercial.txt](Resources/doc/license.commercial.txt)
 
 ## Installation via [composer](http://getcomposer.org/)
 
 ##### Run composer to install the library:
 
 ``` bash
-$ composer require "phansys/getid3: ~2.1"
+$ composer require "phansys/getid3: ^2.1@dev"
 ```
 
 Quick use example reading audio properties

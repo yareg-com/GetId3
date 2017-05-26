@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Module\Audio;
 
 use GetId3\Handler\BaseHandler;
@@ -24,8 +33,8 @@ use GetId3\Lib\Helper;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  */
 class Vqf extends BaseHandler
 {
@@ -114,7 +123,6 @@ class Vqf extends BaseHandler
                         return false;
                     }
                     break;
-
                 case 'NAME':
                 case 'AUTH':
                 case '(c) ':
@@ -123,11 +131,9 @@ class Vqf extends BaseHandler
                 case 'ALBM':
                     $thisfile_vqf['comments'][$this->VQFcommentNiceNameLookup($ChunkName)][] = trim(substr($ChunkData, 8));
                     break;
-
                 case 'DSIZ':
                     $thisfile_vqf['DSIZ'] = Helper::BigEndian2Int(substr($ChunkData, 8, 4));
                     break;
-
                 default:
                     $info['warning'][] = 'Unhandled chunk type "'.$ChunkName.'" at offset '.$ChunkBaseOffset;
                     break;
@@ -143,7 +149,6 @@ class Vqf extends BaseHandler
                     $info['warning'][] = 'Invalid DSIZ value "'.$thisfile_vqf['DSIZ'].'". This is known to happen with VQF files encoded by Ahead Nero, and seems to be its way of saying this is TwinVQF v'.($thisfile_vqf['DSIZ'] + 1).'.0';
                     $info['audio']['encoder'] = 'Ahead Nero';
                     break;
-
                 default:
                     $info['warning'][] = 'Probable corrupted file - should be '.$thisfile_vqf['DSIZ'].' bytes, actually '.($info['avdataend'] - $info['avdataoffset'] - strlen('DATA'));
                     break;
@@ -168,7 +173,7 @@ class Vqf extends BaseHandler
             44 => 44100,
         );
 
-        return (isset($VQFchannelFrequencyLookup[$frequencyid]) ? $VQFchannelFrequencyLookup[$frequencyid] : $frequencyid * 1000);
+        return isset($VQFchannelFrequencyLookup[$frequencyid]) ? $VQFchannelFrequencyLookup[$frequencyid] : $frequencyid * 1000;
     }
 
     /**
@@ -189,6 +194,6 @@ class Vqf extends BaseHandler
             'ALBM' => 'album',
         );
 
-        return (isset($VQFcommentNiceNameLookup[$shortname]) ? $VQFcommentNiceNameLookup[$shortname] : $shortname);
+        return isset($VQFcommentNiceNameLookup[$shortname]) ? $VQFcommentNiceNameLookup[$shortname] : $shortname;
     }
 }

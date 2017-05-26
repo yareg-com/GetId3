@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Tests\Modules;
 
 use GetId3\GetId3Core;
@@ -63,7 +72,7 @@ class AudioTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('mp3', $audio['audio']['dataformat']);
+        $this->assertSame('mp3', $audio['audio']['dataformat']);
     }
 
     public function testWavFile()
@@ -89,9 +98,9 @@ class AudioTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('wav', $audio['audio']['dataformat']);
+        $this->assertSame('wav', $audio['audio']['dataformat']);
         $this->assertArrayHasKey('codec', $audio['audio']);
-        $this->assertEquals('Pulse Code Modulation (PCM)', $audio['audio']['codec']);
+        $this->assertSame('Pulse Code Modulation (PCM)', $audio['audio']['codec']);
         $this->assertArrayHasKey('bitrate', $audio['audio']);
         $this->assertSame(1411200, $audio['audio']['bitrate']);
     }
@@ -119,20 +128,20 @@ class AudioTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayNotHasKey('warning', $audio);
         $this->assertArrayHasKey('fileformat', $audio);
-        $this->assertEquals('vqf', $audio['fileformat']);
+        $this->assertSame('vqf', $audio['fileformat']);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('vqf', $audio['audio']['dataformat']);
+        $this->assertSame('vqf', $audio['audio']['dataformat']);
         $this->assertArrayHasKey('bitrate_mode', $audio['audio']);
         $this->assertArrayHasKey('encoder_options', $audio['audio']);
-        $this->assertEquals('CBR48', $audio['audio']['encoder_options']);
+        $this->assertSame('CBR48', $audio['audio']['encoder_options']);
         $this->assertArrayHasKey('compression_ratio', $audio['audio']);
         $this->assertSame(0.068027210884354, $audio['audio']['compression_ratio']);
         $this->assertArrayHasKey('tags', $audio);
         $this->assertArrayHasKey('vqf', $audio['tags']);
         $this->assertArrayHasKey('title', $audio['tags']['vqf']);
         $this->assertArrayHasKey('mime_type', $audio);
-        $this->assertEquals('application/octet-stream', $audio['mime_type']);
+        $this->assertSame('application/octet-stream', $audio['mime_type']);
         $this->assertArrayHasKey('vqf', $audio);
         $this->assertArrayHasKey('raw', $audio['vqf']);
         $this->assertArrayHasKey('playtime_seconds', $audio);
@@ -162,17 +171,17 @@ class AudioTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayNotHasKey('warning', $audio);
         $this->assertArrayHasKey('fileformat', $audio);
-        $this->assertEquals('flac', $audio['fileformat']);
+        $this->assertSame('flac', $audio['fileformat']);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('flac', $audio['audio']['dataformat']);
+        $this->assertSame('flac', $audio['audio']['dataformat']);
         $this->assertArrayHasKey('bitrate_mode', $audio['audio']);
         $this->assertArrayHasKey('encoder', $audio['audio']);
-        $this->assertEquals('libFLAC 1.1.4 20070213', $audio['audio']['encoder']);
+        $this->assertSame('libFLAC 1.1.4 20070213', $audio['audio']['encoder']);
         $this->assertArrayHasKey('compression_ratio', $audio['audio']);
         $this->assertSame(0.14657823129252, $audio['audio']['compression_ratio']);
         $this->assertArrayHasKey('mime_type', $audio);
-        $this->assertEquals('audio/x-flac', $audio['mime_type']);
+        $this->assertSame('audio/x-flac', $audio['mime_type']);
         $this->assertArrayHasKey('flac', $audio);
         $this->assertArrayHasKey('STREAMINFO', $audio['flac']);
         $this->assertArrayHasKey('samples_stream', $audio['flac']['STREAMINFO']);
@@ -206,19 +215,19 @@ class AudioTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayNotHasKey('warning', $audio);
         $this->assertArrayHasKey('fileformat', $audio);
-        $this->assertEquals('ogg', $audio['fileformat']);
+        $this->assertSame('ogg', $audio['fileformat']);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('vorbis', $audio['audio']['dataformat']);
+        $this->assertSame('vorbis', $audio['audio']['dataformat']);
         $this->assertArrayHasKey('bitrate_mode', $audio['audio']);
-        $this->assertEquals('vbr', $audio['audio']['bitrate_mode']);
+        $this->assertSame('vbr', $audio['audio']['bitrate_mode']);
         $this->assertArrayHasKey('encoder', $audio['audio']);
-        $this->assertEquals('Xiph.Org libVorbis I 20030909', $audio['audio']['encoder']);
+        $this->assertSame('Xiph.Org libVorbis I 20030909', $audio['audio']['encoder']);
         $this->assertArrayHasKey('encoder_options', $audio['audio']);
         $this->assertArrayHasKey('compression_ratio', $audio['audio']);
         $this->assertSame(0.075160635578802, $audio['audio']['compression_ratio']);
         $this->assertArrayHasKey('mime_type', $audio);
-        $this->assertEquals('application/ogg', $audio['mime_type']);
+        $this->assertSame('application/ogg', $audio['mime_type']);
         $this->assertArrayHasKey('ogg', $audio);
         $this->assertArrayHasKey('bitrate_average', $audio['ogg']);
         $this->assertArrayHasKey('playtime_seconds', $audio);
@@ -247,14 +256,14 @@ class AudioTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayNotHasKey('error', $audio);
         $this->assertArrayHasKey('fileformat', $audio);
-        $this->assertEquals('midi', $audio['fileformat']);
+        $this->assertSame('midi', $audio['fileformat']);
         $this->assertArrayHasKey('audio', $audio);
         $this->assertArrayHasKey('dataformat', $audio['audio']);
-        $this->assertEquals('midi', $audio['audio']['dataformat']);
+        $this->assertSame('midi', $audio['audio']['dataformat']);
         $this->assertArrayHasKey('bitrate', $audio['audio']);
         $this->assertSame(740.00982800983, $audio['audio']['bitrate']);
         $this->assertArrayHasKey('mime_type', $audio);
-        $this->assertEquals('audio/midi', $audio['mime_type']);
+        $this->assertSame('audio/midi', $audio['mime_type']);
         $this->assertArrayHasKey('midi', $audio);
         $this->assertArrayHasKey('playtime_seconds', $audio);
         $this->assertSame(152.625, $audio['playtime_seconds']);

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of GetID3.
+ *
+ * (c) James Heinrich <info@getid3.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GetId3\Write;
 
 use GetId3\GetId3Core;
@@ -23,10 +32,10 @@ use GetId3\GetId3Core;
  *
  * @author James Heinrich <info@getid3.org>
  *
- * @link http://getid3.sourceforge.net
- * @link http://www.getid3.org
+ * @see http://getid3.sourceforge.net
+ * @see http://www.getid3.org
  *
- * @uses GetId3\Module\Tag\Lyrics3
+ * @uses \GetId3\Module\Tag\Lyrics3
  */
 class Lyrics3
 {
@@ -59,6 +68,7 @@ class Lyrics3
 
         return false;
     }
+
     public function DeleteLyrics3()
     {
         // Initialize GetId3 engine
@@ -87,11 +97,10 @@ class Lyrics3
                 ignore_user_abort($oldignoreuserabort);
 
                 return true;
-            } else {
-                $this->errors[] = 'Cannot fopen('.$this->filename.', "a+b")';
-
-                return false;
             }
+            $this->errors[] = 'Cannot fopen('.$this->filename.', "a+b")';
+
+            return false;
         }
         // no Lyrics3 present
         return true;
