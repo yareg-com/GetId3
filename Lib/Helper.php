@@ -1838,15 +1838,18 @@ class Helper
      * @param  type $cahrToReplace
      * @param  type $capitaliseFirstChar
      *
-     * @return type
+     * @return string
      */
     public static function toCamelCase($origin, $cahrToReplace = '_', $capitaliseFirstChar = false)
     {
         if ($capitaliseFirstChar) {
             $origin = ucfirst($origin);
         }
-        $func = create_function('$c', 'return strtoupper($c[1]);');
 
-        return preg_replace_callback('/'.$cahrToReplace.'([a-z])/', $func, $origin);
+        return preg_replace_callback(
+            '/'.$cahrToReplace.'([a-z])/',
+            function($c) { return strtoupper($c[1]); },
+            $origin
+        );
     }
 }
