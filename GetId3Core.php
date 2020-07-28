@@ -254,17 +254,20 @@ class GetId3Core
             $this->warning('WARNING: php.ini contains "mbstring.func_overload = '.ini_get('mbstring.func_overload').'", this may break things.');
         }
 
-        // Check for magic_quotes_runtime
-        if (function_exists('get_magic_quotes_runtime')) {
-            if (get_magic_quotes_runtime()) {
-                $this->addStartupError('magic_quotes_runtime must be disabled before running GetId3Core(). Surround GetId3 block by set_magic_quotes_runtime(0) and set_magic_quotes_runtime(1).');
-            }
-        }
+        if (version_compare(PHP_VERSION, '7.4.0', '<')) {
 
-        // Check for magic_quotes_gpc
-        if (function_exists('magic_quotes_gpc')) {
-            if (get_magic_quotes_gpc()) {
-                $this->addStartupError('magic_quotes_gpc must be disabled before running GetId3Core(). Surround GetId3 block by set_magic_quotes_gpc(0) and set_magic_quotes_gpc(1).');
+            // Check for magic_quotes_runtime
+            if (function_exists('get_magic_quotes_runtime')) {
+                if (get_magic_quotes_runtime()) {
+                    $this->addStartupError('magic_quotes_runtime must be disabled before running GetId3Core(). Surround GetId3 block by set_magic_quotes_runtime(0) and set_magic_quotes_runtime(1).');
+                }
+            }
+
+            // Check for magic_quotes_gpc
+            if (function_exists('magic_quotes_gpc')) {
+                if (get_magic_quotes_gpc()) {
+                    $this->addStartupError('magic_quotes_gpc must be disabled before running GetId3Core(). Surround GetId3 block by set_magic_quotes_gpc(0) and set_magic_quotes_gpc(1).');
+                }
             }
         }
 
